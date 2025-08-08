@@ -1,16 +1,8 @@
 
-
 header{
     display: flex;
     justify-content: center;
     align-items: center;
-    border-bottom: 1px solid #FFF;
-    width: 100%;
-    height: 60vh;
-    background: url(/public/images/BG.png);
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
 }
 
 #auth-btn{
@@ -18,11 +10,18 @@ header{
 }
 
 .header-container{
+    background: url(/public/images/BG.png);
     display: flex;
     flex-direction: column;
+    width: 100%;
     align-items: center;
     justify-content: space-around;
     height: inherit;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    height: 60vh;
+    border-bottom: 1px solid #FFF;
 }
 
 .header-container > h1{
@@ -52,7 +51,6 @@ main{
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-bottom: 30px;
 }
 
 .main-container{
@@ -60,6 +58,7 @@ main{
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding-bottom: 30px;
 }
 
 .main-container h2{

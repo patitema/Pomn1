@@ -11,10 +11,6 @@ export default function Nav() {
     
     return (
         <nav>
-            <div className={`burger-menu ${isActive ? 'active' : ''}`} onClick={toggleMenu}>
-                <span></span>
-            </div>
-
             <div className={`nav-container ${isActive ? 'active' : ''}`} onClick={toggleMenu}>
                 <div className='logo-nav'><img src="/images/small.png" alt="" /></div>
                 <ul className='list-Of-Pages'>
