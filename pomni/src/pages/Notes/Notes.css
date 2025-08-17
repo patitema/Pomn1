@@ -20,8 +20,16 @@
     width: 100%;
 }
 
+.NotesContainer canvas{
+    width: 100%;
+    padding-left: 52px;
+    padding-right: 100px;
+    padding-bottom: 20px;
+    height: auto;
+}
+
 .ReadFile{
-    position: absolute;
+    position: fixed;
     right: 0;
     width: 100px;
     height: 670px;

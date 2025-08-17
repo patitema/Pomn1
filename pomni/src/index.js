@@ -13,19 +13,22 @@ import Notes from './pages/Notes/Notes.jsx';
 import Folder from './pages/Folder-view/Folder.jsx';
 import General from './General';
 import Authorization from './pages/Authorization/Authorization.jsx';
+import { ApiProvider } from "./context/ApiContext.js";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<General />} />
-        <Route path="/Notes" element={<Notes />} />
-        <Route path="/Folder" element={<Folder />} />
-        <Route path="/Authorization" element={<Authorization />} />
-        <Route path="*" element={<div>Яна Бийск</div>} />
-      </Routes>
-    </BrowserRouter>
+    <ApiProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<General />} />
+          <Route path="/Notes" element={<Notes />} />
+          <Route path="/Folder" element={<Folder />} />
+          <Route path="/Authorization" element={<Authorization />} />
+          <Route path="*" element={<div>Яна Бийск</div>} />
+        </Routes>
+      </BrowserRouter>
+    </ApiProvider>
   </React.StrictMode>
 );

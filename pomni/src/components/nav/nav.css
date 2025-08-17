@@ -108,4 +108,31 @@ ul{
     filter: drop-shadow(0 0 5px #FFF);
 }
 
+.openNavBtn{
+    position: absolute;
+    top: 50px;
+    right: auto;
+    transform: rotate(180deg);
+    background-color: transparent;
+    border: none;
+    transition: all 0.2s ease-out;
+    width: auto;
+    height: auto;
+}
 
+.openNavSvg{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 15px;
+    height: 43px;
+    color: #FFF;
+}
+
+.openNavBtn.active{
+    top: 40px;
+    right: 0;
+    margin-right: 20px;
+    transform: rotate(0deg);
+    transition: all 0.2s ease-out;
+}

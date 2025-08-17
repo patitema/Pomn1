@@ -11,8 +11,9 @@ export default function Nav() {
     
     return (
         <nav>
-            <div className={`nav-container ${isActive ? 'active' : ''}`} onClick={toggleMenu}>
+            <div className={`nav-container ${isActive ? 'active' : ''}`}>
                 <div className='logo-nav'><img src="/images/small.png" alt="" /></div>
+                <button className={`openNavBtn ${isActive ? 'active' : ''}`}><svg className={`openNavSvg ${isActive ? 'active' : ''}`} onClick={toggleMenu}><use href='/images/icons.svg#Arrow'></use></svg></button>
                 <ul className='list-Of-Pages'>
                     <li><Link to="/">
                         <svg class="icon">

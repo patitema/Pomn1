@@ -1,11 +1,14 @@
-import React, {useState} from 'react';
+import React, {useState, useRef } from 'react';
 import Nav from '../../components/nav/nav';
 import './Notes.css'
 import Footer from '../../components/footer/footer';
+import CanvasCircles from '../../components/drawing/DrawingNotes'
+
 
 export default function Notes() {
     document.title = "POMNI - NOTES";
     const [isActive, setIsActive] = useState(false);
+    const canvasRef = useRef();
         
             const toggleInfo = () => {
                 setIsActive(!isActive);
@@ -23,7 +26,7 @@ export default function Notes() {
             </header>
             <main>
                 <div className='NotesContainer'>
-
+                    <CanvasCircles ref={canvasRef} />
                 </div>
                 <div className={`ReadFile ${isActive ? 'active' : ''}`}>
                     <div className={`FileName ${isActive ? 'active' : ''}`}>
@@ -41,7 +44,7 @@ export default function Notes() {
                 </div>
                 <div className='EditToolsContainer'>
                     <ul className='ToolsList'>
-                        <button className="toolButton"><svg className='toolIcon available'><use href='/images/icons.svg#ToolAdd'></use></svg></button>
+                        <button className="toolButton" onClick={() => canvasRef.current.addCircle()}><svg className='toolIcon available'><use href='/images/icons.svg#ToolAdd'></use></svg></button>
                         <button className="toolButton"><svg className='toolIcon'><use href='/images/icons.svg#ToolColor'></use></svg></button>
                         <button className="toolButton"><svg className='toolIcon'><use href='/images/icons.svg#ToolFolder'></use></svg></button>
                         <button className="toolButton"><svg className='toolIcon'><use href='/images/icons.svg#ToolDelete'></use></svg></button>
