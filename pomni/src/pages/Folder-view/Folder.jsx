@@ -3,6 +3,7 @@ import './Folder.css';
 import Nav from '../../components/nav/nav';
 import Footer from '../../components/footer/footer';
 import { useApi } from '../../context/ApiContext';
+import CreateNoteToggle from '../../components/createNoteBtn/CreateNoteBtn';
 
 export default function Folder() {
     document.title = "POMNI - FOLDER";
@@ -10,17 +11,22 @@ export default function Folder() {
     const { folders, notes, loading } = useApi();
     console.log("FOLDERS:", folders);
     console.log("NOTES:", notes);
-    const [isActive, setIsActive] = useState(false);
-    const toggleInfo = () => {
-                setIsActive(!isActive);
-            };
-
     const [openFolders, setOpenFolders] = useState(new Set()); // Множество открытых папок
+    const [openNotes, setOpenNotes] = useState(new Set()); // Множество открытых заметок
     const [search, setSearch] = useState("");
+
+    const toggleNote = (noteId) => {
+        const newOpenNotes = new Set(openNotes);
+        if (newOpenNotes.has(noteId)) {
+            newOpenNotes.delete(noteId);
+        } else {
+            newOpenNotes.add(noteId);
+        }
+        setOpenNotes(newOpenNotes);
+    };
 
     if (loading) return <p>Загрузка...</p>;
 
-    // Функция для переключения состояния папки
     const toggleFolder = (folderId) => {
         const newOpenFolders = new Set(openFolders);
         if (newOpenFolders.has(folderId)) {
@@ -31,7 +37,6 @@ export default function Folder() {
         setOpenFolders(newOpenFolders);
     };
 
-    // Функция для форматирования даты
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('ru-RU', {
@@ -43,7 +48,6 @@ export default function Folder() {
         });
     };
 
-    // Рекурсивный компонент для отображения папки и её содержимого
     const renderFolder = (folder, level = 0) => {
         const folderNotes = notes.filter(
             (note) =>
@@ -73,7 +77,6 @@ export default function Folder() {
                     </div>
                 </div>
 
-                {/* Если папка раскрыта → показать её содержимое */}
                 <div className={`folder-content ${isOpen ? 'open' : 'closed'}`}>
                     {isOpen && (
                         <ul style={{ marginLeft: "0px", marginTop: "5px" }}>
@@ -84,16 +87,31 @@ export default function Folder() {
                             
                             {/* Заметки в папке */}
                             {folderNotes.length > 0 ? (
-                                folderNotes.map((note, idx) => (
-                                    <li key={`note-${note.id}`} className="stroke note-item" style={{ marginLeft: `${marginLeft + 20}px` }}>
-                                        <div className="note-main">
-                                            {note.title || `Заметка ${note.id}`} — {note.text}
-                                        </div>
-                                        <div className="note-info">
-                                            {note.created_at && formatDate(note.created_at)}
-                                        </div>
-                                    </li>
-                                ))
+                                folderNotes.map((note, idx) => {
+                                    const isNoteOpen = openNotes.has(note.id);
+                                    return (
+                                        <li 
+                                            key={`note-${note.id}`} 
+                                            className="stroke note-item" 
+                                            style={{ marginLeft: `${marginLeft + 20}px`, cursor: 'pointer' }}
+                                            onClick={() => toggleNote(note.id)}
+                                        >
+                                            <div className="note-main">
+                                                {note.title || `Заметка ${note.id}`}
+                                            </div>
+                                            {isNoteOpen && (
+                                                <div className="note-content">
+                                                    <div className="note-text">
+                                                        {note.text || 'Содержимое отсутствует'}
+                                                    </div>
+                                                    <div className="note-info">
+                                                        {note.created_at && formatDate(note.created_at)}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </li>
+                                    );
+                                })
                             ) : (
                                 folder.children && folder.children.length === 0 && (
                                     <li style={{ fontStyle: "italic", marginLeft: `${marginLeft + 20}px` }}>
@@ -129,20 +147,6 @@ export default function Folder() {
 
             <main>
                 <div className='FolderContainer'>
-                    <div className={`ReadFile ${isActive ? 'active' : ''}`}>
-                        <div className={`FileName ${isActive ? 'active' : ''}`}>
-                            <h3>Имя файла</h3>
-                        </div>
-                        <div className='Info'>
-                            <div className='openInfo'>
-                                <button className={`openInfoBtn ${isActive ? 'active' : ''}`}><svg className={`openInfoSvg ${isActive ? 'active' : ''}`} onClick={toggleInfo}><use href='/images/icons.svg#Arrow'></use></svg></button>
-                            </div>
-                            <div className={`FileInfo ${isActive ? 'active' : ''}`}>
-                                <textarea name="FileInfo" id="FileInfo" placeholder='Здесь пока пусто'></textarea>
-                            </div>
-                    </div>
-                    
-                    </div>
                     <div className='navFolderView'>
                         <input
                             className='SearchInput'
@@ -158,18 +162,36 @@ export default function Folder() {
                         {folders.map(folder => renderFolder(folder))}
                         
                         {/* Заметки без папки отображаются под папками */}
-                        {unfolderNotes.map((note, idx) => (
-                            <li key={`unfolder-note-${note.id}`} className="unfolder-stroke note-item">
-                                <div className="note-main">
-                                    {note.title || `Заметка ${note.id}`} — {note.text}
-                                </div>
-                                <div className="note-info">
-                                    {note.created_at && formatDate(note.created_at)}
-                                </div>
-                            </li>
-                        ))}
+                        {unfolderNotes.map((note, idx) => {
+                            const isNoteOpen = openNotes.has(note.id);
+                            return (
+                                <li 
+                                    key={`unfolder-note-${note.id}`} 
+                                    className="unfolder-stroke note-item"
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={() => toggleNote(note.id)}
+                                >
+                                    <div className="note-main">
+                                        {note.title || `Заметка ${note.id}`}
+                                    </div>
+                                    {isNoteOpen && (
+                                        <div className="note-content">
+                                            <div className="note-text">
+                                                {note.text || 'Содержимое отсутствует'}
+                                            </div>
+                                            <div className="note-info">
+                                                {note.created_at && formatDate(note.created_at)}
+                                            </div>
+                                        </div>
+                                    )}
+                                </li>
+                            );
+                        })}
                     </ul>
+                    <CreateNoteToggle onNoteCreated={(note) => console.log("Новая заметка:", note)} />
+                   
                 </div>
+                 
             </main>
 
             <Footer />

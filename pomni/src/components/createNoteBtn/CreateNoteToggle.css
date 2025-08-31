@@ -1,0 +1,102 @@
+.CreateNoteContainer{
+  display: none;
+  opacity: 0;
+  transition: all 0.3s ease-out;
+}
+
+.CreateNoteBtnContainer{
+  position: relative;
+  margin-top: 20px;
+  transition: all 0.3s ease-out;
+}
+
+.CreateNoteBtn{
+  position: sticky;
+  width: 50px;
+  height: 50px;
+  border-radius: 100%;
+  border: 1px solid #FFF;
+  background-color: #333;
+  transition: all 0.3s ease-out;
+}
+
+.CreateNoteBtnContainer.active{
+  position: relative;
+  top: 26vh;
+  transition: all 0.3s ease-out;
+}
+
+.CreateNoteContainer.active{
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  width: 100vw;
+  min-height: 117vh;
+  padding-bottom: 17vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  top: 0;
+  left: 0;
+  justify-content: center;
+  align-items: center;
+  opacity: 1;
+  transition: all 0.3s ease-out;
+}
+
+.CreateNoteContainer.active > h3{
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 30px;
+}
+
+.CreateNote{
+  border: 1px solid #FFF;
+  display: flex;
+  padding: 40px;
+  width: 1000px;
+  height: 500px;
+  border-radius: 20px;
+  flex-direction: column;
+  overflow: none;
+  background-color: #222;
+}
+
+#HeadName{
+  width: 48vw;
+  height: 50px;
+  margin-bottom: 20px;
+  border: 1px solid #999;
+  background-color: transparent;
+  border-radius: 5px;
+  padding-left: 10px;
+  color: #FFF;
+  font-size: 24px;
+  outline: none;
+}
+
+#NoteInfo{
+  margin-top: 20px;
+  width: 48vw;
+  height: 40vh;
+  border: 1px solid #999;
+  background-color: transparent;
+  border-radius: 10px;
+  padding-left: 10px;
+  padding-top: 10px;
+  color: #FFF;
+  font-size: 20px;
+  resize: none;
+  outline: none;
+}
+
+.CreateNoteBtn.active:hover{
+  transform: rotate(180deg);
+}
+
+.CreateNoteBtn:hover{
+  transform: rotate(-180deg);
+}
+
+.CreateNoteBtn > p{
+  color: #FFF;
+  font-size: 25px;
+}
