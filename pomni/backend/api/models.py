@@ -8,7 +8,6 @@ class Folder(models.Model):
     created_at = models.DateTimeField(default=timezone.now, help_text="Время создания папки")
 
     def save(self, *args, **kwargs):
-        # Автоматически генерируем путь на основе родительской папки
         if self.parent:
             self.path = f"{self.parent.path}{self.title}/"
         else:

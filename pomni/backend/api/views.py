@@ -11,7 +11,6 @@ def notes_list(request):
 
 @api_view(['GET'])
 def folders_list(request):
-    # Возвращаем только корневые папки (без родителей)
     folders = Folder.objects.filter(parent=None)
     serializer = FolderSerializer(folders, many=True)
     return Response(serializer.data)

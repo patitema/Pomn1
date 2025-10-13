@@ -42,7 +42,9 @@ export const ApiProvider = ({ children }) => {
   }, []);
 
   return (
-    <ApiContext.Provider value={{ notes, folders, loading, fetchNotes, fetchFolders }}>
+    <ApiContext.Provider
+      value={{ notes, folders, loading, fetchNotes, fetchFolders }}
+    >
       {children}
     </ApiContext.Provider>
   );
