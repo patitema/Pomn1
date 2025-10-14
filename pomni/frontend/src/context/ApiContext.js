@@ -9,12 +9,9 @@ export const ApiProvider = ({ children }) => {
 
   const fetchNotes = async () => {
     try {
-      const resNotes = await fetch("http://127.0.0.1:8000/api/notes/");
-      if (!resNotes.ok) {
-        throw new Error(`HTTP error! status: ${resNotes.status}`);
-      }
-      const data = await resNotes.json();
-
+      const res = await fetch("http://127.0.0.1:8000/api/notes/");
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
       setNotes(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Ошибка загрузки заметок:", error);
@@ -24,12 +21,9 @@ export const ApiProvider = ({ children }) => {
 
   const fetchFolders = async () => {
     try {
-      const resFolders = await fetch("http://127.0.0.1:8000/api/folders/");
-      if (!resFolders.ok) {
-        throw new Error(`HTTP error! status: ${resFolders.status}`);
-      }
-      const data = await resFolders.json();
-
+      const res = await fetch("http://127.0.0.1:8000/api/folders/");
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
       setFolders(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Ошибка загрузки папок:", error);
@@ -38,13 +32,22 @@ export const ApiProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    Promise.all([fetchNotes(), fetchFolders()]).then(() => setLoading(false));
+    Promise.all([fetchNotes(), fetchFolders()]).finally(() =>
+      setLoading(false)
+    );
   }, []);
 
   return (
     <ApiContext.Provider
-      value={{ notes, folders, loading, fetchNotes, fetchFolders }}
-    >
+      value={{
+        notes,
+        setNotes, // полезно для мутаций из других контекстов
+        folders,
+        setFolders, // полезно для мутаций из других контекстов
+        loading,
+        fetchNotes,
+        fetchFolders,
+      }}>
       {children}
     </ApiContext.Provider>
   );

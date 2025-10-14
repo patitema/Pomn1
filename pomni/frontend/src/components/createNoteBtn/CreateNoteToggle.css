@@ -1,32 +1,51 @@
-.CreateNoteContainer{
-  display: none;
+.CreateNoteContainer {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateY(-50%), translateX(-50%);
+  width: 0;
+  height: 0;
   opacity: 0;
   transition: all 0.3s ease-out;
 }
 
-.CreateNoteBtnContainer{
+.CreateNoteBtnContainer {
   position: relative;
   margin-top: 20px;
-  transition: all 0.3s ease-out;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: all 0.5s ease-out;
 }
 
-.CreateNoteBtn{
+.CreateNoteBtn {
   position: sticky;
   width: 50px;
   height: 50px;
   border-radius: 100%;
-  border: 1px solid #FFF;
+  border: 1px solid #fff;
   background-color: #333;
   transition: all 0.3s ease-out;
 }
 
-.CreateNoteBtnContainer.active{
+.CreateNoteBtn.active {
   position: relative;
-  top: 26vh;
+  transform: rotate(45deg);
+}
+
+.CreateNoteBtn > p {
+  color: #fff;
+  font-size: 25px;
+}
+
+.CreateNoteBtnContainer.active {
+  position: absolute;
+  bottom: 14vh;
+  left: 50%;
+  transform: translateX(-50%);
   transition: all 0.3s ease-out;
 }
 
-.CreateNoteContainer.active{
+.CreateNoteContainer.active {
   display: flex;
   flex-direction: column;
   position: absolute;
@@ -42,14 +61,17 @@
   transition: all 0.3s ease-out;
 }
 
-.CreateNoteContainer.active > h3{
+.CreateNoteContainer.active h3 {
   text-align: center;
   margin-bottom: 20px;
   font-size: 30px;
 }
 
-.CreateNote{
-  border: 1px solid #FFF;
+.CreateNote {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #fff;
   display: flex;
   padding: 40px;
   width: 1000px;
@@ -60,7 +82,7 @@
   background-color: #222;
 }
 
-#HeadName{
+#HeadName {
   width: 48vw;
   height: 50px;
   margin-bottom: 20px;
@@ -68,12 +90,12 @@
   background-color: transparent;
   border-radius: 5px;
   padding-left: 10px;
-  color: #FFF;
+  color: #fff;
   font-size: 24px;
   outline: none;
 }
 
-#NoteInfo{
+#NoteInfo {
   margin-top: 20px;
   width: 48vw;
   height: 40vh;
@@ -82,21 +104,18 @@
   border-radius: 10px;
   padding-left: 10px;
   padding-top: 10px;
-  color: #FFF;
+  color: #fff;
   font-size: 20px;
   resize: none;
   outline: none;
 }
 
-.CreateNoteBtn.active:hover{
-  transform: rotate(180deg);
-}
-
-.CreateNoteBtn:hover{
-  transform: rotate(-180deg);
-}
-
-.CreateNoteBtn > p{
-  color: #FFF;
-  font-size: 25px;
+.MakeNote {
+  margin-top: 20px;
+  width: 300px;
+  height: 50px;
+  background-color: #feb7ff;
+  border: none;
+  border-radius: 5px;
+  color: #000;
 }
