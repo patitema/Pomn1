@@ -8,11 +8,11 @@ import CreateNoteToggle from "../../components/createNoteBtn/CreateNoteToggle";
 export default function Folder() {
   document.title = "POMNI - FOLDER";
 
-  const { folders, notes, loading } = useApi();
+  const { folders, notes, loading, deleteNote, deleteFolder } = useApi();
   console.log("FOLDERS:", folders);
   console.log("NOTES:", notes);
-  const [openFolders, setOpenFolders] = useState(new Set()); // Множество открытых папок
-  const [openNotes, setOpenNotes] = useState(new Set()); // Множество открытых заметок
+  const [openFolders, setOpenFolders] = useState(new Set());
+  const [openNotes, setOpenNotes] = useState(new Set());
   const [search, setSearch] = useState("");
 
   const toggleNote = (noteId) => {
@@ -69,7 +69,19 @@ export default function Folder() {
             marginLeft: `${marginLeft}px`,
           }}>
           <div className="folder-main">
-            📁 {folder.title || `Папка ${folder.id}`}
+            <p>📁 {folder.title || `Папка ${folder.id}`}</p>
+            <div className="Tool-btns">
+              <button
+                className="delete-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteFolder(folder.id);
+                }}>
+                <svg className="delete-icon" viewBox="0 0 30 30">
+                  <use href="/images/icons.svg#ToolDelete"></use>
+                </svg>
+              </button>
+            </div>
           </div>
           <div className="folder-info">
             {folder.created_at && formatDate(folder.created_at)}
@@ -79,13 +91,11 @@ export default function Folder() {
         <div className={`folder-content ${isOpen ? "open" : "closed"}`}>
           {isOpen && (
             <ul style={{ marginLeft: "0px", marginTop: "5px" }}>
-              {/* Дочерние папки */}
               {folder.children &&
                 folder.children.map((childFolder) =>
                   renderFolder(childFolder, level + 1)
                 )}
 
-              {/* Заметки в папке */}
               {folderNotes.length > 0
                 ? folderNotes.map((note, idx) => {
                     const isNoteOpen = openNotes.has(note.id);
@@ -99,7 +109,17 @@ export default function Folder() {
                         }}
                         onClick={() => toggleNote(note.id)}>
                         <div className="note-main">
-                          {note.title || `Заметка ${note.id}`}
+                          <p>{note.title || `Заметка ${note.id}`}</p>
+                          <button
+                            className="delete-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteNote(note.id);
+                            }}>
+                            <svg className="delete-icon" viewBox="0 0 30 30">
+                              <use href="/images/icons.svg#ToolDelete"></use>
+                            </svg>
+                          </button>
                         </div>
                         {isNoteOpen && (
                           <div className="note-content">
@@ -131,7 +151,6 @@ export default function Folder() {
     );
   };
 
-  // Заметки без папки
   const unfolderNotes = notes.filter(
     (note) =>
       note.folder === null &&
@@ -162,11 +181,9 @@ export default function Folder() {
             />
           </div>
 
-          {/* Иерархический список папок */}
           <ul className="FileList">
             {folders.map((folder) => renderFolder(folder))}
 
-            {/* Заметки без папки отображаются под папками */}
             {unfolderNotes.map((note, idx) => {
               const isNoteOpen = openNotes.has(note.id);
               return (
@@ -176,7 +193,17 @@ export default function Folder() {
                   style={{ cursor: "pointer" }}
                   onClick={() => toggleNote(note.id)}>
                   <div className="note-main">
-                    {note.title || `Заметка ${note.id}`}
+                    <p>{note.title || `Заметка ${note.id}`}</p>
+                    <button
+                      className="delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteNote(note.id);
+                      }}>
+                      <svg className="delete-icon" viewBox="0 0 30 30">
+                        <use href="/images/icons.svg#ToolDelete"></use>
+                      </svg>
+                    </button>
                   </div>
                   {isNoteOpen && (
                     <div className="note-content">

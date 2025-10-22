@@ -1,4 +1,3 @@
-// context/NotesContext.jsx
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 const NotesContext = createContext();
@@ -6,7 +5,6 @@ const NotesContext = createContext();
 export function NotesProvider({ children }) {
   const [notes, setNotes] = useState([]);
 
-  // 1. Подгрузка заметок при старте
   const fetchNotes = async () => {
     try {
       const res = await fetch("http://127.0.0.1:8000/api/notes/", {
@@ -25,7 +23,6 @@ export function NotesProvider({ children }) {
     fetchNotes();
   }, []);
 
-  // 2. Создание заметки без перезагрузки
   const addNote = async (noteData) => {
     const response = await fetch("http://127.0.0.1:8000/api/notes/", {
       method: "POST",
@@ -44,7 +41,6 @@ export function NotesProvider({ children }) {
     return created;
   };
 
-  // 3. Удаление (если API поддерживает DELETE)
   const deleteNote = async (id) => {
     const response = await fetch(`http://127.0.0.1:8000/api/notes/${id}/`, {
       method: "DELETE",

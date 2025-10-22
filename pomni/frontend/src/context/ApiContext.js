@@ -31,6 +31,30 @@ export const ApiProvider = ({ children }) => {
     }
   };
 
+  const deleteNote = async (noteId) => {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/notes/${noteId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      await fetchNotes();
+    } catch (error) {
+      console.error("Ошибка удаления заметки:", error);
+    }
+  };
+
+  const deleteFolder = async (folderId) => {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/folders/${folderId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      await fetchFolders();
+    } catch (error) {
+      console.error("Ошибка удаления папки:", error);
+    }
+  };
+
   useEffect(() => {
     Promise.all([fetchNotes(), fetchFolders()]).finally(() =>
       setLoading(false)
@@ -41,12 +65,14 @@ export const ApiProvider = ({ children }) => {
     <ApiContext.Provider
       value={{
         notes,
-        setNotes, // полезно для мутаций из других контекстов
+        setNotes,
         folders,
-        setFolders, // полезно для мутаций из других контекстов
+        setFolders,
         loading,
         fetchNotes,
         fetchFolders,
+        deleteNote,
+        deleteFolder,
       }}>
       {children}
     </ApiContext.Provider>
