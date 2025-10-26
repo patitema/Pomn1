@@ -68,6 +68,28 @@
   font-size: 30px;
 }
 
+.CreateNoteHeader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.CloseBtn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 30px;
+  cursor: pointer;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .CreateNote {
   display: flex;
   justify-content: center;
@@ -119,4 +141,16 @@
   border: none;
   border-radius: 5px;
   color: #000;
+  font-size: 16px;
+}
+
+.MakeFolder {
+  margin-top: 10px;
+  width: 300px;
+  height: 50px;
+  background-color: #ffa;
+  border: none;
+  border-radius: 5px;
+  color: #000;
+  font-size: 16px;
 }

@@ -8,8 +8,14 @@ export const ApiProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const fetchNotes = async () => {
+    const token = localStorage.getItem("token");
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/notes/");
+      const res = await fetch("http://127.0.0.1:8000/api/notes/", {
+        headers: {
+          Authorization: token ? `Token ${token}` : "",
+          "Content-Type": "application/json",
+        },
+      });
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       setNotes(Array.isArray(data) ? data : []);
@@ -20,8 +26,14 @@ export const ApiProvider = ({ children }) => {
   };
 
   const fetchFolders = async () => {
+    const token = localStorage.getItem("token");
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/folders/");
+      const res = await fetch("http://127.0.0.1:8000/api/folders/", {
+        headers: {
+          Authorization: token ? `Token ${token}` : "",
+          "Content-Type": "application/json",
+        },
+      });
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       setFolders(Array.isArray(data) ? data : []);
@@ -32,9 +44,13 @@ export const ApiProvider = ({ children }) => {
   };
 
   const deleteNote = async (noteId) => {
+    const token = localStorage.getItem("token");
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/notes/${noteId}`, {
         method: "DELETE",
+        headers: {
+          Authorization: token ? `Token ${token}` : "",
+        },
       });
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       await fetchNotes();
@@ -44,9 +60,13 @@ export const ApiProvider = ({ children }) => {
   };
 
   const deleteFolder = async (folderId) => {
+    const token = localStorage.getItem("token");
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/folders/${folderId}`, {
         method: "DELETE",
+        headers: {
+          Authorization: token ? `Token ${token}` : "",
+        },
       });
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       await fetchFolders();

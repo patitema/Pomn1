@@ -1,4 +1,4 @@
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -6,25 +6,30 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #151515;
-  color: #FFF;
+  color: #fff;
 }
 
-h1, h2, h3, p, button{
-  font-family: 'Home Video', sans-serif;
+h1,
+h2,
+h3,
+p,
+button,
+input[type="submit"] {
+  font-family: "Home Video", sans-serif;
 }
 
 @font-face {
-  font-family: 'Home Video';
+  font-family: "Home Video";
   src: url(./assets/fonts/HomeVideo-Regular.otf);
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }

@@ -4,7 +4,7 @@ from .models import Folder, Note
 class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note
-        fields = '__all__'
+        fields = ('id', 'title', 'text', 'folder', 'user', 'created_at')
 
 class FolderSerializer(serializers.ModelSerializer):
     notes = NoteSerializer(many=True, read_only=True)
@@ -12,7 +12,7 @@ class FolderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Folder
-        fields = ('id', 'title', 'path', 'parent', 'notes', 'children', 'created_at')
+        fields = ('id', 'title', 'path', 'parent', 'user', 'notes', 'children', 'created_at')
 
     def get_children(self, obj):
         # Возвращаем дочерние папки

@@ -1,0 +1,39 @@
+.main-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.reg-form {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.reg-form input {
+  width: 200px;
+  height: 30px;
+  border-radius: 5px;
+  border: 1px solid #000;
+  outline: none;
+  padding-left: 10px;
+}
+
+.reg-form input[type="submit"] {
+  width: 200px;
+  font-size: 16px;
+  border: none !important;
+  padding-left: 0px !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.reg-form input[type="submit"]:hover {
+  box-shadow: 0 0 5px #fff;
+}
+
+.reg-btn {
+  background-color: #feb7ff;
+}

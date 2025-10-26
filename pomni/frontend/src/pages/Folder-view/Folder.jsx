@@ -1,12 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Folder.css";
 import Nav from "../../components/nav/nav";
 import Footer from "../../components/footer/footer";
 import { useApi } from "../../context/ApiContext";
+import { useUsers } from "../../hooks/UseUsers";
 import CreateNoteToggle from "../../components/createNoteBtn/CreateNoteToggle";
 
 export default function Folder() {
   document.title = "POMNI - FOLDER";
+  const navigate = useNavigate();
+  const { token } = useUsers();
+  const { user, fetchCurrentUser } = useUsers();
+
+  useEffect(() => {
+    fetchCurrentUser();
+  }, [fetchCurrentUser]);
+
+  useEffect(() => {
+    if (!token) {
+      navigate("/Auth");
+    }
+  }, [token, navigate]);
 
   const { folders, notes, loading, deleteNote, deleteFolder } = useApi();
   console.log("FOLDERS:", folders);
@@ -164,7 +179,7 @@ export default function Folder() {
         <div className="Hcontainer">
           <div className="hTextContainer">
             <h1>POMNI</h1>
-            <h2>BASE NAME</h2>
+            <h2>{user ? user.username : "None"} BASE</h2>
           </div>
         </div>
       </header>

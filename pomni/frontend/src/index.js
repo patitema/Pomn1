@@ -8,7 +8,9 @@ import "./index.css";
 import Notes from "./pages/Notes/Notes.jsx";
 import Folder from "./pages/Folder-view/Folder.jsx";
 import General from "./General";
-import Authorization from "./pages/Authorization/Authorization.jsx";
+import Auth from "./pages/Auth/Auth.jsx";
+import Reg from "./pages/Reg/Reg.jsx";
+import Profile from "./pages/Profile/Profile.jsx";
 import { ApiProvider } from "./context/ApiContext.js";
 import { NotesProvider } from "./context/NotesContext.js";
 
@@ -23,7 +25,9 @@ root.render(
             <Route path="/" element={<General />} />
             <Route path="/Notes" element={<Notes />} />
             <Route path="/Folder" element={<Folder />} />
-            <Route path="/Authorization" element={<Authorization />} />
+            <Route path="/Auth" element={<Auth />} />
+            <Route path="/Reg" element={<Reg />} />
+            <Route path="/Profile" element={<Profile />} />
             <Route path="*" element={<div>Яна Бийск</div>} />
           </Routes>
         </BrowserRouter>
