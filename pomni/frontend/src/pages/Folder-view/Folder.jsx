@@ -29,7 +29,6 @@ export default function Folder() {
   const [openFolders, setOpenFolders] = useState(new Set());
   const [openNotes, setOpenNotes] = useState(new Set());
   const [search, setSearch] = useState("");
-
   const toggleNote = (noteId) => {
     const newOpenNotes = new Set(openNotes);
     if (newOpenNotes.has(noteId)) {
@@ -125,16 +124,18 @@ export default function Folder() {
                         onClick={() => toggleNote(note.id)}>
                         <div className="note-main">
                           <p>{note.title || `Заметка ${note.id}`}</p>
-                          <button
-                            className="delete-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteNote(note.id);
-                            }}>
-                            <svg className="delete-icon" viewBox="0 0 30 30">
-                              <use href="/images/icons.svg#ToolDelete"></use>
-                            </svg>
-                          </button>
+                          <div className="Tool-btns">
+                            <button
+                              className="delete-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteNote(note.id);
+                              }}>
+                              <svg className="delete-icon" viewBox="0 0 30 30">
+                                <use href="/images/icons.svg#ToolDelete"></use>
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                         {isNoteOpen && (
                           <div className="note-content">
@@ -209,16 +210,18 @@ export default function Folder() {
                   onClick={() => toggleNote(note.id)}>
                   <div className="note-main">
                     <p>{note.title || `Заметка ${note.id}`}</p>
-                    <button
-                      className="delete-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteNote(note.id);
-                      }}>
-                      <svg className="delete-icon" viewBox="0 0 30 30">
-                        <use href="/images/icons.svg#ToolDelete"></use>
-                      </svg>
-                    </button>
+                    <div className="Tool-btns">
+                      <button
+                        className="delete-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteNote(note.id);
+                        }}>
+                        <svg className="delete-icon" viewBox="0 0 30 30">
+                          <use href="/images/icons.svg#ToolDelete"></use>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                   {isNoteOpen && (
                     <div className="note-content">

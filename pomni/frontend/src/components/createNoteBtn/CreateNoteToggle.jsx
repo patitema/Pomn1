@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNotes } from "../../context/NotesContext";
 import { useAddFolder } from "../../hooks/UseFolder";
+import { useApi } from "../../context/ApiContext";
 import "./CreateNoteToggle.css";
 
 export default function CreateNoteToggle({ folderId }) {
@@ -8,8 +9,10 @@ export default function CreateNoteToggle({ folderId }) {
   const [isFolderMode, setIsFolderMode] = useState(false);
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
+  const [selectedFolder, setSelectedFolder] = useState(folderId || "no-folder");
   const { addNote } = useNotes();
   const { addFolder } = useAddFolder();
+  const { folders } = useApi();
 
   const toggleFolderMode = () => {
     setIsFolderMode(true);
@@ -69,12 +72,13 @@ export default function CreateNoteToggle({ folderId }) {
     const data = isFolder
       ? {
           title: title.trim(),
-          parent_id: folderId ? Number(folderId) : 1,
+          parent_id: folderId ? Number(folderId) : null,
         }
       : {
           title: title.trim(),
           text: text.trim(),
-          folder_id: folderId ? Number(folderId) : 1,
+          folder_id:
+            selectedFolder === "no-folder" ? null : Number(selectedFolder),
           created_at: new Date().toISOString(),
         };
 
@@ -151,6 +155,17 @@ export default function CreateNoteToggle({ folderId }) {
               required
             />
           )}
+          <select
+            className="parent-folder"
+            value={selectedFolder}
+            onChange={(e) => setSelectedFolder(e.target.value)}>
+            <option value="no-folder">Без папки</option>
+            {folders.map((folder) => (
+              <option key={folder.id} value={folder.id}>
+                {folder.title || `Папка ${folder.id}`}
+              </option>
+            ))}
+          </select>
           <button className="MakeNote" type="submit">
             Создать
           </button>

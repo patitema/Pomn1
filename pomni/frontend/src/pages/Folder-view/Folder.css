@@ -241,7 +241,23 @@
   color: #ff80ff;
 }
 
-/* Анимация появления элементов */
+.Tool-btns {
+  width: 150px;
+  display: flex;
+  flex-direction: row;
+  justify-content: end;
+  align-items: center;
+}
+
+.parent-folder {
+  padding-left: 5px;
+  border: none;
+  background-color: #333;
+  height: 20px;
+  border-radius: 5px;
+  color: #fff;
+}
+
 .stroke-folder,
 .note-item {
   animation: fadeInUp 0.3s ease-out;

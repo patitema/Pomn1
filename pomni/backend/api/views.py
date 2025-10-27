@@ -52,7 +52,7 @@ def note_detail(request, pk):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = NoteSerializer(note, data=request.data)
+        serializer = NoteSerializer(note, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -70,11 +70,11 @@ def folder_detail(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = FolderSerializer(folder)
+        serializer = FolderSerializer(folder, context={'request': request})
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = FolderSerializer(folder, data=request.data)
+        serializer = FolderSerializer(folder, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
