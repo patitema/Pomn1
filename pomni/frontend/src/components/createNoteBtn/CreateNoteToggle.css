@@ -19,7 +19,7 @@
 }
 
 .CreateNoteBtn {
-  position: sticky;
+  position: absolute;
   width: 50px;
   height: 50px;
   border-radius: 100%;
@@ -51,8 +51,7 @@
   flex-direction: column;
   position: absolute;
   width: 100vw;
-  min-height: 117vh;
-  padding-bottom: 17vh;
+  min-height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
   top: 0;
   left: 0;
@@ -97,8 +96,9 @@
   border: 1px solid #fff;
   display: flex;
   padding: 40px;
-  width: 1000px;
-  height: 500px;
+  width: 40vw;
+  min-height: 400px;
+  height: auto;
   border-radius: 20px;
   flex-direction: column;
   overflow: none;
@@ -106,7 +106,7 @@
 }
 
 #HeadName {
-  width: 48vw;
+  width: 35vw;
   height: 50px;
   margin-bottom: 20px;
   border: 1px solid #999;
@@ -119,9 +119,8 @@
 }
 
 #NoteInfo {
-  margin-top: 20px;
-  width: 48vw;
-  height: 40vh;
+  width: 35vw;
+  height: auto;
   border: 1px solid #999;
   background-color: transparent;
   border-radius: 10px;
@@ -131,12 +130,13 @@
   font-size: 20px;
   resize: none;
   outline: none;
+  margin-bottom: 20px;
 }
 
 .MakeNote {
   margin-top: 20px;
   width: 300px;
-  height: 50px;
+  height: 30px;
   background-color: #feb7ff;
   border: none;
   border-radius: 5px;
@@ -147,10 +147,23 @@
 .MakeFolder {
   margin-top: 10px;
   width: 300px;
-  height: 50px;
+  height: 30px;
   background-color: #ffa;
   border: none;
   border-radius: 5px;
   color: #000;
   font-size: 16px;
+}
+
+.parent-folder {
+  padding-left: 5px;
+  width: 300px;
+  height: 50px;
+  border: none;
+  background-color: #333;
+  height: 20px;
+  border-radius: 5px;
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
 }

@@ -24,11 +24,8 @@ class FolderSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'path', 'parent', 'user', 'notes', 'children', 'created_at')
 
     def get_children(self, obj):
-        # Возвращаем дочерние папки
         children = obj.children.all()
         return FolderSerializer(children, many=True, context=self.context).data
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if hasattr(self, 'context') and 'request' in self.context and self.context['request']:
-            self.fields['notes'].context = self.context

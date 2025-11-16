@@ -30,10 +30,8 @@ class Note(models.Model):
         return self.title
 
 class Profile(models.Model):
-    # Эта строка создает жесткую связь с моделью User
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-    # Здесь ваши дополнительные поля, которых нет в User
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=20, blank=True)
 
     def __str__(self):
