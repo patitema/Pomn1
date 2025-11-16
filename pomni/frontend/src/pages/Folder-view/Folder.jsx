@@ -1,12 +1,46 @@
+// src/pages/Folder-view/Folder.jsx
+
 import React, { useState, useEffect } from 'react'
+
+import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { useDroppable } from '@dnd-kit/core'
+
 import { useNavigate } from 'react-router-dom'
+
 import './Folder.css'
+
 import Nav from '../../components/nav/nav'
 import Footer from '../../components/footer/footer'
-import { useApi } from '../../context/ApiContext'
-import { useUsers } from '../../hooks/UseUsers'
 import CreateNoteToggle from '../../components/createNoteBtn/CreateNoteToggle'
 import EditToggle from '../../components/editToggle/EditToggle'
+import { DraggableNote } from '../../components/draggableNote/DraggableNote'
+import { DroppableFolder } from '../../components/DroppableFolder/DroppableFolder'
+
+import { useApi } from '../../context/ApiContext'
+import { useUsers } from '../../hooks/UseUsers'
+
+function RootDropZone({ children }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: 'root',
+  })
+
+  const style = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '5px',
+    backgroundColor: isOver ? '#333' : 'transparent',
+    minHeight: '100px',
+    borderRadius: '5px',
+    transition: 'background-color 0.2s ease',
+    width: '60vw',
+  }
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      {children}
+    </div>
+  )
+}
 
 export default function Folder() {
   document.title = 'POMNI - FOLDER'
@@ -24,15 +58,70 @@ export default function Folder() {
     }
   }, [token, navigate])
 
-  const { folders, notes, loading, deleteNote, deleteFolder } = useApi()
-  console.log('FOLDERS:', folders)
-  console.log('NOTES:', notes)
+  const {
+    folders,
+    notes,
+    setNotes,
+    loading,
+    deleteNote,
+    deleteFolder,
+    updateNote,
+  } = useApi()
+
   const [openFolders, setOpenFolders] = useState(new Set())
   const [openNotes, setOpenNotes] = useState(new Set())
   const [search, setSearch] = useState('')
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [editItem, setEditItem] = useState(null)
-  const [editType, setEditType] = useState('') // 'folder' or 'note'
+  const [editType, setEditType] = useState('')
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  )
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event
+
+    if (!over) return
+
+    const noteId = Number(active.id)
+    const targetId = over.id
+
+    const currentNote = notes.find((n) => n.id === noteId)
+    if (!currentNote) return
+
+    const newFolderId = targetId === 'root' ? null : Number(targetId)
+
+    if (currentNote.folder === newFolderId) {
+      return
+    }
+
+    setNotes((prevNotes) =>
+      prevNotes.map((note) =>
+        note.id === noteId ? { ...note, folder: newFolderId } : note
+      )
+    )
+
+    const updatedNoteData = {
+      ...currentNote,
+      folder: newFolderId,
+    }
+
+    updateNote(noteId, updatedNoteData).catch((err) => {
+      console.error('Ошибка перемещения заметки:', err)
+      setNotes((prevNotes) =>
+        prevNotes.map((note) =>
+          note.id === noteId ? { ...currentNote } : note
+        )
+      )
+      alert('Не удалось переместить заметку.')
+    })
+  }
+
   const toggleNote = (noteId) => {
     const newOpenNotes = new Set(openNotes)
     if (newOpenNotes.has(noteId)) {
@@ -78,138 +167,6 @@ export default function Folder() {
     setEditType('')
   }
 
-  const renderFolder = (folder, level = 0) => {
-    const folderNotes = notes.filter(
-      (note) =>
-        note.folder === folder.id &&
-        note.title.toLowerCase().includes(search.toLowerCase())
-    )
-
-    const isOpen = openFolders.has(folder.id)
-    const marginLeft = level * 20
-
-    return (
-      <li key={folder.id} className="stroke-folder">
-        <div
-          onClick={() => toggleFolder(folder.id)}
-          className="folder-header"
-          style={{
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            marginLeft: `${marginLeft}px`,
-          }}
-        >
-          <div className="folder-main">
-            <p>📁 {folder.title || `Папка ${folder.id}`}</p>
-            <div className="Tool-btns">
-              <button
-                className="edit-btn"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  openEdit(folder, 'folder')
-                }}
-              >
-                <svg className="edit-icon" viewBox="0 0 30 30">
-                  <use href="/images/icons.svg#ToolEdit"></use>
-                </svg>
-              </button>
-              <button
-                className="delete-btn"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  deleteFolder(folder.id)
-                }}
-              >
-                <svg className="delete-icon" viewBox="0 0 30 30">
-                  <use href="/images/icons.svg#ToolDelete"></use>
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div className="folder-info">
-            {folder.created_at && formatDate(folder.created_at)}
-          </div>
-        </div>
-
-        <div className={`folder-content ${isOpen ? 'open' : 'closed'}`}>
-          {isOpen && (
-            <ul style={{ marginLeft: '0px', marginTop: '5px' }}>
-              {folder.children &&
-                folder.children.map((childFolder) =>
-                  renderFolder(childFolder, level + 1)
-                )}
-
-              {folderNotes.length > 0
-                ? folderNotes.map((note, idx) => {
-                    const isNoteOpen = openNotes.has(note.id)
-                    return (
-                      <li
-                        key={`note-${note.id}`}
-                        className="stroke note-item"
-                        style={{
-                          marginLeft: `${marginLeft + 20}px`,
-                          cursor: 'pointer',
-                        }}
-                        onClick={() => toggleNote(note.id)}
-                      >
-                        <div className="note-main">
-                          <p>{note.title || `Заметка ${note.id}`}</p>
-                          <div className="Tool-btns">
-                            <button
-                              className="edit-btn"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                openEdit(note, 'note')
-                              }}
-                            >
-                              <svg className="edit-icon" viewBox="0 0 30 30">
-                                <use href="/images/icons.svg#ToolEdit"></use>
-                              </svg>
-                            </button>
-                            <button
-                              className="delete-btn"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                deleteNote(note.id)
-                              }}
-                            >
-                              <svg className="delete-icon" viewBox="0 0 30 30">
-                                <use href="/images/icons.svg#ToolDelete"></use>
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                        {isNoteOpen && (
-                          <div className="note-content">
-                            <div className="note-text">
-                              {note.text || 'Содержимое отсутствует'}
-                            </div>
-                            <div className="note-info">
-                              {note.created_at && formatDate(note.created_at)}
-                            </div>
-                          </div>
-                        )}
-                      </li>
-                    )
-                  })
-                : folder.children &&
-                  folder.children.length === 0 && (
-                    <li
-                      style={{
-                        fontStyle: 'italic',
-                        marginLeft: `${marginLeft + 20}px`,
-                      }}
-                    >
-                      Нет заметок
-                    </li>
-                  )}
-            </ul>
-          )}
-        </div>
-      </li>
-    )
-  }
-
   const unfolderNotes = notes.filter(
     (note) =>
       note.folder === null &&
@@ -217,96 +174,83 @@ export default function Folder() {
   )
 
   return (
-    <div>
-      <Nav />
-      <header>
-        <div className="Hcontainer">
-          <div className="hTextContainer">
-            <h1>POMNI</h1>
-            <h2>{user ? user.username : 'None'} BASE</h2>
+    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+      <div>
+        <Nav />
+        <header>
+          <div className="Hcontainer">
+            <div className="hTextContainer">
+              <h1>POMNI</h1>
+              <h2>{user ? user.username : 'None'} BASE</h2>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main>
-        <div className="FolderContainer">
-          <div className="navFolderView">
-            <input
-              className="SearchInput"
-              type="text"
-              placeholder="Search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+        <main>
+          <div className="FolderContainer">
+            <div className="navFolderView">
+              <input
+                className="SearchInput"
+                type="text"
+                placeholder="Search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            <ul className="FileList">
+              {folders.map((folder) => (
+                <DroppableFolder
+                  key={folder.id}
+                  folder={folder}
+                  level={0}
+                  notes={notes}
+                  openFolders={openFolders}
+                  openNotes={openNotes}
+                  toggleFolder={toggleFolder}
+                  toggleNote={toggleNote}
+                  openEdit={openEdit}
+                  deleteFolder={deleteFolder}
+                  deleteNote={deleteNote}
+                  formatDate={formatDate}
+                  search={search}
+                />
+              ))}
+
+              <RootDropZone>
+                {unfolderNotes.map((note) => {
+                  const isNoteOpen = openNotes.has(note.id)
+                  return (
+                    <DraggableNote
+                      key={`unfolder-note-${note.id}`}
+                      note={note}
+                      isNoteOpen={isNoteOpen}
+                      toggleNote={toggleNote}
+                      openEdit={openEdit}
+                      deleteNote={deleteNote}
+                      formatDate={formatDate}
+                      className="unfolder-stroke"
+                    />
+                  )
+                })}
+              </RootDropZone>
+            </ul>
+
+            <CreateNoteToggle
+              onNoteCreated={(note) => console.log('Новая заметка:', note)}
             />
           </div>
+        </main>
 
-          <ul className="FileList">
-            {folders.map((folder) => renderFolder(folder))}
+        <EditToggle
+          isOpen={isEditOpen}
+          onClose={closeEdit}
+          item={editItem}
+          type={editType}
+        />
 
-            {unfolderNotes.map((note, idx) => {
-              const isNoteOpen = openNotes.has(note.id)
-              return (
-                <li
-                  key={`unfolder-note-${note.id}`}
-                  className="unfolder-stroke note-item"
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => toggleNote(note.id)}
-                >
-                  <div className="note-main">
-                    <p>{note.title || `Заметка ${note.id}`}</p>
-                    <div className="Tool-btns">
-                      <button
-                        className="edit-btn"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          openEdit(note, 'note')
-                        }}
-                      >
-                        <svg className="edit-icon" viewBox="0 0 30 30">
-                          <use href="/images/icons.svg#ToolEdit"></use>
-                        </svg>
-                      </button>
-                      <button
-                        className="delete-btn"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          deleteNote(note.id)
-                        }}
-                      >
-                        <svg className="delete-icon" viewBox="0 0 30 30">
-                          <use href="/images/icons.svg#ToolDelete"></use>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                  {isNoteOpen && (
-                    <div className="note-content">
-                      <div className="note-text">
-                        {note.text || 'Содержимое отсутствует'}
-                      </div>
-                      <div className="note-info">
-                        {note.created_at && formatDate(note.created_at)}
-                      </div>
-                    </div>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
-          <CreateNoteToggle
-            onNoteCreated={(note) => console.log('Новая заметка:', note)}
-          />
-        </div>
-      </main>
-
-      <EditToggle
-        isOpen={isEditOpen}
-        onClose={closeEdit}
-        item={editItem}
-        type={editType}
-      />
-
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </DndContext>
   )
 }
