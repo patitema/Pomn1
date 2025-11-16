@@ -107,7 +107,6 @@ export default function Folder() {
     )
 
     const updatedNoteData = {
-      ...currentNote,
       folder: newFolderId,
     }
 
@@ -115,7 +114,7 @@ export default function Folder() {
       console.error('Ошибка перемещения заметки:', err)
       setNotes((prevNotes) =>
         prevNotes.map((note) =>
-          note.id === noteId ? { ...currentNote } : note
+          note.id === noteId ? { ...note, folder: currentNote.folder } : note
         )
       )
       alert('Не удалось переместить заметку.')
