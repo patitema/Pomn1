@@ -67,6 +67,7 @@ export default function Folder() {
     deleteFolder,
     updateNote,
   } = useApi()
+  console.log('hello --- notes', notes)
 
   const [openFolders, setOpenFolders] = useState(new Set())
   const [openNotes, setOpenNotes] = useState(new Set())

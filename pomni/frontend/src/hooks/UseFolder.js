@@ -1,50 +1,34 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react'
+import { useApi } from '../context/ApiContext'
 
 export function useAddFolder() {
-  const [folders, setFolders] = useState([]);
-
-  const fetchFolders = useCallback(async () => {
-    const token = localStorage.getItem("token");
-    try {
-      const res = await fetch("http://127.0.0.1:8000/api/folders/", {
-        headers: {
-          Authorization: token ? `Token ${token}` : "",
-          "Content-Type": "application/json",
-        },
-      });
-      if (!res.ok) throw new Error("Ошибка загрузки папок");
-      const data = await res.json();
-      setFolders(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error(err);
-      setFolders([]);
-    }
-  }, []);
+  const [folders, setFolders] = useState([])
+  const { fetchFolders } = useApi()
 
   useEffect(() => {
-    fetchFolders();
-  }, [fetchFolders]);
+    fetchFolders()
+  }, [fetchFolders])
 
   const addFolder = useCallback(async (folderData) => {
-    const token = localStorage.getItem("token");
-    const response = await fetch("http://127.0.0.1:8000/api/folders/", {
-      method: "POST",
+    const token = localStorage.getItem('token')
+    const response = await fetch('http://127.0.0.1:8000/api/folders/', {
+      method: 'POST',
       headers: {
-        Authorization: token ? `Token ${token}` : "",
-        "Content-Type": "application/json",
+        Authorization: token ? `Token ${token}` : '',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(folderData),
-    });
+    })
 
     if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Ошибка создания папки: ${text}`);
+      const text = await response.text()
+      throw new Error(`Ошибка создания папки: ${text}`)
     }
 
-    const created = await response.json();
-    setFolders((prev) => [created, ...prev]);
-    return created;
-  }, []);
+    const created = await response.json()
+    setFolders((prev) => [created, ...prev])
+    return created
+  }, [])
 
-  return { folders, addFolder, fetchFolders };
+  return { folders, addFolder, fetchFolders }
 }
