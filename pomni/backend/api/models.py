@@ -25,9 +25,15 @@ class Note(models.Model):
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, null=True, blank=True, related_name='notes')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notes', null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now, help_text="Время создания заметки")
+    
 
     def __str__(self):
         return self.title
+
+class Link(models.Model):
+
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, null=False, blank=True, related_name='links')
+    note = models.ForeignKey(Note, on_delete=models.CASCADE, null=False, blank=True, related_name='links')
 
 class Profile(models.Model):
 

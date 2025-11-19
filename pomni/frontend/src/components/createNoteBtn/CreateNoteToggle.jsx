@@ -12,7 +12,7 @@ export default function CreateNoteToggle({ folderId }) {
   const [selectedFolder, setSelectedFolder] = useState(folderId || 'no-folder')
   const { addNote } = useNotes()
   const { addFolder } = useAddFolder()
-  const { folders } = useApi()
+  const { folders, fetchNotes, fetchFolders } = useApi()
 
   const toggleFolderMode = () => {
     setIsFolderMode(true)
@@ -89,9 +89,11 @@ export default function CreateNoteToggle({ folderId }) {
       if (isFolder) {
         console.info('Creating folder...')
         if (typeof addFolder === 'function') {
+          console.log('hello --- add')
           result = await addFolder(data)
         } else {
           console.warn('addFolder not found, using fallback fetch')
+
           result = await fallbackCreateFolder(data)
         }
       } else {
@@ -117,8 +119,6 @@ export default function CreateNoteToggle({ folderId }) {
       setText('')
       setIsActive(false)
       setIsFolderMode(false)
-
-      window.location.reload()
     } catch (err) {
       console.error(
         `Ошибка при создании ${isFolder ? 'папки' : 'заметки'}:`,
