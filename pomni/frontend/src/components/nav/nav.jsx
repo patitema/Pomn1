@@ -1,30 +1,31 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { useUsers } from "../../hooks/UseUsers";
-import "./nav.css";
+import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { useUsers } from '../../hooks/UseUsers'
+import './nav.css'
 
 export default function Nav() {
-  const [isActive, setIsActive] = useState(false);
-  const { user, fetchCurrentUser } = useUsers();
+  const [isActive, setIsActive] = useState(false)
+  const { user, fetchCurrentUser } = useUsers()
 
   useEffect(() => {
-    fetchCurrentUser();
-  }, [fetchCurrentUser]);
+    fetchCurrentUser()
+  }, [fetchCurrentUser])
 
   const toggleMenu = () => {
-    setIsActive(!isActive);
-  };
+    setIsActive(!isActive)
+  }
 
   return (
     <nav>
-      <div className={`nav-container ${isActive ? "active" : ""}`}>
+      <div className={`nav-container ${isActive ? 'active' : ''}`}>
         <div className="logo-nav">
           <img src="/images/small.png" alt="" />
         </div>
-        <button className={`openNavBtn ${isActive ? "active" : ""}`}>
+        <button className={`openNavBtn ${isActive ? 'active' : ''}`}>
           <svg
-            className={`openNavSvg ${isActive ? "active" : ""}`}
-            onClick={toggleMenu}>
+            className={`openNavSvg ${isActive ? 'active' : ''}`}
+            onClick={toggleMenu}
+          >
             <use href="/images/icons.svg#Arrow"></use>
           </svg>
         </button>
@@ -40,7 +41,7 @@ export default function Nav() {
           <li>
             <Link to="/Notes">
               <svg class="icon">
-                <use href="/images/icons.svg#notes"></use>
+                <use href="/images/icons.svg#pointView"></use>
               </svg>
               <p>Заметки</p>
             </Link>
@@ -54,16 +55,24 @@ export default function Nav() {
             </Link>
           </li>
           <li>
-            <Link to={user ? "/Profile" : "/Auth"}>
+            <Link to="/Notes">
+              <svg class="icon">
+                <use href="/images/icons.svg#notes"></use>
+              </svg>
+              <p>Заметки</p>
+            </Link>
+          </li>
+          <li>
+            <Link to={user ? '/Profile' : '/Auth'}>
               <svg className="icon profile-icon" viewBox="0 0 24 24">
                 <use href="/images/icons.svg#icon-profile" />
               </svg>
-              <p>{user ? user.username : "Войти"}</p>
+              <p>{user ? user.username : 'Войти'}</p>
             </Link>
           </li>
         </ul>
       </div>
       <script></script>
     </nav>
-  );
+  )
 }
