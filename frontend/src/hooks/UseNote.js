@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useApi } from '../context/ApiContext'
+import axios from 'axios'
 
 export function useNote() {
   const [notes, setNotes] = useState([])
@@ -12,40 +13,42 @@ export function useNote() {
   const addNote = useCallback(
     async (noteData) => {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://127.0.0.1:8000/api/notes/', {
-        method: 'POST',
-        headers: {
-          Authorization: token ? `Token ${token}` : '',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(noteData),
-      })
 
-      if (!response.ok) {
-        const text = await response.text()
-        throw new Error(`Ошибка создания заметки: ${text}`)
+      try {
+        await axios.post('http://127.0.0.1:8000/api/notes/', noteData, {
+          headers: {
+            Authorization: token ? `Token ${token}` : '',
+          },
+        })
+
+        fetchNotes()
+      } catch (error) {
+        const errorMsg = error.response?.data
+          ? JSON.stringify(error.response.data)
+          : error.message
+        throw new Error(`Ошибка создания заметки: ${errorMsg}`)
       }
-
-      fetchNotes()
     },
     [fetchNotes]
   )
 
   const deleteNote = useCallback(async (id) => {
     const token = localStorage.getItem('token')
-    const response = await fetch(`http://127.0.0.1:8000/api/notes/${id}/`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: token ? `Token ${token}` : '',
-      },
-    })
 
-    if (!response.ok) {
-      const text = await response.text()
-      throw new Error(`Ошибка при удалении заметки: ${text}`)
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/notes/${id}/`, {
+        headers: {
+          Authorization: token ? `Token ${token}` : '',
+        },
+      })
+
+      setNotes((prev) => prev.filter((note) => note.id !== id))
+    } catch (error) {
+      const errorMsg = error.response?.data
+        ? JSON.stringify(error.response.data)
+        : error.message
+      throw new Error(`Ошибка при удалении заметки: ${errorMsg}`)
     }
-
-    setNotes((prev) => prev.filter((note) => note.id !== id))
   }, [])
 
   return { notes, addNote, deleteNote, fetchNotes }

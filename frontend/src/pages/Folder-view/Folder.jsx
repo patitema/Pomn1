@@ -1,5 +1,3 @@
-// src/pages/Folder-view/Folder.jsx
-
 import React, { useState, useEffect } from 'react'
 
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
@@ -67,7 +65,6 @@ export default function Folder() {
     deleteFolder,
     updateNote,
   } = useApi()
-  console.log('hello --- notes', notes)
 
   const [openFolders, setOpenFolders] = useState(new Set())
   const [openNotes, setOpenNotes] = useState(new Set())
@@ -108,7 +105,7 @@ export default function Folder() {
     )
 
     const updatedNoteData = {
-      folder: newFolderId,
+      folder_id: newFolderId,
     }
 
     updateNote(noteId, updatedNoteData).catch((err) => {

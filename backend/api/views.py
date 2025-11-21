@@ -52,7 +52,7 @@ def note_detail(request, pk):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = NoteSerializer(note, data=request.data, context={'request': request})
+        serializer = NoteSerializer(note, data=request.data, context={'request': request}, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -74,7 +74,7 @@ def folder_detail(request, pk):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = FolderSerializer(folder, data=request.data, context={'request': request})
+        serializer = FolderSerializer(folder, data=request.data, context={'request': request}, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

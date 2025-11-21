@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useApi } from '../context/ApiContext'
+import axios from 'axios'
 
 export function useAddFolder() {
   const [folders, setFolders] = useState([])
@@ -9,26 +10,36 @@ export function useAddFolder() {
     fetchFolders()
   }, [fetchFolders])
 
-  const addFolder = useCallback(async (folderData) => {
-    const token = localStorage.getItem('token')
-    const response = await fetch('http://127.0.0.1:8000/api/folders/', {
-      method: 'POST',
-      headers: {
-        Authorization: token ? `Token ${token}` : '',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(folderData),
-    })
+  const addFolder = useCallback(
+    async (folderData) => {
+      const token = localStorage.getItem('token')
 
-    if (!response.ok) {
-      const text = await response.text()
-      throw new Error(`Ошибка создания папки: ${text}`)
-    }
+      try {
+        const response = await axios.post(
+          'http://127.0.0.1:8000/api/folders/',
+          folderData,
+          {
+            headers: {
+              Authorization: token ? `Token ${token}` : '',
+            },
+          }
+        )
 
-    const created = await response.json()
-    setFolders((prev) => [created, ...prev])
-    return created
-  }, [])
+        const created = response.data
+
+        setFolders((prev) => [created, ...prev])
+        await fetchFolders()
+        return created
+      } catch (error) {
+        const errorText = error.response
+          ? JSON.stringify(error.response.data)
+          : error.message
+
+        throw new Error(`Ошибка создания папки: ${errorText}`)
+      }
+    },
+    [fetchFolders]
+  )
 
   return { folders, addFolder, fetchFolders }
 }
