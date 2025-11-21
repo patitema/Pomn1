@@ -72,6 +72,7 @@ const ForceGraphRenderer = () => {
       .join('circle')
       .attr('r', 7)
       .attr('fill', (d) => color(d.group))
+    // .attr('fill', (d) => color(d.group))
 
     node.append('title').text((d) => d.id)
 

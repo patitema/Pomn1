@@ -3,6 +3,7 @@ import { useNotes } from '../../context/NotesContext'
 import { useAddFolder } from '../../hooks/UseFolder'
 import { useApi } from '../../context/ApiContext'
 import './CreateNoteToggle.css'
+import axios from 'axios'
 
 export default function CreateNoteToggle({ folderId }) {
   const [isActive, setIsActive] = useState(false)
@@ -32,38 +33,43 @@ export default function CreateNoteToggle({ folderId }) {
 
   const fallbackCreateNote = async (noteData) => {
     const url = 'http://127.0.0.1:8000/api/notes/'
-    console.info('Fallback: отправка через fetch', url, noteData)
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(noteData),
-      credentials: 'include',
-    })
-    if (!resp.ok) {
-      const text = await resp.text().catch(() => '')
-      throw new Error(`Server responded ${resp.status}: ${text}`)
+    console.info('Fallback: отправка через axios', url, noteData)
+
+    try {
+      const response = await axios.post(url, noteData, {
+        headers: {},
+        withCredentials: true,
+      })
+
+      return response.data
+    } catch (error) {
+      const status = error.response ? error.response.status : 'N/A'
+      const text = error.response?.data
+        ? JSON.stringify(error.response.data)
+        : error.message
+
+      throw new Error(`Server responded ${status}: ${text}`)
     }
-    return resp.json()
   }
 
   const fallbackCreateFolder = async (folderData) => {
     const url = 'http://127.0.0.1:8000/api/folders/'
-    console.info('Fallback: отправка через fetch', url, folderData)
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(folderData),
-      credentials: 'include',
-    })
-    if (!resp.ok) {
-      const text = await resp.text().catch(() => '')
-      throw new Error(`Server responded ${resp.status}: ${text}`)
+    console.info('Fallback: отправка через axios', url, folderData)
+
+    try {
+      const response = await axios.post(url, folderData, {
+        withCredentials: true,
+      })
+
+      return response.data
+    } catch (error) {
+      const status = error.response ? error.response.status : 'N/A'
+      const text = error.response?.data
+        ? JSON.stringify(error.response.data)
+        : error.message
+
+      throw new Error(`Server responded ${status}: ${text}`)
     }
-    return resp.json()
   }
 
   const handleSubmit = async (e) => {
@@ -89,12 +95,12 @@ export default function CreateNoteToggle({ folderId }) {
       if (isFolder) {
         console.info('Creating folder...')
         if (typeof addFolder === 'function') {
-          console.log('hello --- add')
           result = await addFolder(data)
         } else {
           console.warn('addFolder not found, using fallback fetch')
 
           result = await fallbackCreateFolder(data)
+          await fetchFolders()
         }
       } else {
         if (typeof addNote === 'function') {
@@ -111,6 +117,7 @@ export default function CreateNoteToggle({ folderId }) {
         } else {
           console.warn('addNote not found in context, using fallback fetch')
           result = await fallbackCreateNote(data)
+          await fetchNotes()
         }
       }
 

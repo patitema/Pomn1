@@ -1,4 +1,30 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react'
+import axios from 'axios'
+
+const api = axios.create({
+  baseURL: 'http://127.0.0.1:8000/api/',
+  timeout: 5000,
+})
+
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers.Authorization = `Token ${token}`
+    }
+    config.headers['Content-Type'] = 'application/json'
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
 
 const ApiContext = createContext()
 
@@ -7,52 +33,29 @@ export const ApiProvider = ({ children }) => {
   const [folders, setFolders] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const fetchNotes = async () => {
-    const token = localStorage.getItem('token')
+  const fetchNotes = useCallback(async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/notes/', {
-        headers: {
-          Authorization: token ? `Token ${token}` : '',
-          'Content-Type': 'application/json',
-        },
-      })
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
-      const data = await res.json()
-      setNotes(Array.isArray(data) ? data : [])
+      const res = await api.get('notes/')
+      setNotes(Array.isArray(res.data) ? res.data : [])
     } catch (error) {
       console.error('Ошибка загрузки заметок:', error)
       setNotes([])
     }
-  }
+  }, [])
 
-  const fetchFolders = async () => {
-    const token = localStorage.getItem('token')
+  const fetchFolders = useCallback(async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/folders/', {
-        headers: {
-          Authorization: token ? `Token ${token}` : '',
-          'Content-Type': 'application/json',
-        },
-      })
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
-      const data = await res.json()
-      setFolders(Array.isArray(data) ? data : [])
+      const res = await api.get('folders/')
+      setFolders(Array.isArray(res.data) ? res.data : [])
     } catch (error) {
       console.error('Ошибка загрузки папок:', error)
       setFolders([])
     }
-  }
+  }, [])
 
   const deleteNote = async (noteId) => {
-    const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/notes/${noteId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: token ? `Token ${token}` : '',
-        },
-      })
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
+      await api.delete(`notes/${noteId}`)
       await fetchNotes()
     } catch (error) {
       console.error('Ошибка удаления заметки:', error)
@@ -60,15 +63,8 @@ export const ApiProvider = ({ children }) => {
   }
 
   const deleteFolder = async (folderId) => {
-    const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/folders/${folderId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: token ? `Token ${token}` : '',
-        },
-      })
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
+      await api.delete(`folders/${folderId}`)
       await fetchFolders()
     } catch (error) {
       console.error('Ошибка удаления папки:', error)
@@ -76,17 +72,8 @@ export const ApiProvider = ({ children }) => {
   }
 
   const updateNote = async (noteId, data) => {
-    const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/notes/${noteId}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: token ? `Token ${token}` : '',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
+      await api.put(`notes/${noteId}`, data)
       await fetchNotes()
     } catch (error) {
       console.error('Ошибка обновления заметки:', error)
@@ -94,17 +81,8 @@ export const ApiProvider = ({ children }) => {
   }
 
   const updateFolder = async (folderId, data) => {
-    const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/folders/${folderId}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: token ? `Token ${token}` : '',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
+      await api.put(`folders/${folderId}`, data)
       await fetchFolders()
     } catch (error) {
       console.error('Ошибка обновления папки:', error)
@@ -113,7 +91,7 @@ export const ApiProvider = ({ children }) => {
 
   useEffect(() => {
     Promise.all([fetchNotes(), fetchFolders()]).finally(() => setLoading(false))
-  }, [])
+  }, [fetchNotes, fetchFolders])
 
   return (
     <ApiContext.Provider

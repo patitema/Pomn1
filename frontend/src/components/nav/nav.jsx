@@ -55,7 +55,7 @@ export default function Nav() {
             </Link>
           </li>
           <li>
-            <Link to="/Notes">
+            <Link to="/Tasks">
               <svg class="icon">
                 <use href="/images/icons.svg#notes"></use>
               </svg>

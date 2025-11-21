@@ -13,22 +13,18 @@ export function DraggableNote({
   className = '',
 }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: note.id, // ID заметки (должен быть числом)
+    id: note.id,
   })
 
-  // Стили для перемещения
   const style = {
     marginLeft: `${marginLeft}px`,
-    // Применяем transform для визуального перемещения
     transform: CSS.Translate.toString(transform),
-    // Визуальный фидбек при перетаскивании
     opacity: transform ? 0.8 : 1,
     zIndex: transform ? 1000 : 'auto',
   }
 
   return (
     <li
-      // ref и style остаются на <li> для правильной структуры и позиционирования
       ref={setNodeRef}
       style={style}
       key={`note-${note.id}`}
@@ -36,12 +32,10 @@ export function DraggableNote({
     >
       <div
         className="note-main"
-        // 💡 СЛУШАТЕЛИ D&D ПЕРЕНЕСЕНЫ СЮДА (Это "ручка" для перетаскивания)
         {...listeners}
         {...attributes}
-        // onClick остается на "ручке" для открытия/закрытия
         onClick={() => toggleNote(note.id)}
-        style={{ cursor: 'grab' }} // Визуальный индикатор, что можно перетаскивать
+        style={{ cursor: 'grab' }}
       >
         <p>{note.title || `Заметка ${note.id}`}</p>
         <div className="Tool-btns">
