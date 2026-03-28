@@ -2,7 +2,10 @@ import { useCallback, useEffect, useState } from 'react'
 import { useApi } from '../context/ApiContext'
 import axios from 'axios'
 
+// Базовый URL для API (может быть относительным для nginx)
 const API_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api'
+// Убираем trailing slash для консистентности
+const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL
 
 export function useAddFolder() {
   const [folders, setFolders] = useState([])
@@ -18,7 +21,7 @@ export function useAddFolder() {
 
       try {
         const response = await axios.post(
-          `${API_URL}/folders/`,
+          `${baseUrl}/folders/`,
           folderData,
           {
             headers: {
