@@ -5,6 +5,8 @@ import { useApi } from '../../context/ApiContext'
 import './CreateNoteToggle.css'
 import axios from 'axios'
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api'
+
 export default function CreateNoteToggle({ folderId }) {
   const [isActive, setIsActive] = useState(false)
   const [isFolderMode, setIsFolderMode] = useState(false)
@@ -32,7 +34,7 @@ export default function CreateNoteToggle({ folderId }) {
   }
 
   const fallbackCreateNote = async (noteData) => {
-    const url = 'http://127.0.0.1:8000/api/notes/'
+    const url = `${API_URL}/notes/`
     console.info('Fallback: отправка через axios', url, noteData)
 
     try {
@@ -53,7 +55,7 @@ export default function CreateNoteToggle({ folderId }) {
   }
 
   const fallbackCreateFolder = async (folderData) => {
-    const url = 'http://127.0.0.1:8000/api/folders/'
+    const url = `${API_URL}/folders/`
     console.info('Fallback: отправка через axios', url, folderData)
 
     try {

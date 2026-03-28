@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useApi } from '../context/ApiContext'
 import axios from 'axios'
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api'
+
 export function useNote() {
   const [notes, setNotes] = useState([])
   const { fetchNotes } = useApi()
@@ -15,7 +17,7 @@ export function useNote() {
       const token = localStorage.getItem('token')
 
       try {
-        await axios.post('http://127.0.0.1:8000/api/notes/', noteData, {
+        await axios.post(`${API_URL}/notes/`, noteData, {
           headers: {
             Authorization: token ? `Token ${token}` : '',
           },
@@ -36,7 +38,7 @@ export function useNote() {
     const token = localStorage.getItem('token')
 
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/notes/${id}/`, {
+      await axios.delete(`${API_URL}/notes/${id}/`, {
         headers: {
           Authorization: token ? `Token ${token}` : '',
         },

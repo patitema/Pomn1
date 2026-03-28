@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useApi } from '../context/ApiContext'
 import axios from 'axios'
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api'
+
 export function useAddFolder() {
   const [folders, setFolders] = useState([])
   const { fetchFolders } = useApi()
@@ -16,7 +18,7 @@ export function useAddFolder() {
 
       try {
         const response = await axios.post(
-          'http://127.0.0.1:8000/api/folders/',
+          `${API_URL}/folders/`,
           folderData,
           {
             headers: {
