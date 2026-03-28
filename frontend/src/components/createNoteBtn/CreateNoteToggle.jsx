@@ -5,7 +5,10 @@ import { useApi } from '../../context/ApiContext'
 import './CreateNoteToggle.css'
 import axios from 'axios'
 
+// Базовый URL для API (может быть относительным для nginx)
 const API_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api'
+// Убираем trailing slash для консистентности
+const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL
 
 export default function CreateNoteToggle({ folderId }) {
   const [isActive, setIsActive] = useState(false)
@@ -34,7 +37,7 @@ export default function CreateNoteToggle({ folderId }) {
   }
 
   const fallbackCreateNote = async (noteData) => {
-    const url = `${API_URL}/notes/`
+    const url = `${baseUrl}/notes/`
     console.info('Fallback: отправка через axios', url, noteData)
 
     try {
@@ -55,7 +58,7 @@ export default function CreateNoteToggle({ folderId }) {
   }
 
   const fallbackCreateFolder = async (folderData) => {
-    const url = `${API_URL}/folders/`
+    const url = `${baseUrl}/folders/`
     console.info('Fallback: отправка через axios', url, folderData)
 
     try {
