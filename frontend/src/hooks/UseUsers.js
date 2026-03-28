@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { fetchApi } from "../utils/api";
 
 export function useUsers() {
   const [user, setUser] = useState(null);
@@ -6,9 +7,8 @@ export function useUsers() {
 
   const register = useCallback(async (userData) => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/register/", {
+      const response = await fetchApi("register/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: userData.username,
           email: userData.email,
@@ -35,9 +35,8 @@ export function useUsers() {
 
   const login = useCallback(async (credentials) => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/login/", {
+      const response = await fetchApi("login/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials),
       });
 
@@ -59,12 +58,8 @@ export function useUsers() {
 
   const logout = useCallback(async () => {
     try {
-      await fetch("http://127.0.0.1:8000/api/logout/", {
+      await fetchApi("logout/", {
         method: "POST",
-        headers: {
-          Authorization: `Token ${token}`,
-          "Content-Type": "application/json",
-        },
       });
     } catch (err) {
       console.error("Ошибка выхода:", err);
@@ -73,16 +68,14 @@ export function useUsers() {
       setUser(null);
       localStorage.removeItem("token");
     }
-  }, [token]);
+  }, []);
 
   const fetchCurrentUser = useCallback(async () => {
     if (!token) return;
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/current-user/", {
-        headers: {
-          Authorization: `Token ${token}`,
-        },
+      const response = await fetchApi("current-user/", {
+        headers: {},
       });
 
       if (response.ok) {
@@ -103,17 +96,10 @@ export function useUsers() {
       if (!token) return;
 
       try {
-        const response = await fetch(
-          "http://127.0.0.1:8000/api/update-profile/",
-          {
-            method: "PUT",
-            headers: {
-              Authorization: `Token ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(profileData),
-          }
-        );
+        const response = await fetchApi("update-profile/", {
+          method: "PUT",
+          body: JSON.stringify(profileData),
+        });
 
         if (response.ok) {
           const data = await response.json();
