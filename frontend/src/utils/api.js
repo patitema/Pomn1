@@ -1,5 +1,9 @@
 // Базовый URL для API
+// Если начинается с / — относительный путь (для nginx), иначе полный URL
 const API_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api'
+
+// Убираем trailing slash для консистентности
+const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL
 
 /**
  * Получить полный URL для endpoint
@@ -7,7 +11,9 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api'
  * @returns {string}
  */
 export const getApiUrl = (endpoint) => {
-  return `${API_URL}/${endpoint}`.replace(/\/+/g, '/')
+  // Убираем ведущий слэш у endpoint, чтобы не было дублирования
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint
+  return `${baseUrl}/${cleanEndpoint}`.replace(/\/+/g, '/')
 }
 
 /**
