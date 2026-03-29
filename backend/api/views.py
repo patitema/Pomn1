@@ -5,8 +5,10 @@ from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.core.exceptions import ValidationError
 from .models import Folder, Note, Profile
 from .serializer import FolderSerializer, NoteSerializer
+from .validators import validate_username, validate_password, validate_phone, validate_email_unique
 
 @api_view(['GET', 'POST'])
 def notes_list(request):
@@ -92,12 +94,49 @@ def register(request):
     password = request.data.get('password')
     phone_number = request.data.get('phone_number')
 
-    if not username or not password:
-        return Response({'error': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+    errors = {}
 
-    if User.objects.filter(username=username).exists():
-        return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
+    # Валидация логина
+    if not username:
+        errors['username'] = ['Логин обязателен']
+    else:
+        try:
+            validate_username(username)
+        except ValidationError as e:
+            errors['username'] = e.messages
 
+    # Валидация пароля
+    if not password:
+        errors['password'] = ['Пароль обязателен']
+    else:
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            errors['password'] = e.messages
+
+    # Валидация email
+    if not email:
+        errors['email'] = ['Email обязателен']
+    else:
+        try:
+            validate_email_unique(email)
+        except ValidationError as e:
+            errors['email'] = e.messages
+
+    # Валидация телефона
+    if not phone_number:
+        errors['phone_number'] = ['Телефон обязателен']
+    else:
+        try:
+            validate_phone(phone_number)
+        except ValidationError as e:
+            errors['phone_number'] = e.messages
+
+    # Если есть ошибки, возвращаем их
+    if errors:
+        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # Создание пользователя
     user = User.objects.create_user(
         username=username,
         email=email,
@@ -109,7 +148,7 @@ def register(request):
     user.save()
 
     # Create Profile
-    profile = Profile.objects.create(user=user, phone_number=phone_number or '')
+    profile = Profile.objects.create(user=user, phone_number=phone_number)
     profile.save()
 
     token, created = Token.objects.get_or_create(user=user)
