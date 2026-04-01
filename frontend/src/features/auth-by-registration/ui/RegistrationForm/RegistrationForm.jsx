@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { useRegisterMutation } from '../../../../shared/api';
-import { setToken, setUser, logout } from '../../auth-by-login/model';
-import { Input, Button } from '../../../../shared/ui';
-import { routes } from '../../../../shared/config';
+import { useRegisterMutation } from '@shared/api';
+import { setToken, setUser } from '@features/auth-by-login';
+import { Input, Button } from '@shared/ui';
 import './RegistrationForm.css';
 
 const RegistrationForm = () => {

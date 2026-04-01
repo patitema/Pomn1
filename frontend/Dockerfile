@@ -2,11 +2,14 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Копируем всё
-COPY . .
+# Копируем package.json и craco.config.js
+COPY package*.json craco.config.js ./
 
 # Установка зависимостей
 RUN npm install && npm cache clean --force
+
+# Копируем весь исходный код
+COPY . .
 
 # Сборка production-версии
 RUN npm run build

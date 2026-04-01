@@ -1,6 +1,6 @@
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { NoteCard } from '../../../entities/note';
+import { NoteCard } from '@entities/note';
 import './DraggableNote.css';
 
 const DraggableNote = ({ note, onEdit, onDelete }) => {
