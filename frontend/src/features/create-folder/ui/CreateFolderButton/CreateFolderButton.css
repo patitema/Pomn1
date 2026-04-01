@@ -1,0 +1,13 @@
+.create-folder-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.create-folder-button__icon {
+  font-size: 18px;
+}
+
+.create-folder-button__text {
+  font-weight: 600;
+}

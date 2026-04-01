@@ -1,0 +1,8 @@
+.droppable-folder {
+  transition: border-color 0.2s ease;
+}
+
+.droppable-folder--over {
+  border-color: #FEB7FF;
+  background-color: rgba(254, 183, 255, 0.1);
+}

@@ -1,0 +1,12 @@
+.edit-folder-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.edit-folder-modal__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
