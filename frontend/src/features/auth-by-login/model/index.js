@@ -1,3 +1,3 @@
-export { default as authReducer } from './authSlice';
-export * from './selectors';
-export { setToken, setUser, clearError, logout } from './authSlice';
+export { default as authReducer } from './authSlice.js';
+export * from './selectors.js';
+export { setToken, setUser, clearError, logout } from './authSlice.js';
