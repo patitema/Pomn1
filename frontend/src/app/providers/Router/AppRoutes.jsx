@@ -1,12 +1,12 @@
 import { routes } from '@shared/config';
 
-import HomePage from '@pages/home/HomePage.jsx';
-import AuthPage from '@pages/auth/AuthPage.jsx';
-import RegistrationPage from '@pages/registration/RegistrationPage.jsx';
-import NotesPage from '@pages/notes/NotesPage.jsx';
-import FoldersPage from '@pages/folders/FoldersPage.jsx';
-import ProfilePage from '@pages/profile/ProfilePage.jsx';
-import TasksPage from '@pages/tasks/TasksPage.jsx';
+import HomePage from '@pages/home/HomePage';
+import AuthPage from '@pages/auth/AuthPage';
+import RegistrationPage from '@pages/registration/RegistrationPage';
+import NotesPage from '@pages/notes/NotesPage';
+import FoldersPage from '@pages/folders/FoldersPage';
+import ProfilePage from '@pages/profile/ProfilePage';
+import TasksPage from '@pages/tasks/TasksPage';
 
 import { Routes, Route } from 'react-router-dom';
 
