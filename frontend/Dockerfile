@@ -1,31 +1,23 @@
-# Stage 1: Сборка приложения
 FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Копирование package файлов
 COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
 
-# Установка зависимостей
-RUN npm ci --only=production
-
-# Копирование исходного кода
 COPY . .
-
-# Сборка production-версии
 RUN npm run build
 
-# Stage 2: Nginx для раздачи статики
-FROM nginx:alpine
+# Production-запуск через serve
+FROM node:18-alpine
 
-# Копирование build файлов в nginx
-COPY --from=builder /app/build /usr/share/nginx/html
+WORKDIR /app
 
-# Копирование nginx конфига
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
 
-# Открываем порт
-EXPOSE 80
+EXPOSE 3000
 
-# Запуск nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Запуск serve для раздачи build-версии
+CMD ["npm", "run", "start:prod"]
