@@ -224,10 +224,10 @@ CREATE DATABASE Pomni CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 ## Production деплой
 
-### Docker Compose (рекомендуется)
+### Docker Compose
 
 ```bash
-# Сборка и запуск в production режиме
+# Сборка и запуск
 docker-compose up -d --build
 
 # Просмотр логов
@@ -240,24 +240,53 @@ docker-compose down
 ### Архитектура развёртывания
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│   Nginx     │────▶│   Django     │────▶│    MySQL    │
-│   (port 80) │     │  (port 8000) │     │ (port 3306) │
-└─────────────┘     └──────────────┘     └─────────────┘
-      │
-      └─ /api/* → backend
-      └─ /* → static files
+┌─────────────────┐     ┌──────────────┐     ┌─────────────┐
+│  Твой nginx     │────▶│   Django     │────▶│    MySQL    │
+│  (Custom Loc)   │     │  (port 8000) │     │ (port 3306) │
+└─────────────────┘     └──────────────┘     └─────────────┘
+        │
+        └─ /api/* → backend:8000
+        └─ /* → frontend:3000
 ```
 
-### Конфигурация nginx
+### Настройка внешнего nginx
 
-Frontend использует nginx для:
-- Раздачи статических файлов
-- Проксирования `/api/*` запросов на backend
-- Gzip сжатия
-- Кэширования статики (1 год для JS, CSS, изображений)
+Если используешь панель (aaPanel, CyberPanel, etc.), настрой проксирование:
 
-Конфигурация в `frontend/nginx.conf`
+**Location для frontend:**
+```
+Location: /
+Proxy URL: http://localhost:3000/
+```
+
+**Location для API:**
+```
+Location: /api/
+Proxy URL: http://localhost:8000/api/
+```
+
+### Режимы работы
+
+#### Разработка (локально)
+```bash
+cd frontend
+npm install
+npm start  # Dev-сервер на http://localhost:3000
+```
+
+#### Production (Docker)
+```bash
+docker-compose up -d --build
+# Frontend на http://localhost:3000 (production build)
+```
+
+#### Production (без Docker)
+```bash
+cd frontend
+npm install
+npm run build
+npm run start:prod  # Serve на http://localhost:3000
+```
 
 ### Переменные окружения
 

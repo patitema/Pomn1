@@ -49,8 +49,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: pomni_frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     ports:
-      - "80:80"  # nginx на 80 порту
+      - "3000:3000"
     environment:
       - REACT_APP_API_URL=/api
     depends_on:
