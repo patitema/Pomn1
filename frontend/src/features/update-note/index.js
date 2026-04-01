@@ -1,1 +1,1 @@
-export { EditNoteModal } from './ui/EditNoteModal';
+export { EditNoteModal } from './ui/EditNoteModal/index.js';

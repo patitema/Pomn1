@@ -1,5 +1,5 @@
-import { formatFolderDate } from '../../model/helpers';
-import { DeleteFolderButton } from '../../../features/delete-folder';
+import { formatFolderDate } from '../../model/helpers.js';
+import { DeleteFolderButton } from '../../../features/delete-folder/index.js';
 import './FolderCard.css';
 
 const FolderCard = ({ 

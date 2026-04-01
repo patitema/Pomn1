@@ -1,8 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { UserInfo } from '../../../entities/user';
-import { selectIsAuthenticated } from '../../../entities/user';
-import { routes } from '../../../shared/config';
+import { UserInfo } from '../../../entities/user/index.js';
+import { selectIsAuthenticated } from '../../../entities/user/index.js';
+import { routes } from '../../../shared/config/index.js';
 import './Header.css';
 
 const Header = () => {

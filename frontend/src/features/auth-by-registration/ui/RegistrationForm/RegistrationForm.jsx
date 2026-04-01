@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { useRegisterMutation } from '../../../shared/api';
-import { setToken, setUser } from '../../auth-by-login/model/authSlice';
-import { Input, Button } from '../../../shared/ui';
-import { routes } from '../../../shared/config';
+import { useRegisterMutation } from '../../../../shared/api/index.js';
+import { setToken, setUser } from '../../../auth-by-login/model/authSlice.js';
+import { Input, Button } from '../../../../shared/ui/index.js';
+import { routes } from '../../../../shared/config/index.js';
 import './RegistrationForm.css';
 
 const RegistrationForm = () => {
@@ -38,7 +38,7 @@ const RegistrationForm = () => {
       const result = await register(registerData).unwrap();
       dispatch(setToken(result.token));
       dispatch(setUser(result.user));
-      navigate(routes.notes);
+      navigate('/notes');
     } catch (err) {
       console.error('Registration failed:', err);
     }
@@ -99,7 +99,7 @@ const RegistrationForm = () => {
       </Button>
       
       <p className="registration-form__footer">
-        Уже есть аккаунт? <Link to={routes.auth}>Войти</Link>
+        Уже есть аккаунт? <Link to="/auth">Войти</Link>
       </p>
     </form>
   );
