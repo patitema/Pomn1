@@ -14,7 +14,6 @@ import './FoldersPage.css';
 const FoldersPage = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const folders = useSelector(selectAllFolders);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState(null);
 
   if (!isAuthenticated) {
@@ -28,7 +27,7 @@ const FoldersPage = () => {
       <main className="folders-page__content">
         <div className="folders-page__header">
           <h1 className="folders-page__title">Папки</h1>
-          <CreateFolderButton onClick={() => setIsCreateModalOpen(true)} />
+          <CreateFolderButton onClick={() => {}} />
         </div>
         
         <div className="folders-page__grid">
