@@ -1,10 +1,10 @@
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { selectIsAuthenticated } from '@entities/user';
-import { Header } from '@widgets/header';
-import { Footer } from '@widgets/footer';
-import { Button } from '@shared/ui';
-import { routes } from '@shared/config';
+import { selectIsAuthenticated } from '../../entities/user';
+import { Header } from '../../widgets/header';
+import { Footer } from '../../widgets/footer';
+import { Button } from '../../shared/ui';
+import { routes } from '../../shared/config';
 import './HomePage.css';
 
 const HomePage = () => {
