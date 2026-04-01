@@ -1,0 +1,12 @@
+.create-folder-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.create-folder-form__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}

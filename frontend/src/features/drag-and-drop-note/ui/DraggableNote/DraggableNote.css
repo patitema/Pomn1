@@ -1,0 +1,9 @@
+.draggable-note {
+  display: inline-block;
+  touch-action: none;
+  user-select: none;
+}
+
+.draggable-note:active {
+  cursor: grabbing;
+}
