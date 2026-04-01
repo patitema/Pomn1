@@ -1,4 +1,5 @@
 import { formatFolderDate } from '../../model/helpers';
+import { DeleteFolderButton } from '@features/delete-folder';
 import './FolderCard.css';
 
 const FolderCard = ({ 
@@ -8,13 +9,6 @@ const FolderCard = ({
   onDelete,
   notesCount = 0 
 }) => {
-  const handleDelete = (e) => {
-    e.stopPropagation();
-    if (window.confirm('Удалить папку?')) {
-      onDelete?.(folder.id);
-    }
-  };
-
   const handleEdit = (e) => {
     e.stopPropagation();
     onEdit?.(folder);
@@ -41,12 +35,7 @@ const FolderCard = ({
         >
           ✏️
         </button>
-        <button 
-          className="folder-card__button folder-card__button--delete"
-          onClick={handleDelete}
-        >
-          🗑️
-        </button>
+        <DeleteFolderButton folderId={folder.id} onSuccess={onDelete} />
       </div>
     </div>
   );

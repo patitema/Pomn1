@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '@entities/user';
 import { selectAllFolders } from '@entities/folder';
 import { FolderCard } from '@entities/folder';
-import { CreateFolderButton } from '@features/create-folder';
+import { CreateFolderForm, CreateFolderButton } from '@features/create-folder';
 import { EditFolderModal } from '@features/update-folder';
 import { Header } from '@widgets/header';
 import { Footer } from '@widgets/footer';
@@ -14,6 +14,7 @@ import './FoldersPage.css';
 const FoldersPage = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const folders = useSelector(selectAllFolders);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState(null);
 
   if (!isAuthenticated) {
@@ -27,7 +28,7 @@ const FoldersPage = () => {
       <main className="folders-page__content">
         <div className="folders-page__header">
           <h1 className="folders-page__title">Папки</h1>
-          <CreateFolderButton onClick={() => {}} />
+          <CreateFolderButton onClick={() => setIsCreateModalOpen(true)} />
         </div>
         
         <div className="folders-page__grid">
@@ -44,6 +45,11 @@ const FoldersPage = () => {
           )}
         </div>
       </main>
+      
+      <CreateFolderForm
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
       
       <EditFolderModal
         folder={editingFolder}

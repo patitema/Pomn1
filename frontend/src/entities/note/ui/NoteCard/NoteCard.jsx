@@ -1,13 +1,8 @@
 import { formatNoteDate, getNotePreview } from '../../model/helpers';
+import { DeleteNoteButton } from '@features/delete-note';
 import './NoteCard.css';
 
 const NoteCard = ({ note, onEdit, onDelete }) => {
-  const handleDelete = () => {
-    if (window.confirm('Удалить заметку?')) {
-      onDelete?.(note.id);
-    }
-  };
-
   return (
     <div className="note-card">
       <div className="note-card__header">
@@ -28,12 +23,7 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
         >
           Редактировать
         </button>
-        <button 
-          className="note-card__button note-card__button--delete"
-          onClick={handleDelete}
-        >
-          Удалить
-        </button>
+        <DeleteNoteButton noteId={note.id} onSuccess={onDelete} />
       </div>
     </div>
   );
