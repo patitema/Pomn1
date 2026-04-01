@@ -6,7 +6,7 @@ WORKDIR /app
 COPY . .
 
 # Установка зависимостей
-RUN npm ci && npm cache clean --force
+RUN npm install && npm cache clean --force
 
 # Сборка production-версии
 RUN npm run build

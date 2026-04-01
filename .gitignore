@@ -25,7 +25,7 @@ __pycache__/
 /frontend/build
 /docs
 /plans
-/reports 
+/reports
 
 # misc
 .DS_Store
