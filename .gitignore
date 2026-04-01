@@ -24,6 +24,8 @@ __pycache__/
 # production
 /build
 /docs
+/plans
+/reports 
 
 # misc
 .DS_Store
