@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { routes } from '@shared/config';
+import { routes } from '../../../shared/config';
 import './Footer.css';
 
 const Footer = () => {

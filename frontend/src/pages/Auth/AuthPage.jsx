@@ -1,6 +1,6 @@
-import { LoginForm } from '@features/auth-by-login';
-import { Header } from '@widgets/header';
-import { Footer } from '@widgets/footer';
+import { LoginForm } from '../../features/auth-by-login';
+import { Header } from '../../widgets/header';
+import { Footer } from '../../widgets/footer';
 import './AuthPage.css';
 
 const AuthPage = () => {

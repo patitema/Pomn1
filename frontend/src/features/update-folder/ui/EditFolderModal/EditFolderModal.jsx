@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useUpdateFolderMutation } from '@shared/api';
-import { Input, Button, Modal } from '@shared/ui';
+import { useUpdateFolderMutation } from '../../../shared/api';
+import { Input, Button, Modal } from '../../../shared/ui';
 import './EditFolderModal.css';
 
 const EditFolderModal = ({ folder, isOpen, onClose }) => {

@@ -1,9 +1,9 @@
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectIsAuthenticated } from '@entities/user';
-import { Header } from '@widgets/header';
-import { Footer } from '@widgets/footer';
-import { routes } from '@shared/config';
+import { selectIsAuthenticated } from '../../entities/user';
+import { Header } from '../../widgets/header';
+import { Footer } from '../../widgets/footer';
+import { routes } from '../../shared/config';
 import './TasksPage.css';
 
 const TasksPage = () => {
