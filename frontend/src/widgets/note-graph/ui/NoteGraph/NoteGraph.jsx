@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import * as d3 from 'd3';
-import { selectAllNotes } from '../../../entities/note/index.js';
-import { EditNoteModal } from '../../../features/update-note/index.js';
-import { CreateNoteForm, CreateNoteButton } from '../../../features/create-note/index.js';
-import { Loader } from '../../../shared/ui/index.js';
+import { selectAllNotes } from '../../../entities/note';
+import { EditNoteModal } from '../../../features/update-note';
+import { CreateNoteForm, CreateNoteButton } from '../../../features/create-note';
+import { Loader } from '../../../shared/ui';
 import './NoteGraph.css';
 
 const NoteGraph = () => {

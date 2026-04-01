@@ -1,5 +1,5 @@
-import { useDeleteNoteMutation } from '../../../../shared/api/index.js';
-import { Button } from '../../../../shared/ui/index.js';
+import { useDeleteNoteMutation } from '../../../../shared/api';
+import { Button } from '../../../../shared/ui';
 import './DeleteNoteButton.css';
 
 const DeleteNoteButton = ({ noteId, onSuccess, variant = 'icon' }) => {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useCreateFolderMutation } from '../../../../shared/api/index.js';
-import { Input, Button, Modal } from '../../../../shared/ui/index.js';
+import { useCreateFolderMutation } from '../../../../shared/api';
+import { Input, Button, Modal } from '../../../../shared/ui';
 import './CreateFolderForm.css';
 
 const CreateFolderForm = ({ isOpen, onClose, parentId = null }) => {

@@ -1,6 +1,6 @@
-import { RegistrationForm } from '../../features/auth-by-registration/index.js';
-import { Header } from '../../widgets/header/index.js';
-import { Footer } from '../../widgets/footer/index.js';
+import { RegistrationForm } from '../../features/auth-by-registration';
+import { Header } from '../../widgets/header';
+import { Footer } from '../../widgets/footer';
 import './RegistrationPage.css';
 
 const RegistrationPage = () => {

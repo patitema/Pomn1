@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useCreateNoteMutation } from '../../../../shared/api/index.js';
-import { Input, Button, Modal } from '../../../../shared/ui/index.js';
+import { useCreateNoteMutation } from '../../../../shared/api';
+import { Input, Button, Modal } from '../../../../shared/ui';
 import './CreateNoteForm.css';
 
 const CreateNoteForm = ({ isOpen, onClose, parentId = null }) => {

@@ -1,1 +1,1 @@
-export { RegistrationForm } from './ui/RegistrationForm/index.js';
+export { RegistrationForm } from './ui/RegistrationForm';
