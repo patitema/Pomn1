@@ -136,9 +136,13 @@ app → pages → widgets → features → entities → shared
 - Python 3.10+
 - Node.js 18+
 - MySQL 8.0+
-- **Docker и Docker Compose** (опционально, для контейнеризации)
+- **Docker и Docker Compose** (для контейнеризации)
 
-### 🐳 Запуск через Docker (рекомендуется)
+---
+
+## 🚀 Быстрый старт
+
+### Запуск через Docker (рекомендуется)
 
 ```bash
 # Клонирование репозитория
@@ -150,7 +154,7 @@ docker-compose up --build
 ```
 
 После запуска:
-- **Frontend:** http://localhost:3000
+- **Frontend:** http://localhost:80  ⚠️ **Порт изменён с 3000 на 80!**
 - **Backend API:** http://localhost:8000/api/
 - **База данных:** localhost:3306
 
@@ -159,15 +163,13 @@ docker-compose up --build
 docker-compose down
 ```
 
-### Локальная установка
+**Важно:** Frontend теперь работает на **80 порту** (nginx), а не на 3000!
 
-### 1. Клонирование репозитория
-```bash
-git clone <repository-url>
-cd Pomn1
-```
+---
 
-### 2. Настройка Backend
+## Локальная разработка (без Docker)
+
+### 1. Настройка Backend
 ```bash
 cd backend
 
@@ -191,10 +193,10 @@ pip install -r requirements.txt
 python manage.py migrate
 
 # Запуск сервера разработки
-python manage.py runserver
+python manage.py runserver 0.0.0.0:8000
 ```
 
-### 3. Настройка Frontend
+### 2. Настройка Frontend
 ```bash
 cd frontend
 
@@ -205,6 +207,13 @@ npm install
 npm start
 ```
 
+Frontend будет доступен на http://localhost:3000
+
+**Важно:** Для локальной разработки создайте `.env` файл:
+```env
+REACT_APP_API_URL=http://localhost:8000/api
+```
+
 ### 4. Настройка базы данных
 Создайте базу данных `Pomni` в MySQL:
 ```sql
@@ -213,10 +222,64 @@ CREATE DATABASE Pomni CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 ---
 
+## Production деплой
+
+### Docker Compose (рекомендуется)
+
+```bash
+# Сборка и запуск в production режиме
+docker-compose up -d --build
+
+# Просмотр логов
+docker-compose logs -f
+
+# Остановка
+docker-compose down
+```
+
+### Архитектура развёртывания
+
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│   Nginx     │────▶│   Django     │────▶│    MySQL    │
+│   (port 80) │     │  (port 8000) │     │ (port 3306) │
+└─────────────┘     └──────────────┘     └─────────────┘
+      │
+      └─ /api/* → backend
+      └─ /* → static files
+```
+
+### Конфигурация nginx
+
+Frontend использует nginx для:
+- Раздачи статических файлов
+- Проксирования `/api/*` запросов на backend
+- Gzip сжатия
+- Кэширования статики (1 год для JS, CSS, изображений)
+
+Конфигурация в `frontend/nginx.conf`
+
+### Переменные окружения
+
+#### Frontend (.env)
+```env
+REACT_APP_API_URL=/api
+```
+
+#### Backend (.env или settings.py)
+```python
+DB_HOST=db
+DB_NAME=Pomni
+DB_USER=pomni
+DB_PASSWORD=pomnipassword
+```
+
+---
+
 ## 🚀 Использование
 
 После запуска:
-- **Frontend:** http://localhost:3000
+- **Frontend:** http://localhost:80
 - **Backend API:** http://localhost:8000/api/
 
 ### Основные маршруты
