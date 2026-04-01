@@ -2,10 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import * as d3 from 'd3';
 import { selectAllNotes } from '@entities/note';
-import { DraggableNote } from '@features/drag-and-drop-note';
 import { EditNoteModal } from '@features/update-note';
-import { CreateNoteForm } from '@features/create-note';
-import { CreateNoteButton } from '@features/create-note';
+import { CreateNoteForm, CreateNoteButton } from '@features/create-note';
 import { Loader } from '@shared/ui';
 import './NoteGraph.css';
 
