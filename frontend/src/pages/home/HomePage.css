@@ -1,0 +1,40 @@
+.home-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-page__content {
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 20px;
+  width: 100%;
+}
+
+.home-page__hero {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.home-page__title {
+  font-size: 48px;
+  color: #fff;
+  margin: 0 0 20px;
+}
+
+.home-page__accent {
+  color: #FEB7FF;
+}
+
+.home-page__subtitle {
+  font-size: 20px;
+  color: #888;
+  margin: 0 0 40px;
+}
+
+.home-page__actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}

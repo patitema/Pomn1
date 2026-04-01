@@ -1,0 +1,39 @@
+.folders-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.folders-page__content {
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  width: 100%;
+}
+
+.folders-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.folders-page__title {
+  margin: 0;
+  font-size: 32px;
+  color: #fff;
+}
+
+.folders-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.folders-page__empty {
+  color: #888;
+  font-size: 16px;
+  text-align: center;
+  padding: 40px;
+}
