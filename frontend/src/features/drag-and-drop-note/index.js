@@ -1,2 +1,2 @@
-export { DraggableNote } from './ui/DraggableNote/index.js';
-export { DroppableFolder } from './ui/DroppableFolder/index.js';
+export { DraggableNote } from './ui/DraggableNote';
+export { DroppableFolder } from './ui/DroppableFolder';

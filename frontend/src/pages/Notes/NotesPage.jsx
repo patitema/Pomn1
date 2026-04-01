@@ -1,10 +1,10 @@
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectIsAuthenticated } from '../../entities/user/index.js';
-import { NoteGraph } from '../../widgets/note-graph/index.js';
-import { Header } from '../../widgets/header/index.js';
-import { Footer } from '../../widgets/footer/index.js';
-import { routes } from '../../shared/config/index.js';
+import { selectIsAuthenticated } from '../../entities/user';
+import { NoteGraph } from '../../widgets/note-graph';
+import { Header } from '../../widgets/header';
+import { Footer } from '../../widgets/footer';
+import { routes } from '../../shared/config';
 import './NotesPage.css';
 
 const NotesPage = () => {

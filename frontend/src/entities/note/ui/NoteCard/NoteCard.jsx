@@ -1,5 +1,5 @@
-import { formatNoteDate, getNotePreview } from '../../model/helpers.js';
-import { DeleteNoteButton } from '../../../features/delete-note/index.js';
+import { formatNoteDate, getNotePreview } from '../../model/helpers';
+import { DeleteNoteButton } from '../../../features/delete-note';
 import './NoteCard.css';
 
 const NoteCard = ({ note, onEdit, onDelete }) => {

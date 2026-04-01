@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectIsAuthenticated } from '../../entities/user/index.js';
-import { selectAllFolders } from '../../entities/folder/index.js';
-import { FolderCard } from '../../entities/folder/index.js';
-import { CreateFolderForm, CreateFolderButton } from '../../features/create-folder/index.js';
-import { EditFolderModal } from '../../features/update-folder/index.js';
-import { Header } from '../../widgets/header/index.js';
-import { Footer } from '../../widgets/footer/index.js';
-import { routes } from '../../shared/config/index.js';
+import { selectIsAuthenticated } from '../../entities/user';
+import { selectAllFolders } from '../../entities/folder';
+import { FolderCard } from '../../entities/folder';
+import { CreateFolderForm, CreateFolderButton } from '../../features/create-folder';
+import { EditFolderModal } from '../../features/update-folder';
+import { Header } from '../../widgets/header';
+import { Footer } from '../../widgets/footer';
+import { routes } from '../../shared/config';
 import './FoldersPage.css';
 
 const FoldersPage = () => {

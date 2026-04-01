@@ -1,1 +1,1 @@
-export { DeleteFolderButton } from './ui/DeleteFolderButton/index.js';
+export { DeleteFolderButton } from './ui/DeleteFolderButton';

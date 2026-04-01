@@ -1,4 +1,4 @@
-import { routes } from '../../../shared/config/index.js';
+import { routes } from '../../../shared/config';
 
 import HomePage from '../../../pages/home/HomePage.jsx';
 import AuthPage from '../../../pages/auth/AuthPage.jsx';

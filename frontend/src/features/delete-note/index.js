@@ -1,1 +1,1 @@
-export { DeleteNoteButton } from './ui/DeleteNoteButton/index.js';
+export { DeleteNoteButton } from './ui/DeleteNoteButton';

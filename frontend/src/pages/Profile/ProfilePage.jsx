@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser, selectIsAuthenticated } from '../../entities/user/index.js';
-import { useLogoutMutation, useUpdateProfileMutation } from '../../shared/api/index.js';
-import { Header } from '../../widgets/header/index.js';
-import { Footer } from '../../widgets/footer/index.js';
-import { Input, Button } from '../../shared/ui/index.js';
-import { routes } from '../../shared/config/index.js';
+import { selectCurrentUser, selectIsAuthenticated } from '../../entities/user';
+import { useLogoutMutation, useUpdateProfileMutation } from '../../shared/api';
+import { Header } from '../../widgets/header';
+import { Footer } from '../../widgets/footer';
+import { Input, Button } from '../../shared/ui';
+import { routes } from '../../shared/config';
 import './ProfilePage.css';
 
 const ProfilePage = () => {

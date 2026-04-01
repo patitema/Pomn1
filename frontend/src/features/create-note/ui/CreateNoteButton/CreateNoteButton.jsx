@@ -1,4 +1,4 @@
-import { Button } from '../../../../shared/ui/index.js';
+import { Button } from '../../../../shared/ui';
 import './CreateNoteButton.css';
 
 const CreateNoteButton = ({ onClick, className = '' }) => (

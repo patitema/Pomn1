@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { useRegisterMutation } from '../../../../shared/api/index.js';
-import { setToken, setUser } from '../../../auth-by-login/model/authSlice.js';
-import { Input, Button } from '../../../../shared/ui/index.js';
-import { routes } from '../../../../shared/config/index.js';
+import { useRegisterMutation } from '../../../../shared/api';
+import { setToken, setUser, logout } from '../../auth-by-login/model';
+import { Input, Button } from '../../../../shared/ui';
+import { routes } from '../../../../shared/config';
 import './RegistrationForm.css';
 
 const RegistrationForm = () => {

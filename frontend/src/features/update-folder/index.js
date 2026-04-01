@@ -1,1 +1,1 @@
-export { EditFolderModal } from './ui/EditFolderModal/index.js';
+export { EditFolderModal } from './ui/EditFolderModal';

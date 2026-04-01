@@ -1,1 +1,1 @@
-export { LoginForm } from './ui/LoginForm/index.js';
+export { LoginForm } from './ui/LoginForm';

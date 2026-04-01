@@ -1,2 +1,2 @@
-export { CreateNoteForm } from './ui/CreateNoteForm/index.js';
-export { CreateNoteButton } from './ui/CreateNoteButton/index.js';
+export { CreateNoteForm } from './ui/CreateNoteForm';
+export { CreateNoteButton } from './ui/CreateNoteButton';

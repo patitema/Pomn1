@@ -1,5 +1,5 @@
-import { useDeleteFolderMutation } from '../../../../shared/api/index.js';
-import { Button } from '../../../../shared/ui/index.js';
+import { useDeleteFolderMutation } from '../../../../shared/api';
+import { Button } from '../../../../shared/ui';
 import './DeleteFolderButton.css';
 
 const DeleteFolderButton = ({ folderId, onSuccess, variant = 'icon' }) => {
