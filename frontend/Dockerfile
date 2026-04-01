@@ -2,28 +2,31 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Копируем package.json и craco.config.js
-COPY package*.json craco.config.js ./
+# Копируем только package файлы сначала
+COPY package.json package-lock.json ./
 
-# Установка зависимостей
-RUN npm install && npm cache clean --force
+# Установка всех зависимостей (включая dev для craco)
+RUN npm ci && npm cache clean --force
 
-# Копируем весь исходный код
+# Теперь копируем весь исходный код
 COPY . .
 
 # Сборка production-версии
 RUN npm run build
 
-# Production-запуск через serve
+# Production stage
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Копируем build и node_modules
+# Копируем только build и package.json для serve
 COPY --from=builder /app/build ./build
-COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
+
+# Устанавливаем serve для раздачи статики
+RUN npm install --global serve
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start:prod"]
+# Запуск serve для раздачи build
+CMD ["serve", "-s", "build", "-l", "3000"]
