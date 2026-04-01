@@ -1,0 +1,12 @@
+.notes-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.notes-page__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}

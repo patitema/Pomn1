@@ -1,0 +1,39 @@
+.tasks-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.tasks-page__content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.tasks-page__container {
+  text-align: center;
+}
+
+.tasks-page__title {
+  margin: 0 0 40px;
+  font-size: 32px;
+  color: #fff;
+}
+
+.tasks-page__placeholder {
+  color: #888;
+}
+
+.tasks-page__icon {
+  font-size: 64px;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.tasks-page__subtitle {
+  font-size: 14px;
+  margin-top: 8px;
+  color: #666;
+}

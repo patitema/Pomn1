@@ -1,0 +1,69 @@
+.note-graph {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.note-graph__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #333;
+}
+
+.note-graph__title {
+  margin: 0;
+  font-size: 24px;
+  color: #fff;
+}
+
+.note-graph__container {
+  flex: 1;
+  position: relative;
+  background-color: #1a1a1a;
+  overflow: hidden;
+}
+
+.note-graph__svg {
+  width: 100%;
+  height: 100%;
+}
+
+.note-graph__loading,
+.note-graph__empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #888;
+}
+
+.note-graph__loading p,
+.note-graph__empty p {
+  margin: 16px 0 0;
+  font-size: 16px;
+}
+
+.note-graph__empty h2 {
+  margin: 0 0 8px;
+  color: #666;
+  font-size: 20px;
+}
+
+.note-graph__nodes circle {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.note-graph__nodes circle:hover {
+  opacity: 0.8;
+}
+
+.note-graph__labels text {
+  pointer-events: none;
+  text-shadow: 1px 1px 2px #000;
+}

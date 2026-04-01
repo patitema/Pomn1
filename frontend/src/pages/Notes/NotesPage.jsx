@@ -1,7 +1,11 @@
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '@entities/user';
+import { NoteGraph } from '@widgets/note-graph';
+import { Header } from '@widgets/header';
+import { Footer } from '@widgets/footer';
 import { routes } from '@shared/config';
+import './NotesPage.css';
 
 const NotesPage = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -12,8 +16,13 @@ const NotesPage = () => {
 
   return (
     <div className="notes-page">
-      <h1>Заметки</h1>
-      <p>Граф заметок будет здесь</p>
+      <Header />
+      
+      <main className="notes-page__content">
+        <NoteGraph />
+      </main>
+      
+      <Footer />
     </div>
   );
 };
