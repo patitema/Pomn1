@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useUpdateNoteMutation } from '../../../shared/api';
-import { Input, Button, Modal } from '../../../shared/ui';
+import { useUpdateNoteMutation } from '../../../../shared/api/index.js';
+import { Input, Button, Modal } from '../../../../shared/ui/index.js';
 import './EditNoteModal.css';
 
 const EditNoteModal = ({ note, isOpen, onClose }) => {

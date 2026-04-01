@@ -1,2 +1,2 @@
-export * from './model';
-export { FolderCard } from './ui/FolderCard';
+export * from './model/index.js';
+export { FolderCard } from './ui/FolderCard/index.js';

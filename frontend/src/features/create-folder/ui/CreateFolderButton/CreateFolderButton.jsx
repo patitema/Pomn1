@@ -1,4 +1,4 @@
-import { Button } from '../../../shared/ui';
+import { Button } from '../../../../shared/ui/index.js';
 import './CreateFolderButton.css';
 
 const CreateFolderButton = ({ onClick, className = '' }) => (
