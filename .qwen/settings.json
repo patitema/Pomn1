@@ -4,7 +4,8 @@
       "Bash(docker-compose *)",
       "Bash(docker *)",
       "Bash(git checkout *)",
-      "Bash(git merge *)"
+      "Bash(git merge *)",
+      "Bash(findstr *)"
     ]
   },
   "$version": 3
