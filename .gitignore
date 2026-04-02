@@ -26,6 +26,7 @@ __pycache__/
 /docs
 /plans
 /reports
+.qwen
 
 # misc
 .DS_Store

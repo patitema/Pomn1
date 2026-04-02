@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(docker-compose *)",
-      "Bash(docker *)"
+      "Bash(docker *)",
+      "Bash(git checkout *)",
+      "Bash(git merge *)"
     ]
   },
   "$version": 3
