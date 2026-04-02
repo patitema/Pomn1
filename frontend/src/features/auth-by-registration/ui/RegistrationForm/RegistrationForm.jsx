@@ -15,6 +15,7 @@ const RegistrationForm = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    phone_number: '',
   });
   const [validationError, setValidationError] = useState('');
 
@@ -40,6 +41,11 @@ const RegistrationForm = () => {
       navigate('/notes');
     } catch (err) {
       console.error('Registration failed:', err);
+      // Ошибки валидации от сервера
+      if (err?.data) {
+        const errors = Object.values(err.data).flat().join('\n');
+        setValidationError(errors);
+      }
     }
   };
 
@@ -50,13 +56,13 @@ const RegistrationForm = () => {
   return (
     <form className="registration-form" onSubmit={handleSubmit}>
       <h2 className="registration-form__title">Регистрация</h2>
-      
+
       {(error || validationError) && (
         <div className="registration-form__error">
-          {error?.data?.message || error?.message || validationError}
+          {validationError}
         </div>
       )}
-      
+
       <Input
         type="text"
         placeholder="Имя пользователя"
@@ -65,7 +71,7 @@ const RegistrationForm = () => {
         onChange={handleChange}
         required
       />
-      
+
       <Input
         type="email"
         placeholder="Email"
@@ -74,7 +80,16 @@ const RegistrationForm = () => {
         onChange={handleChange}
         required
       />
-      
+
+      <Input
+        type="tel"
+        placeholder="Телефон"
+        name="phone_number"
+        value={formData.phone_number}
+        onChange={handleChange}
+        required
+      />
+
       <Input
         type="password"
         placeholder="Пароль"
@@ -83,7 +98,7 @@ const RegistrationForm = () => {
         onChange={handleChange}
         required
       />
-      
+
       <Input
         type="password"
         placeholder="Подтвердите пароль"
@@ -92,11 +107,11 @@ const RegistrationForm = () => {
         onChange={handleChange}
         required
       />
-      
+
       <Button type="submit" disabled={isLoading} className="registration-form__button">
         {isLoading ? 'Регистрация...' : 'Зарегистрироваться'}
       </Button>
-      
+
       <p className="registration-form__footer">
         Уже есть аккаунт? <Link to="/auth">Войти</Link>
       </p>
