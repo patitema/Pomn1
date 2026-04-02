@@ -1,12 +1,18 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api';
+const API_URL = process.env.REACT_APP_API_URL;
 
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
     baseUrl: API_URL,
-    prepareHeaders: (headers, { getState }) => {
+    prepareHeaders: (headers, { getState, endpoint }) => {
+      // Не добавляем токен к публичным endpoints
+      const publicEndpoints = ['login', 'register'];
+      if (publicEndpoints.includes(endpoint)) {
+        return headers;
+      }
+
       const token = localStorage.getItem('token');
       if (token) {
         headers.set('Authorization', `Token ${token}`);
