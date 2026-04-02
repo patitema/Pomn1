@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { ReduxProvider } from './providers/ReduxProvider';
 import { AppRoutes } from './providers/Router';
+import { Navigation } from '@widgets/navigation';
 
 // Инициализация Telegram Web App
 if (window.Telegram && window.Telegram.WebApp) {
@@ -12,7 +13,12 @@ if (window.Telegram && window.Telegram.WebApp) {
 export const App = () => (
   <ReduxProvider>
     <BrowserRouter>
-      <AppRoutes />
+      <div className="app">
+        <Navigation />
+        <main className="app__content">
+          <AppRoutes />
+        </main>
+      </div>
     </BrowserRouter>
   </ReduxProvider>
 );

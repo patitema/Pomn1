@@ -3,8 +3,6 @@ import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser, selectIsAuthenticated } from '../../entities/user';
 import { useLogoutMutation, useUpdateProfileMutation } from '../../shared/api';
-import { Header } from '../../widgets/header';
-import { Footer } from '../../widgets/footer';
 import { Input, Button } from '../../shared/ui';
 import { routes } from '../../shared/config';
 import './ProfilePage.css';
@@ -33,7 +31,7 @@ const ProfilePage = () => {
     e.preventDefault();
     setIsSubmitting(true);
     setSuccessMessage('');
-    
+
     try {
       await updateProfile(formData).unwrap();
       setSuccessMessage('Профиль обновлён');
@@ -49,46 +47,40 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="profile-page">
-      <Header />
-      
-      <main className="profile-page__content">
-        <div className="profile-page__container">
-          <h1 className="profile-page__title">Профиль</h1>
-          
-          {successMessage && (
-            <div className="profile-page__success">{successMessage}</div>
-          )}
-          
-          <form className="profile-page__form" onSubmit={handleSubmit}>
-            <Input
-              type="text"
-              label="Имя пользователя"
-              value={formData.username}
-              onChange={handleChange('username')}
-            />
-            
-            <Input
-              type="email"
-              label="Email"
-              value={formData.email}
-              onChange={handleChange('email')}
-            />
-            
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Сохранение...' : 'Сохранить'}
-            </Button>
-          </form>
-          
-          <div className="profile-page__logout">
-            <Button variant="danger" onClick={handleLogout}>
-              Выйти
-            </Button>
-          </div>
+    <div className="page-container page-container--centered">
+      <div className="profile-container">
+        <h1 className="profile-title">Профиль</h1>
+
+        {successMessage && (
+          <div className="profile-success">{successMessage}</div>
+        )}
+
+        <form className="profile-form" onSubmit={handleSubmit}>
+          <Input
+            type="text"
+            label="Имя пользователя"
+            value={formData.username}
+            onChange={handleChange('username')}
+          />
+
+          <Input
+            type="email"
+            label="Email"
+            value={formData.email}
+            onChange={handleChange('email')}
+          />
+
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Сохранение...' : 'Сохранить'}
+          </Button>
+        </form>
+
+        <div className="profile-logout">
+          <Button variant="danger" onClick={handleLogout}>
+            Выйти
+          </Button>
         </div>
-      </main>
-      
-      <Footer />
+      </div>
     </div>
   );
 };
