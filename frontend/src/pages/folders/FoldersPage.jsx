@@ -6,8 +6,6 @@ import { selectAllFolders } from '../../entities/folder';
 import { FolderCard } from '../../entities/folder';
 import { CreateFolderForm, CreateFolderButton } from '../../features/create-folder';
 import { EditFolderModal } from '../../features/update-folder';
-import { Header } from '../../widgets/header';
-import { Footer } from '../../widgets/footer';
 import { routes } from '../../shared/config';
 import './FoldersPage.css';
 
@@ -22,18 +20,16 @@ const FoldersPage = () => {
   }
 
   return (
-    <div className="folders-page">
-      <Header />
-      
-      <main className="folders-page__content">
-        <div className="folders-page__header">
-          <h1 className="folders-page__title">Папки</h1>
+    <div className="page-container">
+      <div className="folders-container">
+        <div className="folders-header">
+          <h1 className="folders-title">Папки</h1>
           <CreateFolderButton onClick={() => setIsCreateModalOpen(true)} />
         </div>
-        
-        <div className="folders-page__grid">
+
+        <div className="folders-grid">
           {folders.length === 0 ? (
-            <p className="folders-page__empty">Нет папок</p>
+            <p className="folders-empty">Нет папок</p>
           ) : (
             folders.map((folder) => (
               <FolderCard
@@ -44,20 +40,18 @@ const FoldersPage = () => {
             ))
           )}
         </div>
-      </main>
-      
+      </div>
+
       <CreateFolderForm
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
       />
-      
+
       <EditFolderModal
         folder={editingFolder}
         isOpen={!!editingFolder}
         onClose={() => setEditingFolder(null)}
       />
-      
-      <Footer />
     </div>
   );
 };

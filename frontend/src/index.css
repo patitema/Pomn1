@@ -1,12 +1,3 @@
-:root {
-  --background: #151515;
-  --text: #ffffff;
-  --accent: #FEB7FF;
-  --secondary: #222222;
-  --error: #ff4444;
-  --success: #44ff44;
-}
-
 * {
   margin: 0;
   padding: 0;
@@ -20,8 +11,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--background);
-  color: var(--text);
+  background-color: #151515;
+  color: #fff;
 }
 
 h1,
@@ -43,11 +34,32 @@ code {
     monospace;
 }
 
-a {
-  color: var(--accent);
-  text-decoration: none;
+/* Основной контейнер приложения */
+.app {
+  display: flex;
+  min-height: 100vh;
 }
 
-a:hover {
-  text-decoration: underline;
+/* Контент с отступом для сайдбара */
+.app__content {
+  flex: 1;
+  margin-left: 55px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Контейнер страницы */
+.page-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.page-container--centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
