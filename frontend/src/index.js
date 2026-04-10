@@ -16,6 +16,12 @@ import Tasks from './pages/Tasks/Tasks.jsx'
 import { ApiProvider } from './context/ApiContext.js'
 import { NotesProvider } from './context/NotesContext.js'
 
+// Инициализация Telegram Web App
+if (window.Telegram && window.Telegram.WebApp) {
+  window.Telegram.WebApp.ready()
+  window.Telegram.WebApp.expand() // Развернуть на весь экран
+}
+
 const root = ReactDOM.createRoot(document.getElementById('root'))
 
 root.render(
