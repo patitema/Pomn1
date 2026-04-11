@@ -1,35 +1,27 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Nav from '../../components/nav/nav'
-import './Notes.css'
-import Footer from '../../components/footer/footer'
-import ForceGraphRenderer from '../../components/forceGraphRender/ForceGraphRender'
-import { useUsers } from '../../hooks/UseUsers'
+import React, { useState, useRef } from 'react'
+import { useSelector } from 'react-redux'
+import { selectUser } from '@entities/user'
+import { Footer } from '@widgets/footer'
+import { ForceGraphRenderer } from '@widgets/note-graph'
+import './NotesPage.css'
 
-export default function Notes() {
+const NotesPage = () => {
   document.title = 'POMNI - NOTES'
-  const navigate = useNavigate()
-  const { token } = useUsers()
+  const user = useSelector(selectUser)
   const [isActive, setIsActive] = useState(false)
   const canvasRef = useRef()
-
-  useEffect(() => {
-    if (!token) {
-      navigate('/Auth')
-    }
-  }, [token, navigate])
 
   const toggleInfo = () => {
     setIsActive(!isActive)
   }
+
   return (
-    <div>
-      <Nav></Nav>
+    <div className="page-container">
       <header>
         <div className="Hcontainer">
           <div className="hTextContainer">
             <h1>POMNI</h1>
-            <h2>BASE NAME</h2>
+            <h2>{user ? user.username : 'BASE NAME'} BASE</h2>
           </div>
         </div>
       </header>
@@ -66,7 +58,7 @@ export default function Notes() {
           <ul className="ToolsList">
             <button
               className="toolButton"
-              onClick={() => canvasRef.current.addCircle()}
+              onClick={() => canvasRef.current?.addCircle?.()}
             >
               <svg className="toolIcon available">
                 <use href="/images/icons.svg#ToolAdd"></use>
@@ -90,7 +82,9 @@ export default function Notes() {
           </ul>
         </div>
       </main>
-      <Footer></Footer>
+      <Footer />
     </div>
   )
 }
+
+export default NotesPage
