@@ -201,11 +201,8 @@ Pomn1/
 │           ├── api/             # RTK Query
 │           ├── config/          # Маршруты
 │           └── ui/              # UI (Button, Input, PhoneInput, Modal, Loader, ProtectedRoute)
-├── docs/
-│   ├── THEORY_REPORT.md
-│   ├── IMPLEMENTATION.md
-│   └── ARCHITECTURE.md          # Документация по FSD
-└── README.md
+├── README.md
+└── ARCHITECTURE.md          # Документация по FSD
 ```
 
 ---
