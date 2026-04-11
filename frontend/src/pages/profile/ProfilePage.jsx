@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { selectCurrentUser, selectIsAuthenticated } from '../../entities/user';
-import { useLogoutMutation, useUpdateProfileMutation } from '../../shared/api';
-import { Input, Button } from '../../shared/ui';
-import { routes } from '../../shared/config';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectCurrentUser } from '@entities/user';
+import { useLogoutMutation, useUpdateProfileMutation } from '@shared/api';
+import { logout as clearAuth } from '@features/auth-by-login/model/authSlice';
+import { Input, Button, PhoneInput } from '@shared/ui';
+import { routes } from '@shared/config';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
   const user = useSelector(selectCurrentUser);
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [logout] = useLogoutMutation();
   const [updateProfile] = useUpdateProfileMutation();
   const [formData, setFormData] = useState({
@@ -31,12 +33,15 @@ const ProfilePage = () => {
     }
   }, [user]);
 
-  if (!isAuthenticated) {
-    return <Navigate to={routes.auth} replace />;
-  }
-
   const handleLogout = async () => {
-    await logout().unwrap();
+    try {
+      await logout().unwrap();
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      dispatch(clearAuth());
+      navigate(routes.auth);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -95,9 +100,9 @@ const ProfilePage = () => {
             onChange={handleChange('email')}
           />
 
-          <Input
-            type="tel"
+          <PhoneInput
             label="Телефон"
+            name="phone_number"
             value={formData.phone_number}
             onChange={handleChange('phone_number')}
           />

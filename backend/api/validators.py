@@ -50,12 +50,14 @@ def validate_password(value):
 def validate_phone(value):
     """
     Валидация телефона:
-    - Формат: +7(XXX)-XXX-XX-XX
+    - Только цифры
+    - Ровно 11 цифр (7 + 10-значный номер)
     """
-    # Проверка формата
-    pattern = r'^\+7\(\d{3}\)-\d{3}-\d{2}-\d{2}$'
-    if not re.match(pattern, value):
-        raise ValidationError('Введите номер в формате +7(XXX)-XXX-XX-XX')
+    digits = re.sub(r'[^\d]', '', value)
+    if len(digits) != 11:
+        raise ValidationError('Номер телефона должен содержать 11 цифр')
+    if digits[0] != '7':
+        raise ValidationError('Номер должен начинаться с 7')
 
 
 def validate_email_unique(value):
