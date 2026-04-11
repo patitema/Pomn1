@@ -1,0 +1,87 @@
+.main-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.reg-form {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.reg-form input {
+  width: 200px;
+  height: 30px;
+  border-radius: 5px;
+  border: 1px solid #000;
+  outline: none;
+  padding-left: 10px;
+}
+
+.reg-form input[type="submit"] {
+  width: 200px;
+  font-size: 16px;
+  border: none !important;
+  padding-left: 0px !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.reg-form input[type="submit"]:hover {
+  box-shadow: 0 0 5px #fff;
+}
+
+.reg-btn {
+  background-color: #feb7ff;
+}
+
+/* Стили для ошибок валидации */
+.reg-form .form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.reg-form input.error {
+  border-color: #dc3545;
+}
+
+.reg-form input.error:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
+
+.reg-form .form-error {
+  font-size: 12px;
+  color: #dc3545;
+  text-align: center;
+  min-height: 16px;
+}
+
+.reg-form .form-error-general {
+  font-size: 14px;
+  color: #dc3545;
+  background-color: #f8d7da;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.reg-form .switch-btn {
+  margin-top: 10px;
+  background: none;
+  border: 1px solid #000;
+  border-radius: 5px;
+  padding: 5px 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.reg-form .switch-btn:hover {
+  background-color: #f0f0f0;
+}
