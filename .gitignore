@@ -22,8 +22,12 @@ __pycache__/
 /coverage
 
 # production
-/build
+/frontend/build
 /docs
+/plans
+/reports
+.qwen
+.vscode
 
 # misc
 .DS_Store

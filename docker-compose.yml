@@ -49,9 +49,6 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: pomni_frontend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
     ports:
       - "3000:3000"
     environment:
@@ -60,7 +57,6 @@ services:
       - backend
     networks:
       - pomni_network
-    command: npm start
 
 networks:
   pomni_network:

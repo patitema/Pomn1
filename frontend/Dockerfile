@@ -1,18 +1,30 @@
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Копируем package файлы
+COPY package.json package-lock.json ./
+
+# Установка всех зависимостей
+RUN npm ci && npm cache clean --force
+
+# Копируем исходный код
+COPY . .
+
+# Сборка через npx craco build (явно указываем craco)
+RUN npx craco build
+
+# Production stage
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Копирование package файлов
-COPY package*.json ./
+# Копируем build
+COPY --from=builder /app/build ./build
 
-# Установка зависимостей
-RUN npm install
+# Устанавливаем serve
+RUN npm install --global serve
 
-# Копирование исходного кода
-COPY . .
-
-# Открываем порт для React Dev Server
 EXPOSE 3000
 
-# Запуск React в режиме разработки
-CMD ["npm", "start"]
+CMD ["serve", "-s", "build", "-l", "3000"]
