@@ -63,10 +63,24 @@ export const Navigation = () => {
           </li>
           <li>
             <Link to={isAuthenticated ? routes.profile : routes.auth}>
-              <svg className="icon profile-icon" viewBox="0 0 24 24">
-                <use href="/images/icons.svg#icon-profile" />
-              </svg>
-              <p>{user ? user.username : 'Войти'}</p>
+              <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                <svg className="icon profile-icon" viewBox="0 0 24 24">
+                  <use href="/images/icons.svg#icon-profile" />
+                </svg>
+                {isAuthenticated && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-2px',
+                    right: '-2px',
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: '#4caf50',
+                    border: '1.5px solid #151515',
+                  }} />
+                )}
+              </div>
+              <p>{user ? user.username : (isAuthenticated ? 'Профиль' : 'Войти')}</p>
             </Link>
           </li>
         </ul>
