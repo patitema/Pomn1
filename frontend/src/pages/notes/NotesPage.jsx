@@ -1,21 +1,15 @@
 import React, { useState, useRef } from 'react'
-import { Navigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { selectIsAuthenticated, selectUser } from '@entities/user'
+import { selectUser } from '@entities/user'
 import { Footer } from '@widgets/footer'
 import { ForceGraphRenderer } from '@widgets/note-graph'
 import './NotesPage.css'
 
 const NotesPage = () => {
   document.title = 'POMNI - NOTES'
-  const isAuthenticated = useSelector(selectIsAuthenticated)
   const user = useSelector(selectUser)
   const [isActive, setIsActive] = useState(false)
   const canvasRef = useRef()
-
-  if (!isAuthenticated) {
-    return <Navigate to="/Auth" replace />
-  }
 
   const toggleInfo = () => {
     setIsActive(!isActive)
@@ -27,7 +21,7 @@ const NotesPage = () => {
         <div className="Hcontainer">
           <div className="hTextContainer">
             <h1>POMNI</h1>
-            <h2>{user ? user.username : 'BASE NAME'}</h2>
+            <h2>{user ? user.username : 'BASE NAME'} BASE</h2>
           </div>
         </div>
       </header>

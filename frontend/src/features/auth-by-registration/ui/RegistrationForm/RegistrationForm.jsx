@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useRegisterMutation } from '@shared/api';
 import { setToken, setUser } from '@features/auth-by-login';
-import { Input, Button } from '@shared/ui';
+import { Input, Button, PhoneInput } from '@shared/ui';
 import './RegistrationForm.css';
 
 const RegistrationForm = () => {
@@ -81,13 +81,10 @@ const RegistrationForm = () => {
         required
       />
 
-      <Input
-        type="tel"
-        placeholder="Телефон"
+      <PhoneInput
         name="phone_number"
         value={formData.phone_number}
         onChange={handleChange}
-        required
       />
 
       <Input

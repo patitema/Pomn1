@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
-import { Navigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { selectIsAuthenticated, selectUser } from '@entities/user'
+import { selectUser } from '@entities/user'
 import { useGetNotesQuery, useGetFoldersQuery } from '@shared/api'
 import {
   useUpdateNoteMutation,
@@ -21,12 +20,11 @@ import './FoldersPage.css'
 
 const FoldersPage = () => {
   document.title = 'POMNI - FOLDER'
-  const isAuthenticated = useSelector(selectIsAuthenticated)
   const user = useSelector(selectUser)
 
   // Загружаем данные с сервера
-  const { data: notes = [], isLoading: notesLoading } = useGetNotesQuery(undefined, { skip: !isAuthenticated })
-  const { data: folders = [], isLoading: foldersLoading } = useGetFoldersQuery(undefined, { skip: !isAuthenticated })
+  const { data: notes = [], isLoading: notesLoading } = useGetNotesQuery()
+  const { data: folders = [], isLoading: foldersLoading } = useGetFoldersQuery()
 
   const [updateNote] = useUpdateNoteMutation()
   const [deleteNoteMutation] = useDeleteNoteMutation()
@@ -141,10 +139,6 @@ const FoldersPage = () => {
       note.folder === null &&
       note.title.toLowerCase().includes(search.toLowerCase())
   )
-
-  if (!isAuthenticated) {
-    return <Navigate to="/Auth" replace />
-  }
 
   if (notesLoading || foldersLoading) return <p>Загрузка...</p>
 
