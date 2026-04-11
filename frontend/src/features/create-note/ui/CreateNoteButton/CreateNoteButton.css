@@ -1,0 +1,15 @@
+.create-note-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.create-note-button__icon {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.create-note-button__text {
+  font-weight: 600;
+}

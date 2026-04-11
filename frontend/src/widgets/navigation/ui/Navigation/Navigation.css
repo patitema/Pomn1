@@ -1,0 +1,152 @@
+nav {
+  position: fixed;
+}
+
+.nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding-top: 10px;
+  width: 55px;
+  height: 100vh;
+  border-right: 1px solid #fff;
+  background-color: #222222;
+  transition: all 0.3s ease-out;
+}
+
+.nav-container.active {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding-top: 10px;
+  width: 250px;
+  height: 100vh;
+  border-right: 1px solid #fff;
+  background-color: #222222;
+}
+
+.logo-nav {
+  position: absolute;
+  top: 0;
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  width: 200px;
+  height: 100px;
+  opacity: 0;
+  transition: all 0.2s ease-out;
+}
+
+.nav-container.active .logo-nav {
+  display: flex;
+  justify-content: center;
+  width: 200px;
+  height: 100px;
+  opacity: 1;
+}
+
+.logo-nav img {
+  width: 50px;
+  height: 50px;
+  user-select: none;
+}
+
+ul {
+  list-style: none;
+}
+
+.list-Of-Pages {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.list-Of-Pages > li p {
+  user-select: none;
+  opacity: 0;
+  font-size: 0;
+}
+
+.nav-container.active .list-Of-Pages > li > a {
+  opacity: 1;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 2px;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.1s ease-out;
+}
+
+.nav-container.active .list-Of-Pages > li p {
+  opacity: 1;
+  display: flex;
+  flex-direction: row;
+  font-size: 20px;
+  flex-wrap: nowrap;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.1s ease-out;
+}
+
+.nav-container.active .list-Of-Pages > li p:hover {
+  text-shadow: 0 0 5px #feb7ff;
+  color: #feb7ff;
+}
+
+.icon {
+  width: 30px;
+  height: 30px;
+  transition: all 0.1s ease-in-out;
+  user-select: none;
+}
+
+.profile-icon {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.list-Of-Pages > li > a:hover .icon {
+  filter: drop-shadow(0 0 5px #feb7ff);
+  color: #feb7ff;
+}
+
+.openNavBtn {
+  position: absolute;
+  top: 50px;
+  right: auto;
+  transform: rotate(180deg);
+  background-color: transparent;
+  border: none;
+  transition: all 0.2s ease-out;
+  width: auto;
+  height: auto;
+}
+
+.openNavSvg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 15px;
+  height: 43px;
+  color: #fff;
+}
+
+.openNavBtn.active {
+  top: 40px;
+  right: 0;
+  margin-right: 20px;
+  transform: rotate(0deg);
+  transition: all 0.2s ease-out;
+}
+
+.icon {
+  display: block;
+  width: 30px;
+  height: 30px;
+  color: #fff;
+  transition: filter 0.12s ease, color 0.12s ease;
+}

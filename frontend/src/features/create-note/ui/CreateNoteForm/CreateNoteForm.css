@@ -1,0 +1,33 @@
+.create-note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.create-note-form__textarea {
+  padding: 12px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background-color: #222;
+  color: #fff;
+  font-size: 16px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 120px;
+}
+
+.create-note-form__textarea:focus {
+  outline: none;
+  border-color: #FEB7FF;
+}
+
+.create-note-form__textarea::placeholder {
+  color: #666;
+}
+
+.create-note-form__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}

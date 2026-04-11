@@ -201,6 +201,16 @@ def update_profile(request):
         except Profile.DoesNotExist:
             profile = Profile.objects.create(user=user)
 
+        # Обновляем поля User
+        username = request.data.get('username')
+        email = request.data.get('email')
+        if username:
+            user.username = username
+        if email:
+            user.email = email
+        user.save()
+
+        # Обновляем поля Profile
         phone_number = request.data.get('phone_number')
         if phone_number is not None:
             profile.phone_number = phone_number
