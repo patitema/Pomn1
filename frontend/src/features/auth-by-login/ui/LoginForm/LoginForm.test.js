@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter } from 'react-router-dom';
@@ -66,11 +66,6 @@ describe('LoginForm', () => {
       target: { value: 'password123' },
     });
     fireEvent.click(screen.getByRole('button', { name: /войти/i }));
-    // Login mutation is async, check that loading state appears or navigation happens
-    await waitFor(() => {
-      // Either shows loading text or navigates after success
-      const loadingBtn = screen.queryByRole('button', { name: /вход\.\.\./i });
-      // Test passes if form was submitted (no crash)
-    });
+    // Login mutation is async — test passes if form submits without crash
   });
 });
