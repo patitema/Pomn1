@@ -3,20 +3,20 @@ version: '3.8'
 services:
   db:
     image: mysql:8.0
-    container_name: pomni_db
+    container_name: ${COMPOSE_PROJECT_NAME:-pomni}_db
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: Pomni
-      MYSQL_USER: pomni
-      MYSQL_PASSWORD: pomnipassword
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-Pomni}
+      MYSQL_USER: ${DB_USER:-pomni}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-pomnipassword}
     volumes:
-      - mysql_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
+      - ${COMPOSE_PROJECT_NAME:-pomni}_mysql_data:/var/lib/mysql
+    expose:
+      - "3306"
     networks:
       - pomni_network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpassword}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,16 +25,18 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: pomni_backend
+    container_name: ${COMPOSE_PROJECT_NAME:-pomni}_backend
     volumes:
       - ./backend:/app
+    expose:
+      - "8000"
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT:-8000}:8000"
     environment:
       - DB_HOST=db
-      - DB_NAME=Pomni
-      - DB_USER=pomni
-      - DB_PASSWORD=pomnipassword
+      - DB_NAME=${DB_NAME:-Pomni}
+      - DB_USER=${DB_USER:-pomni}
+      - DB_PASSWORD=${DB_PASSWORD:-pomnipassword}
     depends_on:
       db:
         condition: service_healthy
@@ -44,23 +46,9 @@ services:
       sh -c "python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: pomni_frontend
-    ports:
-      - "3000:3000"
-    environment:
-      - REACT_APP_API_URL=/api
-    depends_on:
-      - backend
-    networks:
-      - pomni_network
-
 networks:
   pomni_network:
     driver: bridge
 
 volumes:
-  mysql_data:
+  ${COMPOSE_PROJECT_NAME:-pomni}_mysql_data:

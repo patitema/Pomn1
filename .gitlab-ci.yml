@@ -1,31 +1,242 @@
-stages:          # List of stages for jobs, and their order of execution
+# GitLab CI/CD для Pomni
+# Пайплайн запускается при изменениях в ветках dev и main
+#
+# Требуемые CI/CD Variables (Settings → CI/CD → Variables):
+#   SSH_KEY             — приватный SSH ключ (type: File)
+#   SSH_USER            — пользователь на сервере (например: root)
+#   SERVER_HOST         — IP или домен сервера (например: 148.253.208.46)
+
+stages:
+  - lint
   - build
   - test
   - deploy
 
-build-job:       # This job runs in the build stage, which runs first.
+# ============================================
+# Stage: Lint — проверка кода
+# ============================================
+
+lint-frontend:
+  stage: lint
+  image: node:18
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+    - if: $CI_COMMIT_BRANCH == "main"
+  script:
+    - cd frontend
+    - npm ci
+    - npx eslint src/ --max-warnings=0
+  allow_failure: true
+
+lint-backend:
+  stage: lint
+  image: python:3.11
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+    - if: $CI_COMMIT_BRANCH == "main"
+  before_script:
+    - pip install flake8
+  script:
+    - flake8 backend/ api/ --max-line-length=120 --exclude=migrations,__pycache__
+  allow_failure: true
+
+# ============================================
+# Stage: Build — сборка
+# ============================================
+
+build-frontend:
   stage: build
+  image: node:18
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+    - if: $CI_COMMIT_BRANCH == "main"
   script:
-    - echo "Compiling the code..."
-    - echo "Compile complete."
+    - cd frontend
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - frontend/build/
+    expire_in: 1 week
+  needs:
+    - lint-frontend
 
-unit-test-job:   # This job runs in the test stage.
-  stage: test    # It only starts when the job in the build stage completes successfully.
+build-backend:
+  stage: build
+  image: python:3.11
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+    - if: $CI_COMMIT_BRANCH == "main"
+  before_script:
+    - pip install -r backend/requirements.txt
   script:
-    - echo "Running unit tests... This will take about 60 seconds."
-    - sleep 60
-    - echo "Code coverage is 90%"
+    - cd backend
+    - python manage.py check
+  needs:
+    - lint-backend
 
-lint-test-job:   # This job also runs in the test stage.
-  stage: test    # It can run at the same time as unit-test-job (in parallel).
-  script:
-    - echo "Linting code... This will take about 10 seconds."
+# ============================================
+# Stage: Test — API тесты через Newman
+# ============================================
+
+api-tests:
+  stage: test
+  image: postman/newman:latest
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+    - if: $CI_COMMIT_BRANCH == "main"
+  services:
+    - name: mysql:8.0
+      alias: db
+  variables:
+    MYSQL_ROOT_PASSWORD: rootpassword
+    MYSQL_DATABASE: Pomni
+    MYSQL_USER: pomni
+    MYSQL_PASSWORD: pomnipassword
+    DB_HOST: db
+    DB_NAME: Pomni
+    DB_USER: pomni
+    DB_PASSWORD: pomnipassword
+  before_script:
+    # Ждём пока MySQL поднимется
     - sleep 10
-    - echo "No lint issues found."
-
-deploy-job:      # This job runs in the deploy stage.
-  stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
-  environment: production
+    # Запускаем бэкенд
+    - cd backend
+    - pip install -r requirements.txt
+    - python manage.py migrate
+    - python manage.py runserver 0.0.0.0:8000 &
+    # Ждём пока Django поднимется
+    - |
+      for i in $(seq 1 30); do
+        if curl -s http://localhost:8000/api/register/ > /dev/null 2>&1; then
+          echo "Backend is ready"
+          break
+        fi
+        echo "Waiting for backend... ($i)"
+        sleep 2
+      done
   script:
-    - echo "Deploying application..."
-    - echo "Application successfully deployed."
+    - newman run tests/api/postman-collection.json --env-var baseUrl=http://host.docker.internal:8000/api --bail
+  needs:
+    - build-backend
+  allow_failure: false
+
+frontend-tests:
+  stage: test
+  image: node:18
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+    - if: $CI_COMMIT_BRANCH == "main"
+  script:
+    - cd frontend
+    - npm ci
+    - npm test -- --watchAll=false --passWithNoTests
+  needs:
+    - build-frontend
+  allow_failure: true
+
+# ============================================
+# Stage: Deploy — деплой на dev / main
+# ============================================
+
+.deploy-template:
+  stage: deploy
+  image: alpine:latest
+  variables:
+    SSH_KNOWN_HOSTS: ""
+  before_script:
+    # Устанавливаем ssh, git
+    - apk add --no-cache openssh-client git
+    # Настраиваем SSH
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    # SSH_KEY — это File type variable, содержит путь к файлу с ключом
+    - cp "$SSH_KEY" ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    # Отключаем строгую проверку хоста
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+    - ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+  needs:
+    - api-tests
+    - frontend-tests
+  allow_failure: false
+
+deploy-dev:
+  extends: .deploy-template
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+  environment:
+    name: dev
+    url: https://dev.patitema-site.ru
+  variables:
+    DEPLOY_PATH: /opt/pomni-dev
+    DEPLOY_BRANCH: dev
+    COMPOSE_PROJECT_NAME: pomni_dev
+    BACKEND_PORT: "8001"
+    DEPLOY_URL: https://dev.patitema-site.ru
+  script:
+    - |
+      ssh -i ~/.ssh/id_ed25519 "$SSH_USER@$SERVER_HOST" << REMOTE_EOF
+        set -e
+        cd ${DEPLOY_PATH} || { mkdir -p ${DEPLOY_PATH} && cd ${DEPLOY_PATH}; }
+
+        # Забираем последние изменения
+        if [ -d ".git" ]; then
+          git fetch origin ${DEPLOY_BRANCH}
+          git reset --hard origin/${DEPLOY_BRANCH}
+        else
+          git clone --branch ${DEPLOY_BRANCH} https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git .
+        fi
+
+        # Останавливаем старые контейнеры
+        docker-compose down || true
+
+        # Собираем и запускаем
+        COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME} BACKEND_PORT=${BACKEND_PORT} docker-compose up -d --build
+
+        # Чистим старые образы
+        docker image prune -f
+
+        echo "Dev обновлён: ${DEPLOY_URL}"
+      REMOTE_EOF
+  when: manual
+
+deploy-main:
+  extends: .deploy-template
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  environment:
+    name: production
+    url: https://patitema-site.ru
+  variables:
+    DEPLOY_PATH: /opt/pomni-main
+    DEPLOY_BRANCH: main
+    COMPOSE_PROJECT_NAME: pomni_main
+    BACKEND_PORT: "8000"
+    DEPLOY_URL: https://patitema-site.ru
+  script:
+    - |
+      ssh -i ~/.ssh/id_ed25519 "$SSH_USER@$SERVER_HOST" << REMOTE_EOF
+        set -e
+        cd ${DEPLOY_PATH} || { mkdir -p ${DEPLOY_PATH} && cd ${DEPLOY_PATH}; }
+
+        # Забираем последние изменения
+        if [ -d ".git" ]; then
+          git fetch origin ${DEPLOY_BRANCH}
+          git reset --hard origin/${DEPLOY_BRANCH}
+        else
+          git clone --branch ${DEPLOY_BRANCH} https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git .
+        fi
+
+        # Останавливаем старые контейнеры
+        docker-compose down || true
+
+        # Собираем и запускаем
+        COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME} BACKEND_PORT=${BACKEND_PORT} docker-compose up -d --build
+
+        # Чистим старые образы
+        docker image prune -f
+
+        echo "Production обновлён: ${DEPLOY_URL}"
+      REMOTE_EOF
+  when: manual

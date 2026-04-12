@@ -6,3 +6,4 @@ mysql==0.0.3
 mysqlclient==2.2.7
 sqlparse==0.5.3
 tzdata==2025.2
+flake8==7.1.1
