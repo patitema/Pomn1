@@ -4,7 +4,6 @@ import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import authReducer from '@features/auth-by-login/model/authSlice';
 import ProtectedRoute from './ProtectedRoute';
-import { routes } from '@shared/config';
 
 const TestWrapper = ({ isAuthenticated }) => {
   const store = configureStore({
@@ -24,7 +23,7 @@ const TestWrapper = ({ isAuthenticated }) => {
     <Provider store={store}>
       <MemoryRouter initialEntries={['/protected']}>
         <Routes>
-          <Route path={routes.auth} element={<div>Auth Page</div>} />
+          <Route path="/auth" element={<div>Auth Page</div>} />
           <Route path="/protected" element={<ProtectedRoute />}>
             <Route index element={<div>Protected Content</div>} />
           </Route>

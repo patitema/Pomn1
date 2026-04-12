@@ -6,12 +6,6 @@ import authReducer from '@features/auth-by-login/model/authSlice';
 import { api } from '@shared/api';
 import LoginForm from './LoginForm';
 
-const mockNavigate = jest.fn();
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockNavigate,
-}));
-
 const createStore = () =>
   configureStore({
     reducer: { auth: authReducer, [api.reducerPath]: api.reducer },
@@ -33,10 +27,6 @@ const renderLoginForm = () => {
 };
 
 describe('LoginForm', () => {
-  beforeEach(() => {
-    mockNavigate.mockClear();
-  });
-
   it('should render login form with inputs and submit button', () => {
     renderLoginForm();
     expect(screen.getByPlaceholderText('Имя пользователя')).toBeInTheDocument();
