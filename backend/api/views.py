@@ -8,7 +8,11 @@ from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 from .models import Folder, Note, Profile
 from .serializer import FolderSerializer, NoteSerializer
-from .validators import validate_username, validate_password, validate_phone, validate_email_unique
+from .validators import (
+    validate_username, validate_password,
+    validate_phone, validate_email_unique,
+)
+
 
 @api_view(['GET', 'POST'])
 def notes_list(request):
@@ -23,8 +27,12 @@ def notes_list(request):
         serializer = NoteSerializer(data=data)
         if serializer.is_valid():
             note = serializer.save()
-            return Response(NoteSerializer(note).data, status=status.HTTP_201_CREATED)
+            return Response(
+                NoteSerializer(note).data,
+                status=status.HTTP_201_CREATED,
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET', 'POST'])
 def folders_list(request):
@@ -39,8 +47,12 @@ def folders_list(request):
         serializer = FolderSerializer(data=data)
         if serializer.is_valid():
             folder = serializer.save()
-            return Response(FolderSerializer(folder).data, status=status.HTTP_201_CREATED)
+            return Response(
+                FolderSerializer(folder).data,
+                status=status.HTTP_201_CREATED,
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def note_detail(request, pk):
@@ -54,7 +66,10 @@ def note_detail(request, pk):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = NoteSerializer(note, data=request.data, context={'request': request}, partial=True)
+        serializer = NoteSerializer(
+            note, data=request.data,
+            context={'request': request}, partial=True,
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -63,6 +78,7 @@ def note_detail(request, pk):
     elif request.method == 'DELETE':
         note.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def folder_detail(request, pk):
@@ -76,7 +92,10 @@ def folder_detail(request, pk):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = FolderSerializer(folder, data=request.data, context={'request': request}, partial=True)
+        serializer = FolderSerializer(
+            folder, data=request.data,
+            context={'request': request}, partial=True,
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -85,6 +104,7 @@ def folder_detail(request, pk):
     elif request.method == 'DELETE':
         folder.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -143,7 +163,7 @@ def register(request):
         password=password,
         is_active=True,
         is_staff=False,
-        is_superuser=False
+        is_superuser=False,
     )
     user.save()
 
@@ -152,7 +172,16 @@ def register(request):
     profile.save()
 
     token, created = Token.objects.get_or_create(user=user)
-    return Response({'token': token.key, 'user': {'id': user.id, 'username': user.username, 'email': user.email, 'phone_number': profile.phone_number}}, status=status.HTTP_201_CREATED)
+    return Response({
+        'token': token.key,
+        'user': {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'phone_number': profile.phone_number,
+        },
+    }, status=status.HTTP_201_CREATED)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -161,7 +190,10 @@ def login(request):
     password = request.data.get('password')
 
     if not username or not password:
-        return Response({'error': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {'error': 'Username and password are required'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     user = authenticate(username=username, password=password)
     if user:
@@ -171,14 +203,27 @@ def login(request):
             phone_number = profile.phone_number
         except Profile.DoesNotExist:
             phone_number = ''
-        return Response({'token': token.key, 'user': {'id': user.id, 'username': user.username, 'email': user.email, 'phone_number': phone_number}}, status=status.HTTP_200_OK)
+        return Response({
+            'token': token.key,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'phone_number': phone_number,
+            },
+        }, status=status.HTTP_200_OK)
     else:
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(
+            {'error': 'Invalid credentials'},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
 
 @api_view(['POST'])
 def logout(request):
     request.user.auth_token.delete()
     return Response({'message': 'Logged out successfully'}, status=status.HTTP_200_OK)
+
 
 @api_view(['GET'])
 def current_user(request):
@@ -189,8 +234,17 @@ def current_user(request):
             phone_number = profile.phone_number
         except Profile.DoesNotExist:
             phone_number = ''
-        return Response({'id': user.id, 'username': user.username, 'email': user.email, 'phone_number': phone_number})
-    return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'phone_number': phone_number,
+        })
+    return Response(
+        {'error': 'Not authenticated'},
+        status=status.HTTP_401_UNAUTHORIZED,
+    )
+
 
 @api_view(['PUT'])
 def update_profile(request):
@@ -216,5 +270,13 @@ def update_profile(request):
             profile.phone_number = phone_number
         profile.save()
 
-        return Response({'id': user.id, 'username': user.username, 'email': user.email, 'phone_number': profile.phone_number})
-    return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'phone_number': profile.phone_number,
+        })
+    return Response(
+        {'error': 'Not authenticated'},
+        status=status.HTTP_401_UNAUTHORIZED,
+    )

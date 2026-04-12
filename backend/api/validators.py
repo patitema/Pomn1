@@ -13,15 +13,15 @@ def validate_username(value):
     # Проверка длины
     if len(value) < 3:
         raise ValidationError('Логин должен содержать минимум 3 символа')
-    
+
     if len(value) > 20:
         raise ValidationError('Логин не должен превышать 20 символов')
-    
+
     # Проверка допустимых символов
     pattern = r'^[a-zA-Zа-яА-ЯёЁ0-9_]+$'
     if not re.match(pattern, value):
         raise ValidationError('Логин может содержать только буквы, цифры и подчёркивание')
-    
+
     # Проверка на уникальность
     if User.objects.filter(username=value).exists():
         raise ValidationError('Этот логин уже занят')
@@ -37,11 +37,11 @@ def validate_password(value):
     # Проверка длины
     if len(value) < 8:
         raise ValidationError('Пароль должен содержать минимум 8 символов')
-    
+
     # Проверка на наличие цифры
     if not re.search(r'\d', value):
         raise ValidationError('Пароль должен содержать минимум одну цифру')
-    
+
     # Проверка на наличие спецсимвола
     if not re.search(r'[!_-]', value):
         raise ValidationError('Пароль должен содержать минимум один спецсимвол (!, _ или -)')
@@ -70,7 +70,7 @@ def validate_email_unique(value):
     pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
     if not re.match(pattern, value):
         raise ValidationError('Неверный формат email')
-    
+
     # Проверка на уникальность
     if User.objects.filter(email=value).exists():
         raise ValidationError('Этот email уже зарегистрирован')
