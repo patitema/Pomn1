@@ -158,23 +158,19 @@ deploy-dev:
     DEPLOY_URL: https://dev.patitema-site.ru
   script:
     - ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -o ConnectTimeout=30 "$SSH_USER@$SERVER_HOST" "echo SSH_OK"
-    - ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -o ConnectTimeout=30 "$SSH_USER@$SERVER_HOST" "
+    - |
+      ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -o ConnectTimeout=30 "$SSH_USER@$SERVER_HOST" "
         set -e
         cd ${DEPLOY_PATH} || { mkdir -p ${DEPLOY_PATH} && cd ${DEPLOY_PATH}; }
-
         if [ -d '.git' ]; then
           git fetch origin ${DEPLOY_BRANCH}
           git reset --hard origin/${DEPLOY_BRANCH}
         else
           git clone --branch ${DEPLOY_BRANCH} https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git .
         fi
-
         docker-compose down || true
-
         COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME} BACKEND_PORT=${BACKEND_PORT} docker-compose up -d --build
-
         docker image prune -f
-
         echo 'Dev обновлён: ${DEPLOY_URL}'
       "
   when: manual
@@ -194,23 +190,19 @@ deploy-main:
     DEPLOY_URL: https://patitema-site.ru
   script:
     - ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -o ConnectTimeout=30 "$SSH_USER@$SERVER_HOST" "echo SSH_OK"
-    - ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -o ConnectTimeout=30 "$SSH_USER@$SERVER_HOST" "
+    - |
+      ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -o ConnectTimeout=30 "$SSH_USER@$SERVER_HOST" "
         set -e
         cd ${DEPLOY_PATH} || { mkdir -p ${DEPLOY_PATH} && cd ${DEPLOY_PATH}; }
-
         if [ -d '.git' ]; then
           git fetch origin ${DEPLOY_BRANCH}
           git reset --hard origin/${DEPLOY_BRANCH}
         else
           git clone --branch ${DEPLOY_BRANCH} https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git .
         fi
-
         docker-compose down || true
-
         COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME} BACKEND_PORT=${BACKEND_PORT} docker-compose up -d --build
-
         docker image prune -f
-
         echo 'Production обновлён: ${DEPLOY_URL}'
       "
   when: manual
