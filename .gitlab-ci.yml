@@ -26,7 +26,8 @@ lint-backend:
   before_script:
     - pip install flake8
   script:
-    - flake8 backend/ api/ --max-line-length=120 --exclude=migrations,__pycache__
+    - cd backend
+    - flake8 api/ backend/ --max-line-length=120 --exclude=migrations,__pycache__
   allow_failure: true
 
 build-frontend:
