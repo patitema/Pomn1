@@ -1,8 +1,12 @@
 from rest_framework import serializers
 from .models import Folder, Note
 
+
 class NoteSerializer(serializers.ModelSerializer):
-    folder_id = serializers.PrimaryKeyRelatedField(source='folder', queryset=Folder.objects.all(), allow_null=True, required=False)
+    folder_id = serializers.PrimaryKeyRelatedField(
+        source='folder', queryset=Folder.objects.all(),
+        allow_null=True, required=False,
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -14,6 +18,7 @@ class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note
         fields = ('id', 'title', 'text', 'folder', 'folder_id', 'user', 'created_at')
+
 
 class FolderSerializer(serializers.ModelSerializer):
     notes = NoteSerializer(many=True, read_only=True)

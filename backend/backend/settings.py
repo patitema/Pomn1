@@ -26,7 +26,11 @@ SECRET_KEY = 'django-insecure-oq298kob6_%@ju0y31cr*m&=p^l@crr4u#xu2k5skk7)_lnm)x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,patitema-site.ru,api.patitema-site.ru,148.253.208.46').split(',')
+ALLOWED_HOSTS = os.environ.get(
+    'ALLOWED_HOSTS',
+    'localhost,127.0.0.1,patitema-site.ru,'
+    'api.patitema-site.ru,148.253.208.46',
+).split(',')
 
 
 # Application definition
