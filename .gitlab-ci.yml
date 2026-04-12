@@ -1,20 +1,9 @@
-# GitLab CI/CD для Pomni
-# Пайплайн запускается при изменениях в ветках dev и main
-#
-# Требуемые CI/CD Variables (Settings → CI/CD → Variables):
-#   SSH_KEY             — приватный SSH ключ (type: File)
-#   SSH_USER            — пользователь на сервере (например: root)
-#   SERVER_HOST         — IP или домен сервера (например: 148.253.208.46)
 
 stages:
   - lint
   - build
   - test
   - deploy
-
-# ============================================
-# Stage: Lint — проверка кода
-# ============================================
 
 lint-frontend:
   stage: lint
@@ -39,10 +28,6 @@ lint-backend:
   script:
     - flake8 backend/ api/ --max-line-length=120 --exclude=migrations,__pycache__
   allow_failure: true
-
-# ============================================
-# Stage: Build — сборка
-# ============================================
 
 build-frontend:
   stage: build
@@ -74,10 +59,6 @@ build-backend:
     - python manage.py check
   needs:
     - lint-backend
-
-# ============================================
-# Stage: Test — API тесты через Newman
-# ============================================
 
 api-tests:
   stage: test
@@ -116,7 +97,7 @@ api-tests:
         sleep 2
       done
   script:
-    - newman run tests/api/postman-collection.json --env-var baseUrl=http://host.docker.internal:8000/api --bail
+    - newman run tests/api/postman-collection.json --env-var baseUrl=http://localhost:8000/api --bail
   needs:
     - build-backend
   allow_failure: false
