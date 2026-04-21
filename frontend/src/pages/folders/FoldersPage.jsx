@@ -139,6 +139,7 @@ const FoldersPage = () => {
 
   const unfolderNotes = notes.filter(
     (note) =>
+      !note.is_folder &&
       note.folder === null &&
       note.title.toLowerCase().includes(search.toLowerCase())
   )
