@@ -3,7 +3,7 @@ import { useCreateNoteMutation } from '../../../../shared/api';
 import { Input, Button, Modal } from '../../../../shared/ui';
 import './CreateNoteForm.css';
 
-const CreateNoteForm = ({ isOpen, onClose, parentId = null }) => {
+const CreateNoteForm = ({ isOpen, onClose, parentId = null, isFolder = false }) => {
   const [createNote] = useCreateNoteMutation();
   const [formData, setFormData] = useState({
     title: '',
@@ -14,9 +14,14 @@ const CreateNoteForm = ({ isOpen, onClose, parentId = null }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
-      await createNote({ ...formData, parent: parentId }).unwrap();
+      await createNote({
+        title: formData.title,
+        text: formData.content,
+        folder: parentId,
+        is_folder: isFolder,
+      }).unwrap();
       onClose();
       setFormData({ title: '', content: '' });
     } catch (err) {
@@ -33,31 +38,37 @@ const CreateNoteForm = ({ isOpen, onClose, parentId = null }) => {
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Создать заметку">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isFolder ? "Создать папку" : "Создать заметку"}
+    >
       <form className="create-note-form" onSubmit={handleSubmit}>
         <Input
           type="text"
-          placeholder="Заголовок"
+          placeholder={isFolder ? "Название папки" : "Заголовок"}
           value={formData.title}
           onChange={handleChange('title')}
           required
         />
-        
-        <textarea
-          className="create-note-form__textarea"
-          placeholder="Содержимое заметки..."
-          value={formData.content}
-          onChange={handleChange('content')}
-          rows={6}
-          required
-        />
-        
+
+        {!isFolder && (
+          <textarea
+            className="create-note-form__textarea"
+            placeholder="Содержимое заметки..."
+            value={formData.content}
+            onChange={handleChange('content')}
+            rows={6}
+            required
+          />
+        )}
+
         <div className="create-note-form__actions">
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Создание...' : 'Создать'}
           </Button>
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             onClick={onClose}
             disabled={isSubmitting}
           >
