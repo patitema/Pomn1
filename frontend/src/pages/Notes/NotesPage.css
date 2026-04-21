@@ -40,7 +40,7 @@
 }
 
 .FileName.active h3{
-    width: 1000px;
+    width: 450px;
 }
 
 .Info{
@@ -151,6 +151,7 @@
 .ReadFile{
     position: absolute;
     right: 0;
+    top: 100px;
     width: 100px;
     height: 670px;
     padding-top: 10px;
@@ -162,13 +163,14 @@
 }
 
 .ReadFile.active{
-    right: 50%;
-    transform: translate(50%);
+    right: 0;
     border-radius: 30px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
     height: 700px;
-    width: 1200px;
+    width: 500px;
     padding-bottom: 20px;
-    transition: all 0.8s ease-out;
+    transition: all 0.5s ease-out;
 }
 
 .FileName{
@@ -188,7 +190,7 @@
 }
 
 .FileName.active h3{
-    width: 1000px;
+    width: 450px;
 }
 
 .Info{

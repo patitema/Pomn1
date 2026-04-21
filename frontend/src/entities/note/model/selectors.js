@@ -29,3 +29,9 @@ export const selectNotesByFolderId = (folderId) => createSelector(
   [selectAllNotes],
   (notes) => notes.filter((note) => note.parent === folderId)
 );
+
+// Селектор только заметок (без папок)
+export const selectOnlyNotes = createSelector(
+  [selectAllNotes],
+  (notes) => notes.filter((note) => !note.is_folder)
+);

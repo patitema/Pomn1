@@ -38,11 +38,14 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Note', 'Folder', 'User'],
+  tagTypes: ['Note', 'Link', 'User'],
   endpoints: (builder) => ({
-    // === NOTES ===
+    // === NOTES (включая папки) ===
     getNotes: builder.query({
-      query: () => 'notes/',
+      query: (params) => ({
+        url: 'notes/',
+        params: params  // { is_folder: true/false } для фильтрации
+      }),
       providesTags: (result) =>
         result
           ? [...result.map(({ id }) => ({ type: 'Note', id })), { type: 'Note', id: 'LIST' }]
@@ -61,25 +64,42 @@ export const api = createApi({
       invalidatesTags: (result, error, id) => [{ type: 'Note', id }],
     }),
 
-    // === FOLDERS ===
+    // === FOLDERS (обратная совместимость - возвращает notes с is_folder=true) ===
     getFolders: builder.query({
       query: () => 'folders/',
       providesTags: (result) =>
         result
-          ? [...result.map(({ id }) => ({ type: 'Folder', id })), { type: 'Folder', id: 'LIST' }]
-          : [{ type: 'Folder', id: 'LIST' }],
+          ? [...result.map(({ id }) => ({ type: 'Note', id })), { type: 'Note', id: 'LIST' }]
+          : [{ type: 'Note', id: 'LIST' }],
     }),
     createFolder: builder.mutation({
       query: (body) => ({ url: 'folders/', method: 'POST', body }),
-      invalidatesTags: [{ type: 'Folder', id: 'LIST' }],
+      invalidatesTags: [{ type: 'Note', id: 'LIST' }],
     }),
     updateFolder: builder.mutation({
       query: ({ id, body }) => ({ url: `folders/${id}/`, method: 'PUT', body }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'Folder', id }],
+      invalidatesTags: (result, error, { id }) => [{ type: 'Note', id }],
     }),
     deleteFolder: builder.mutation({
       query: (id) => ({ url: `folders/${id}/`, method: 'DELETE' }),
-      invalidatesTags: (result, error, id) => [{ type: 'Folder', id }],
+      invalidatesTags: (result, error, id) => [{ type: 'Note', id }],
+    }),
+
+    // === LINKS (связи между заметками) ===
+    getLinks: builder.query({
+      query: () => 'links/',
+      providesTags: (result) =>
+        result
+          ? [...result.map(({ id }) => ({ type: 'Link', id })), { type: 'Link', id: 'LIST' }]
+          : [{ type: 'Link', id: 'LIST' }],
+    }),
+    createLink: builder.mutation({
+      query: (body) => ({ url: 'links/', method: 'POST', body }),
+      invalidatesTags: [{ type: 'Link', id: 'LIST' }],
+    }),
+    deleteLink: builder.mutation({
+      query: (id) => ({ url: `links/${id}/`, method: 'DELETE' }),
+      invalidatesTags: (result, error, id) => [{ type: 'Link', id }],
     }),
 
     // === USER ===
@@ -115,6 +135,9 @@ export const {
   useCreateFolderMutation,
   useUpdateFolderMutation,
   useDeleteFolderMutation,
+  useGetLinksQuery,
+  useCreateLinkMutation,
+  useDeleteLinkMutation,
   useGetCurrentUserQuery,
   useLoginMutation,
   useRegisterMutation,
