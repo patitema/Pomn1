@@ -43,8 +43,13 @@ services:
     networks:
       - pomni_network
     command: >
-      sh -c "python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
+      sh -c "
+        until python manage.py migrate 2>&1; do
+          echo 'Waiting for database...';
+          sleep 2;
+        done &&
+        python manage.py runserver 0.0.0.0:8000
+      "
 
   frontend:
     build:
