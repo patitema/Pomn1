@@ -100,32 +100,3 @@ class Profile(models.Model):
 
     def __str__(self):
         return f'Профиль {self.user.username}'
-
-
-# Старые модели для миграции данных (будут удалены после миграции)
-class FolderOld(models.Model):
-    title = models.CharField(max_length=255)
-    path = models.CharField(max_length=500, default='/')
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='folders_old', null=True, blank=True)
-    created_at = models.DateTimeField(default=timezone.now)
-
-    class Meta:
-        db_table = 'api_folder_old'
-
-    def __str__(self):
-        return self.title
-
-
-class NoteOld(models.Model):
-    title = models.CharField(max_length=255)
-    text = models.TextField()
-    folder = models.ForeignKey(FolderOld, on_delete=models.CASCADE, null=True, blank=True, related_name='notes')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notes_old', null=True, blank=True)
-    created_at = models.DateTimeField(default=timezone.now)
-
-    class Meta:
-        db_table = 'api_note_old'
-
-    def __str__(self):
-        return self.title

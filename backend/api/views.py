@@ -6,8 +6,8 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
-from .models import Note, Link, Profile, FolderOld, NoteOld
-from .serializer import NoteSerializer, LinkSerializer, FolderOldSerializer, NoteOldSerializer
+from .models import Note, Link, Profile
+from .serializer import NoteSerializer, LinkSerializer
 from .validators import (
     validate_username, validate_password,
     validate_phone, validate_email_unique,
