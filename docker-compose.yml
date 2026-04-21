@@ -10,7 +10,7 @@ services:
       MYSQL_USER: ${DB_USER:-pomni}
       MYSQL_PASSWORD: ${DB_PASSWORD:-pomnipassword}
     volumes:
-      - ${COMPOSE_PROJECT_NAME:-pomni}_mysql_data:/var/lib/mysql
+      - pomni_mysql_data:/var/lib/mysql
     expose:
       - "3306"
     networks:
@@ -51,4 +51,4 @@ networks:
     driver: bridge
 
 volumes:
-  ${COMPOSE_PROJECT_NAME:-pomni}_mysql_data:
+  pomni_mysql_data:
