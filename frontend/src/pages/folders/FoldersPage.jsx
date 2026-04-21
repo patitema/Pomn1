@@ -134,6 +134,9 @@ const FoldersPage = () => {
     }
   }
 
+  // Фильтруем только папки верхнего уровня (без родителя)
+  const rootFolders = folders.filter((folder) => folder.folder === null)
+
   const unfolderNotes = notes.filter(
     (note) =>
       note.folder === null &&
@@ -167,7 +170,7 @@ const FoldersPage = () => {
             </div>
 
             <ul className="FileList">
-              {folders.map((folder) => (
+              {rootFolders.map((folder) => (
                 <DroppableFolder
                   key={folder.id}
                   folder={folder}
