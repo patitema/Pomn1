@@ -11,8 +11,8 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:-pomnipassword}
     volumes:
       - pomni_mysql_data:/var/lib/mysql
-    expose:
-      - "3306"
+    ports:
+      - "${DB_PORT:-3306}:3306"
     networks:
       - pomni_network
     healthcheck:
