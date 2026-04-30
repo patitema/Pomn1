@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectCurrentUser } from '@entities/user';
+import { selectCurrentUser, logout as clearAuth } from '@entities/user';
 import { useLogoutMutation, useUpdateProfileMutation } from '@shared/api';
-import { logout as clearAuth } from '@features/auth-by-login/model/authSlice';
 import { Input, Button, PhoneInput } from '@shared/ui';
 import { routes } from '@shared/config';
 import './ProfilePage.css';

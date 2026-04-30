@@ -4,3 +4,5 @@ export { Modal } from './Modal';
 export { Loader } from './Loader';
 export { ProtectedRoute } from './ProtectedRoute';
 export { PhoneInput, unformatPhone } from './PhoneInput';
+export { MarkdownEditor } from './MarkdownEditor';
+export { MarkdownViewer } from './MarkdownViewer';

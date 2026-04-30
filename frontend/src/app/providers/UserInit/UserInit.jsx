@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useGetCurrentUserQuery } from '@shared/api'
-import { setUser, setToken, logout as clearAuth } from '@features/auth-by-login/model/authSlice'
+import { setUser, setToken, logout as clearAuth } from '@entities/user'
 import { Loader } from '@shared/ui'
 
 /**

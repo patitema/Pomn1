@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useRegisterMutation } from '@shared/api';
-import { setToken, setUser } from '@features/auth-by-login';
+import { setToken, setUser } from '@entities/user';
 import { Input, Button, PhoneInput } from '@shared/ui';
 import './RegistrationForm.css';
 

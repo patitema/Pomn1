@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { logout as clearAuth } from '@features/auth-by-login/model/authSlice';
+import { logout as clearAuth } from '@entities/user';
 import { routes } from '@shared/config';
 
 const API_URL = process.env.REACT_APP_API_URL;

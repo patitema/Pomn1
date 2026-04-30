@@ -6,8 +6,8 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
-from .models import Note, Link, Profile, FolderOld, NoteOld
-from .serializer import NoteSerializer, LinkSerializer, FolderOldSerializer, NoteOldSerializer
+from .models import Note, Link, Profile
+from .serializer import NoteSerializer, LinkSerializer
 from .validators import (
     validate_username, validate_password,
     validate_phone, validate_email_unique,
@@ -35,7 +35,7 @@ def notes_list(request):
     elif request.method == 'POST':
         data = request.data.copy()
         data['user'] = request.user.id
-        serializer = NoteSerializer(data=data)
+        serializer = NoteSerializer(data=data, context={'request': request})
         if serializer.is_valid():
             note = serializer.save()
 
@@ -69,7 +69,7 @@ def folders_list(request):
         data = request.data.copy()
         data['user'] = request.user.id
         data['is_folder'] = True  # Принудительно устанавливаем как папку
-        serializer = NoteSerializer(data=data)
+        serializer = NoteSerializer(data=data, context={'request': request})
         if serializer.is_valid():
             folder = serializer.save()
             return Response(

@@ -1,5 +1,4 @@
-import { formatFolderDate } from '../../model/helpers';
-import { DeleteFolderButton } from '@features/delete-folder';
+import { formatDateTime } from '@shared/lib';
 import './FolderCard.css';
 
 const FolderCard = ({ 
@@ -14,6 +13,11 @@ const FolderCard = ({
     onEdit?.(folder);
   };
 
+  const handleDelete = (e) => {
+    e.stopPropagation();
+    onDelete?.(folder.id);
+  };
+
   return (
     <div className="folder-card" onClick={() => onOpen?.(folder.id)}>
       <div className="folder-card__icon">📁</div>
@@ -21,7 +25,7 @@ const FolderCard = ({
       <div className="folder-card__content">
         <h3 className="folder-card__title">{folder.name || 'Без названия'}</h3>
         <span className="folder-card__date">
-          {formatFolderDate(folder.created_at)}
+          {formatDateTime(folder.created_at)}
         </span>
         {notesCount > 0 && (
           <span className="folder-card__count">{notesCount} заметок</span>
@@ -35,7 +39,12 @@ const FolderCard = ({
         >
           ✏️
         </button>
-        <DeleteFolderButton folderId={folder.id} onSuccess={onDelete} />
+        <button
+          className="folder-card__button folder-card__button--delete"
+          onClick={handleDelete}
+        >
+          Удалить
+        </button>
       </div>
     </div>
   );

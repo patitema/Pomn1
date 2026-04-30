@@ -4,3 +4,4 @@ export {
   selectLinksError,
   selectLinksByNoteId,
 } from './selectors';
+export { getLinkEndpoints, isLinkConnectedToNote } from './helpers';

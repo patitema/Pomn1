@@ -15,7 +15,10 @@ const CreateFolderForm = ({ isOpen, onClose, parentId = null }) => {
     setIsSubmitting(true);
     
     try {
-      await createFolder({ ...formData, parent: parentId }).unwrap();
+      await createFolder({
+        title: formData.name,
+        folder_id: parentId,
+      }).unwrap();
       onClose();
       setFormData({ name: '' });
     } catch (err) {

@@ -28,12 +28,12 @@ export default function CreateNoteToggle({ folderId }) {
     const data = isFolder
       ? {
           title: title.trim(),
-          parent: folderId ? Number(folderId) : null,
+          folder_id: folderId ? Number(folderId) : null,
         }
       : {
           title: title.trim(),
           text: text.trim(),
-          folder:
+          folder_id:
             selectedFolder === 'no-folder' ? null : Number(selectedFolder),
         }
 

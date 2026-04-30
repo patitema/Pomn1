@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
+import { isLinkConnectedToNote } from './helpers';
 
-// Базовый селектор связей из RTK Query
 const selectLinksQuery = (state) => state.api.queries.getLinks;
 
 export const selectAllLinks = createSelector(
@@ -18,10 +18,7 @@ export const selectLinksError = createSelector(
   (query) => query?.error || null
 );
 
-// Селектор связей по ID заметки
-export const selectLinksByNoteId = (noteId) => createSelector(
-  [selectAllLinks],
-  (links) => links.filter(link =>
-    link.note_from === noteId || link.note_to === noteId
-  )
-);
+export const selectLinksByNoteId = (noteId) =>
+  createSelector([selectAllLinks], (links) =>
+    links.filter((link) => isLinkConnectedToNote(link, noteId))
+  );

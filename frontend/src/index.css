@@ -15,12 +15,7 @@ body {
   color: #fff;
 }
 
-h1,
-h2,
-h3,
-p,
-button,
-input[type="submit"] {
+h1 {
   font-family: "Home Video", sans-serif;
 }
 

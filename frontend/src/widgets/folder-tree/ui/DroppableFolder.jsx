@@ -1,5 +1,7 @@
 import React from 'react'
 import { useDroppable } from '@dnd-kit/core'
+import { getChildFolders, getFolderTitle, hasChildFolders } from '@entities/folder'
+import { noteMatchesSearch } from '@entities/note'
 import { DraggableNote } from './DraggableNote'
 
 export const DroppableFolder = React.memo(
@@ -24,11 +26,9 @@ export const DroppableFolder = React.memo(
     })
 
     const folderNotes = notes.filter(
-      (note) =>
-        note.folder === folder.id &&
-        note.title.toLowerCase().includes(search.toLowerCase())
+      (note) => note.folder === folder.id && noteMatchesSearch(note, search)
     )
-
+    const childFolders = getChildFolders(folder)
     const isOpen = openFolders.has(folder.id)
     const marginLeft = level * 20
 
@@ -52,7 +52,12 @@ export const DroppableFolder = React.memo(
           }}
         >
           <div className="folder-main">
-            <p>📁 {folder.title || `Папка ${folder.id}`}</p>
+            <p className="folder-title">
+              <svg className="folder-title__icon" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/images/icons.svg#folders"></use>
+              </svg>
+              <span>{getFolderTitle(folder)}</span>
+            </p>
             <div className="Tool-btns">
               <button
                 className="edit-btn"
@@ -86,24 +91,23 @@ export const DroppableFolder = React.memo(
         <div className={`folder-content ${isOpen ? 'open' : 'closed'}`}>
           {isOpen && (
             <ul style={{ marginLeft: '0px', marginTop: '5px' }}>
-              {folder.children &&
-                folder.children.map((childFolder) => (
-                  <DroppableFolder
-                    key={childFolder.id}
-                    folder={childFolder}
-                    level={level + 1}
-                    notes={notes}
-                    openFolders={openFolders}
-                    openNotes={openNotes}
-                    toggleFolder={toggleFolder}
-                    toggleNote={toggleNote}
-                    openEdit={openEdit}
-                    deleteFolder={deleteFolder}
-                    deleteNote={deleteNote}
-                    formatDate={formatDate}
-                    search={search}
-                  />
-                ))}
+              {childFolders.map((childFolder) => (
+                <DroppableFolder
+                  key={childFolder.id}
+                  folder={childFolder}
+                  level={level + 1}
+                  notes={notes}
+                  openFolders={openFolders}
+                  openNotes={openNotes}
+                  toggleFolder={toggleFolder}
+                  toggleNote={toggleNote}
+                  openEdit={openEdit}
+                  deleteFolder={deleteFolder}
+                  deleteNote={deleteNote}
+                  formatDate={formatDate}
+                  search={search}
+                />
+              ))}
 
               {folderNotes.length > 0
                 ? folderNotes.map((note) => {
@@ -121,15 +125,14 @@ export const DroppableFolder = React.memo(
                       />
                     )
                   })
-                : folder.children &&
-                  folder.children.length === 0 && (
+                : !hasChildFolders(folder) && (
                     <li
                       style={{
                         fontStyle: 'italic',
                         marginLeft: `${marginLeft + 20}px`,
                       }}
                     >
-                      Нет заметок
+                      РќРµС‚ Р·Р°РјРµС‚РѕРє
                     </li>
                   )}
             </ul>

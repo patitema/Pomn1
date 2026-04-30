@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
+import { isRegularNote } from './helpers';
 
-// Базовый селектор заметок из RTK Query
 const selectNotesQuery = (state) => state.api.queries.getNotes;
 
 export const selectAllNotes = createSelector(
@@ -18,20 +18,20 @@ export const selectNotesError = createSelector(
   (query) => query?.error || null
 );
 
-// Селектор заметки по ID
-export const selectNoteById = (id) => createSelector(
+export const selectNoteById = (id) =>
+  createSelector([selectAllNotes], (notes) => notes.find((note) => note.id === id));
+
+export const selectNotesByFolderId = (folderId) =>
+  createSelector([selectAllNotes], (notes) =>
+    notes.filter((note) => note.folder === folderId)
+  );
+
+export const selectRootNotes = createSelector(
   [selectAllNotes],
-  (notes) => notes.find((note) => note.id === id)
+  (notes) => notes.filter((note) => note.folder === null)
 );
 
-// Селектор заметок по папке
-export const selectNotesByFolderId = (folderId) => createSelector(
-  [selectAllNotes],
-  (notes) => notes.filter((note) => note.parent === folderId)
-);
-
-// Селектор только заметок (без папок)
 export const selectOnlyNotes = createSelector(
   [selectAllNotes],
-  (notes) => notes.filter((note) => !note.is_folder)
+  (notes) => notes.filter(isRegularNote)
 );

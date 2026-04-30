@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useCreateNoteMutation } from '../../../../shared/api';
-import { Input, Button, Modal } from '../../../../shared/ui';
+import { useCreateNoteMutation } from '@shared/api';
+import { Input, Button, Modal, MarkdownEditor } from '@shared/ui';
 import './CreateNoteForm.css';
 
 const CreateNoteForm = ({ isOpen, onClose, parentId = null, isFolder = false }) => {
@@ -19,7 +19,7 @@ const CreateNoteForm = ({ isOpen, onClose, parentId = null, isFolder = false }) 
       await createNote({
         title: formData.title,
         text: formData.content,
-        folder: parentId,
+        folder_id: parentId,
         is_folder: isFolder,
       }).unwrap();
       onClose();
@@ -53,13 +53,12 @@ const CreateNoteForm = ({ isOpen, onClose, parentId = null, isFolder = false }) 
         />
 
         {!isFolder && (
-          <textarea
-            className="create-note-form__textarea"
-            placeholder="Содержимое заметки..."
+          <MarkdownEditor
             value={formData.content}
-            onChange={handleChange('content')}
-            rows={6}
-            required
+            onChange={(value) => setFormData({ ...formData, content: value || '' })}
+            placeholder="Содержимое заметки (поддерживается Markdown)..."
+            height={300}
+            preview="edit"
           />
         )}
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useUpdateNoteMutation } from '../../../../shared/api';
-import { Input, Button, Modal } from '../../../../shared/ui';
+import { useUpdateNoteMutation } from '@shared/api';
+import { Input, Button, Modal, MarkdownEditor } from '@shared/ui';
 import './EditNoteModal.css';
 
 const EditNoteModal = ({ note, isOpen, onClose }) => {
@@ -15,7 +15,7 @@ const EditNoteModal = ({ note, isOpen, onClose }) => {
     if (note) {
       setFormData({
         title: note.title || '',
-        content: note.content || '',
+        content: note.text || '',
       });
     }
   }, [note]);
@@ -25,7 +25,13 @@ const EditNoteModal = ({ note, isOpen, onClose }) => {
     setIsSubmitting(true);
     
     try {
-      await updateNote({ id: note.id, body: formData }).unwrap();
+      await updateNote({
+        id: note.id,
+        body: {
+          title: formData.title,
+          text: formData.content,
+        },
+      }).unwrap();
       onClose();
     } catch (err) {
       console.error('Failed to update note:', err);
@@ -51,13 +57,12 @@ const EditNoteModal = ({ note, isOpen, onClose }) => {
           required
         />
         
-        <textarea
-          className="edit-note-modal__textarea"
-          placeholder="Содержимое заметки..."
+        <MarkdownEditor
           value={formData.content}
-          onChange={handleChange('content')}
-          rows={6}
-          required
+          onChange={(value) => setFormData({ ...formData, content: value || '' })}
+          placeholder="Содержимое заметки (поддерживается Markdown)..."
+          height={300}
+          preview="edit"
         />
         
         <div className="edit-note-modal__actions">

@@ -100,6 +100,43 @@
     display: flex;
 }
 
+.FileInfo .markdown-viewer {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    color: #FFF;
+    font-size: 20px;
+    text-align: start;
+}
+
+.FileInfo .markdown-viewer h1,
+.FileInfo .markdown-viewer h2,
+.FileInfo .markdown-viewer h3 {
+    color: #FFF;
+}
+
+.FileInfo .markdown-viewer code {
+    background-color: #333;
+    color: #FFF;
+}
+
+.FileInfo .markdown-viewer pre {
+    background-color: #333;
+}
+
+.FileInfo .markdown-viewer blockquote {
+    border-left-color: #666;
+    color: #AAA;
+}
+
+.FileInfo .markdown-viewer th,
+.FileInfo .markdown-viewer td {
+    border-color: #666;
+}
+
+.FileInfo .markdown-viewer th {
+    background-color: #333;
+}
 
 .EditToolsContainer{
     display: flex;

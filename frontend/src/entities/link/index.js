@@ -3,4 +3,6 @@ export {
   selectLinksLoading,
   selectLinksError,
   selectLinksByNoteId,
+  getLinkEndpoints,
+  isLinkConnectedToNote,
 } from './model';

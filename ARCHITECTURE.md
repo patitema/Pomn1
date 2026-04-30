@@ -2,293 +2,439 @@
 
 ## Обзор
 
-Pomni — SPA-приложение на React с бэкендом на Django REST Framework. Фронтенд построен по методологии **Feature-Sliced Design (FSD)**, состояние управляется через **Redux Toolkit + RTK Query**.
+Pomni - SPA-приложение на React с backend API на Django REST Framework. Проект уже использует слои Feature-Sliced Design, но фронтенд пока находится в переходном состоянии: рядом с FSD-слоями еще живут директории старой структуры (`components`, `context`, `hooks`, `utils`).
+
+Поэтому корректно считать текущую архитектуру не "строгим FSD", а **гибридной структурой с миграцией в сторону FSD**.
+
+Этот документ фиксирует:
+- текущее состояние проекта;
+- целевую архитектурную модель;
+- правила раскладки кода по слоям;
+- допустимые зависимости между слоями;
+- зоны, которые еще требуют рефакторинга.
 
 ---
 
-## Feature-Sliced Design
+## Архитектурный статус
 
-### Слои и зависимости
+### Что уже внедрено
 
-```
-app → pages → widgets → features → entities → shared
-```
+- слои `app`, `pages`, `widgets`, `features`, `entities`, `shared`;
+- алиасы `@app`, `@pages`, `@widgets`, `@features`, `@entities`, `@shared`;
+- Redux Toolkit + RTK Query как базовый state/API слой;
+- единый auth flow с `UserInit` и `ProtectedRoute`;
+- разнесение части пользовательских сценариев по feature-модулям;
+- общие UI-компоненты в `shared/ui`.
 
-Зависимости идут **только сверху вниз**. Запрещено:
-- Зависимости снизу вверх
-- Зависимости между модулями одного слоя
-- Пропуск слоёв
+### Что еще не доведено
 
-### Структура слоёв
-
-#### `app/` — Инициализация приложения
-Точка входа, провайдеры, роутинг. Не содержит бизнес-логики.
-
-```
-app/
-├── providers/
-│   ├── ReduxProvider/    # Redux store конфигурация
-│   ├── Router/           # React Router (AppRoutes)
-│   └── UserInit/         # Восстановление сессии при старте
-├── styles/               # Глобальные стили
-└── index.js              # Точка входа (<App />)
-```
-
-#### `pages/` — Страницы приложения
-Композиция виджетов и фич для конкретных маршрутов. Каждая страница — отдельный модуль.
-
-```
-pages/
-├── Auth/            # Страница входа
-├── home/            # Лендинг
-├── registration/    # Регистрация
-├── Notes/           # Граф заметок
-├── folders/         # Файловая структура заметок
-├── Profile/         # Личный кабинет
-└── Tasks/           # Управление задачами
-```
-
-#### `widgets/` — Композиционные блоки
-Крупные самостоятельные блоки страницы, которые можно переиспользовать между страницами.
-
-```
-widgets/
-├── header/          # Шапка
-├── footer/          # Подвал
-├── navigation/      # Боковая навигация
-└── note-graph/      # Визуализация графа (D3.js)
-```
-
-#### `features/` — Бизнес-сценарии
-Интерактивные части, которые реализуют конкретные действия пользователя.
-
-```
-features/
-├── auth-by-login/
-│   ├── model/
-│   │   ├── authSlice.js     # Redux slice (token, user, isAuthenticated)
-│   │   └── selectors.js     # Селекторы к auth-состоянию
-│   └── ui/
-│       └── LoginForm/       # Форма входа
-├── auth-by-registration/
-│   └── ui/
-│       └── RegistrationForm/
-├── create-note-toggle/      # Создание заметки
-├── edit-item/               # Редактирование заметок/папок
-└── ...
-```
-
-#### `entities/` — Бизнес-сущности
-Модели предметной области.
-
-```
-entities/
-└── user/
-    └── model/
-        └── selectors.js     # Переиспользуемые селекторы (selectCurrentUser, selectIsAuthenticated)
-```
-
-#### `shared/` — Переиспользуемый код
-Нижний слой, не зависит ни от чего выше.
-
-```
-shared/
-├── api/
-│   └── index.js             # RTK Query API (все endpoints, 401 interceptor)
-├── config/
-│   ├── routes.js            # Маршруты (routes.home, routes.auth, ...)
-│   └── index.js
-└── ui/
-    ├── Button/
-    ├── Input/
-    ├── Modal/
-    ├── Loader/
-    ├── ProtectedRoute/      # Auth guard
-    └── PhoneInput/          # Маска телефона
-```
+- в `frontend/src` остаются `components`, `context`, `hooks`, `utils`, `assets`;
+- слой `entities` выражен только частично;
+- некоторые страницы перегружены логикой;
+- есть нарушения "чистого FSD" в направленности зависимостей;
+- документация и структура проекта до этого расходились.
 
 ---
 
-## Управление состоянием
+## Слои и зависимости
 
-### Redux Store
+### Целевая цепочка зависимостей
+
+```text
+app -> pages -> widgets -> features -> entities -> shared
+```
+
+Зависимости должны идти только сверху вниз.
+
+### Что считается нарушением
+
+- `shared` импортирует что-то из `entities`, `features`, `widgets`, `pages`, `app`
+- `entities` импортируют `features`, `widgets`, `pages`, `app`
+- `features` импортируют `widgets`, `pages`, `app`
+- `widgets` импортируют `pages` или `app`
+- модули одного слоя напрямую тянут внутренности друг друга без public API
+
+### Что допустимо как временное состояние
+
+- наличие старых директорий, если они еще не вычищены;
+- смешанная структура, пока модуль находится в миграции;
+- точечные компромиссы, если они явно зафиксированы и не маскируются под "готовую архитектуру".
+
+---
+
+## Текущее дерево фронтенда
+
+```text
+frontend/src/
+  app/
+  assets/
+  components/
+  context/
+  entities/
+  features/
+  hooks/
+  pages/
+  shared/
+  utils/
+  widgets/
+```
+
+### Как это интерпретировать
+
+- `app`, `pages`, `widgets`, `features`, `entities`, `shared` - основа целевой архитектуры.
+- `components`, `context`, `hooks`, `utils` - остатки более ранней организации кода.
+- `assets` пока живет отдельно, но в целевом состоянии должен быть либо частью `shared`, либо локальным активом конкретного модуля.
+
+---
+
+## Назначение слоев
+
+### `app`
+
+**Роль:** точка сборки приложения.
+
+**Сюда кладем:**
+- глобальные провайдеры;
+- router;
+- store setup;
+- инициализацию сессии;
+- глобальную композицию приложения.
+
+**Сюда не кладем:**
+- предметную бизнес-логику;
+- доменные helpers;
+- логику конкретных страниц и пользовательских сценариев.
+
+**Примеры из проекта:**
+- `frontend/src/app/providers/ReduxProvider`
+- `frontend/src/app/providers/Router`
+- `frontend/src/app/providers/UserInit`
+
+### `pages`
+
+**Роль:** страницы маршрутов.
+
+**Сюда кладем:**
+- композицию widgets и features под конкретный route;
+- локальное page-state, если он нужен только этой странице;
+- page-level layout.
+
+**Сюда не кладем:**
+- переиспользуемые UI-блоки;
+- общие доменные преобразования;
+- инфраструктурные утилиты;
+- тяжелую бизнес-логику, которую можно вынести в `features`, `widgets` или `entities`.
+
+### `widgets`
+
+**Роль:** крупные композиционные блоки, которые собирают несколько более мелких частей интерфейса.
+
+**Сюда кладем:**
+- визуально и структурно самостоятельные блоки страницы;
+- составные части экранов;
+- интеграцию нескольких features/entities в один UI-блок.
+
+**Сюда не кладем:**
+- глобальную инициализацию;
+- чисто доменные helpers;
+- слишком мелкие кнопки и формы, если это отдельный пользовательский сценарий.
+
+**Примеры из проекта:**
+- `frontend/src/widgets/note-graph`
+- `frontend/src/widgets/folder-tree`
+- `frontend/src/widgets/navigation`
+- `frontend/src/widgets/header`
+- `frontend/src/widgets/footer`
+
+### `features`
+
+**Роль:** пользовательские сценарии.
+
+**Сюда кладем:**
+- действия пользователя: создать, обновить, удалить, переместить, авторизоваться;
+- формы, модалки и кнопки, если они являются частью конкретного сценария;
+- локальную model-логику сценария.
+
+**Сюда не кладем:**
+- базовые сущности предметной области;
+- глобальные shared-хелперы;
+- композицию целой страницы.
+
+**Примеры из проекта:**
+- `frontend/src/features/auth-by-login`
+- `frontend/src/features/auth-by-registration`
+- `frontend/src/features/create-note`
+- `frontend/src/features/update-note`
+- `frontend/src/features/edit-item`
+
+### `entities`
+
+**Роль:** предметные сущности.
+
+**Сюда кладем:**
+- селекторы;
+- доменные helpers;
+- базовые мапперы;
+- минимальные представления сущности, если они переиспользуются;
+- локальную model-логику, описывающую саму сущность, а не сценарий.
+
+**Состояние сейчас:**
+- слой есть, но развит слабо;
+- явно оформлен `entities/user`;
+- для `note`, `folder`, `link`, `task` слой еще предстоит укрепить.
+
+### `shared`
+
+**Роль:** базовый переиспользуемый слой без знания о конкретных сценариях и предметных модулях верхних уровней.
+
+**Сюда кладем:**
+- UI primitives;
+- API infrastructure;
+- config;
+- универсальные helpers;
+- универсальные hooks;
+- общие assets.
+
+**Сюда не кладем:**
+- auth feature-логику;
+- note/folder/task сценарии;
+- page-specific код.
+
+**Текущие сегменты:**
+- `frontend/src/shared/api`
+- `frontend/src/shared/config`
+- `frontend/src/shared/ui`
+
+**Целевые дополнительные сегменты:**
+- `frontend/src/shared/lib`
+- `frontend/src/shared/assets`
+
+---
+
+## Правила для старых директорий
+
+Следующие каталоги считаются временными и подлежат переразложению:
+
+### `frontend/src/components`
+
+Использовать как место для нового кода нельзя.
+
+**Что делать с содержимым:**
+- общий UI -> `shared/ui`
+- сценарный UI -> `features/*/ui`
+- крупный составной блок -> `widgets/*/ui`
+
+### `frontend/src/context`
+
+Использовать как место для нового кода нельзя.
+
+**Правило:**
+- глобальные провайдеры -> `app/providers`
+- локальный контекст фичи -> внутрь соответствующего модуля
+- если контекст дублирует Redux/RTK Query, его нужно убирать
+
+### `frontend/src/hooks`
+
+Использовать как общую папку для новых хуков нельзя.
+
+**Правило:**
+- общий хук -> `shared/lib`
+- доменный хук -> `entities/*/lib` или `entities/*/model`
+- сценарный хук -> `features/*/model`
+
+### `frontend/src/utils`
+
+Использовать как общую папку для новых утилит нельзя.
+
+**Правило:**
+- универсальная утилита -> `shared/lib`
+- доменная утилита -> `entities/*/lib`
+- сценарная утилита -> `features/*/lib` или `features/*/model`
+
+### `frontend/src/assets`
+
+Пока допустимо существование, но новые ассеты стоит размещать так:
+- глобально используемые -> `shared/assets`
+- модульные -> рядом с модулем, который их использует
+
+---
+
+## Сегменты внутри модулей
+
+Для `features`, `entities`, `widgets` желательно придерживаться одинаковой структуры.
+
+### `ui/`
+
+Содержит React-компоненты и стили модуля.
+
+### `model/`
+
+Содержит:
+- state;
+- selectors;
+- hooks состояния;
+- reducers/slices, если они реально относятся к модулю.
+
+### `lib/`
+
+Содержит:
+- helper-функции модуля;
+- адаптеры;
+- форматирование и преобразования, привязанные к модулю.
+
+### `index.js`
+
+Public API модуля.
+
+**Правило:**
+по умолчанию импортируем модуль через его `index.js`, а не через глубокий путь.
+
+**Допустимое исключение:**
+внутренние импорты внутри самого модуля.
+
+---
+
+## Public API
+
+### Правило импорта
+
+Предпочтительный импорт:
 
 ```js
-// app/providers/ReduxProvider/store.js
-const store = configureStore({
-  reducer: {
-    [api.reducerPath]: api.reducer,  // RTK Query кэш
-    auth: authReducer,                // authSlice
-  },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(api.middleware),
-});
+import { MarkdownViewer } from '@shared/ui';
+import { LoginForm } from '@features/auth-by-login';
+import { NoteGraph } from '@widgets/note-graph';
 ```
 
-### Auth Slice
+Менее желательный импорт:
 
-| State | Описание |
-|-------|----------|
-| `token` | JWT-токен из localStorage |
-| `user` | Объект пользователя (id, username, email, phone_number) |
-| `isAuthenticated` | Булев флаг авторизации |
-| `loading` | Флаг загрузки (login pending) |
-| `error` | Ошибка авторизации |
+```js
+import MarkdownViewer from '@shared/ui/MarkdownViewer/MarkdownViewer';
+```
 
-**Actions:**
-- `setToken(payload)` — сохранить токен
-- `setUser(payload)` — сохранить данные пользователя
-- `logout()` — полный выход (очистка state + localStorage)
-- `clearError()` — сброс ошибки
+### Зачем это нужно
 
-**extraReducers:** автоматически реагируют на RTK Query actions `login/pending`, `login/fulfilled`, `login/rejected`, `logout/fulfilled`.
-
-### RTK Query (API слой)
-
-Все API-запросы через единый `createApi` в `shared/api/index.js`.
-
-**Tag Types:** `Note`, `Folder`, `User` — для автоматического кэширования и инвалидации.
-
-**401 Interceptor:** кастомный `baseQueryWithReauth` перехватывает 401 ответы:
-1. Dispatch `logout()` — очистка Redux-состояния
-2. `window.location.href = routes.auth` — редирект на вход
+- упрощает перемещение внутренних файлов;
+- фиксирует внешнюю поверхность модуля;
+- уменьшает связность;
+- упрощает рефакторинг без переписывания импорта по всему проекту.
 
 ---
 
-## Контроль сессии
+## Состояние ключевых модулей
 
-### Поток аутентификации
+### Auth flow
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Приложение стартует                   │
-│                                                         │
-│  1. UserInit проверяет localStorage                     │
-│     ├── Токен есть → GET /current-user/                 │
-│     │   ├── 200 → dispatch(setToken + setUser)          │
-│     │   └── 401   → dispatch(logout), очистка storage   │
-│     └── Токена нет → dispatch(logout)                   │
-│                                                         │
-│  2. Пока UserInit грузит → показывает <Loader />        │
-│                                                         │
-│  3. ProtectedRoute проверяет isAuthenticated:           │
-│     ├── true  → рендерит дочерний маршрут               │
-│     ├── false → <Navigate to="/auth" />                 │
-│     └── null  → <Loader /> (ждёт UserInit)              │
-└─────────────────────────────────────────────────────────┘
-```
+**Сейчас:**
+- state хранится в `features/auth-by-login/model/authSlice.js`;
+- session initialization находится в `app/providers/UserInit`;
+- API работает через `shared/api`.
 
-### Компоненты
+**Проблема:**
+- `shared/api` знает о `features/auth-by-login`, что нарушает направленность зависимостей.
 
-| Компонент | Слой | Назначение |
-|-----------|------|------------|
-| **ProtectedRoute** | `shared/ui` | Guard для приватных маршрутов. Использует `<Outlet />` из React Router v6 |
-| **UserInit** | `app/providers` | Восстановление сессии из localStorage. Блокирует рендер пока не завершит |
-| **baseQueryWithReauth** | `shared/api` | Перехват 401 от API, автоматический logout |
+**Целевое направление:**
+- либо вынести auth model ближе к `entities/user` или `app/model`;
+- либо убрать знание `shared/api` о feature-слое другим способом.
 
-### Роутинг
+### Notes / Folders
 
-```jsx
-<Routes>
-  {/* Публичные */}
-  <Route path="/" element={<HomePage />} />
-  <Route path="/auth" element={<AuthPage />} />
-  <Route path="/registration" element={<RegistrationPage />} />
+**Сейчас:**
+- страницы `NotesPage` и `FoldersPage` содержат заметную долю состояния и orchestration-логики;
+- часть сценариев уже вынесена в features;
+- часть крупных блоков уже вынесена в widgets.
 
-  {/* Приватные — под единым guard */}
-  <Route element={<ProtectedRoute />}>
-    <Route path="/notes" element={<NotesPage />} />
-    <Route path="/folders" element={<FoldersPage />} />
-    <Route path="/profile" element={<ProfilePage />} />
-    <Route path="/tasks" element={<TasksPage />} />
-  </Route>
+**Проблема:**
+- page-слой пока перегружен;
+- доменная логика заметок и папок недостаточно выражена в `entities`.
 
-  {/* 404 */}
-  <Route path="*" element={<div>Страница не найдена</div>} />
-</Routes>
-```
+### Markdown
 
-### Токен
-
-- **Хранение:** `localStorage.getItem('token')`
-- **Формат заголовка:** `Authorization: Token <token>` (Django Token Auth)
-- **Источник истины:** Redux `state.auth.isAuthenticated`
-- **Инициализация:** из localStorage при старте приложения
+**Сейчас:**
+- `MarkdownEditor` и `MarkdownViewer` уже вынесены в `shared/ui`;
+- это хороший пример reusable UI-компонентов без привязки к конкретной feature.
 
 ---
 
-## Телефонный ввод
+## Backend-архитектура в текущем виде
 
-### PhoneInput
+Backend построен проще, чем фронтенд, и пока не дробится на глубокие внутренние слои.
 
-Компонент в `shared/ui/PhoneInput/` с маской `+7(XXX)-XXX-XX-XX`.
+### Что уже есть
 
-**Принцип работы:**
-- Хранит **чистые цифры** (`79991234567`) в родительском state
-- Отображает **отформатированную строку** (`+7(999)-123-45-67`)
-- `inputMode="numeric"` — цифровая клавиатура на мобильных
-- Функции `formatPhone()` / `unformatPhone()` экспортируются для использования в валидации
+- Django REST Framework;
+- token auth;
+- endpoints для auth, notes, folders, links, profile;
+- единая модель `Note` с `is_folder`;
+- модели `Task` и `Status` как задел на будущий модуль задач.
 
-**Бэкенд валидация:**
-- `validate_phone()` в `backend/api/validators.py` — извлекает только цифры, проверяет длину = 11 и начало с `7`
-- В БД хранятся **чистые цифры**
+### Что важно понимать
 
----
-
-## Бэкенд архитектура
-
-### Django REST Framework
-
-**Аутентификация:** TokenAuthentication (стандартная DRF)
-
-**Модели:**
-| Модель | Поля |
-|--------|------|
-| `Folder` | title, path, parent (FK self), user (FK User), created_at |
-| `Note` | title, text, folder (FK Folder), user (FK User), created_at |
-| `Link` | folder (FK), note (FK) |
-| `Profile` | user (OneToOne User), phone_number |
-
-**Endpoints:**
-- `POST /api/register/` — регистрация
-- `POST /api/login/` — вход, возврат токена
-- `POST /api/logout/` — выход (удаление токена)
-- `GET /api/current-user/` — данные текущего пользователя
-- `PUT /api/update-profile/` — обновление профиля
-- `GET/POST/PUT/DELETE /api/notes/` и `/api/notes/<id>/` — CRUD заметок
-- `GET/POST/PUT/DELETE /api/folders/` и `/api/folders/<id>/` — CRUD папок
-
-Все endpoints кроме login/register требуют `Authorization: Token <token>`.
+- код backend API пока концентрируется в `models.py`, `serializer.py`, `views.py`, `urls.py`;
+- это приемлемо для текущего масштаба, но по мере роста задач может понадобиться дополнительное разбиение;
+- в коде остаются переходные модели `FolderOld` и `NoteOld`, которые надо либо убрать, либо явно изолировать.
 
 ---
 
-## Инфраструктура
+## Целевое дерево фронтенда
 
-### Docker
-
+```text
+frontend/src/
+  app/
+  pages/
+  widgets/
+  features/
+  entities/
+    user/
+    note/
+    folder/
+    link/
+    task/
+  shared/
+    api/
+    config/
+    ui/
+    lib/
+    assets/
 ```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│  frontend   │────▶│   backend    │────▶│    MySQL    │
-│  (port 3000)│     │  (port 8000) │     │ (port 3306) │
-└─────────────┘     └──────────────┘     └─────────────┘
-```
 
-- `frontend` — Node.js 18, CRACO build, serve в production
-- `backend` — Python 3.11, Django + mysqlclient
-- `db` — MySQL 8.0 с healthcheck
+### Что должно исчезнуть из корня `src`
 
-### Переменные окружения
+- `components`
+- `context`
+- `hooks`
+- `utils`
 
-**Frontend:**
-```env
-REACT_APP_API_URL=/api    # Production (через nginx proxy)
-REACT_APP_API_URL=http://localhost:8000/api  # Local dev
-```
+Не обязательно одномоментно, но как самостоятельные точки роста нового кода они должны перестать использоваться.
 
-**Backend:**
-```env
-DB_HOST=db
-DB_NAME=Pomni
-DB_USER=pomni
-DB_PASSWORD=pomnipassword
-```
+---
+
+## Критерии архитектурной готовности
+
+Архитектуру фронтенда можно считать выровненной, если:
+
+- новые модули создаются только в рамках FSD-слоев;
+- `shared` не зависит от `features`;
+- `pages` в основном собирают блоки, а не хранят большую бизнес-логику;
+- `entities` отражают ключевые сущности проекта;
+- старые директории перестают использоваться для нового кода;
+- импорт между модулями идет через public API, а не через случайные внутренние пути.
+
+---
+
+## Практические правила для разработки
+
+1. Новый пользовательский сценарий создаем в `features`.
+2. Новый reusable UI создаем в `shared/ui`.
+3. Новый domain helper создаем в `entities/*` или `shared/lib`, в зависимости от привязки к домену.
+4. Новый route собираем в `pages`.
+5. Новый крупный составной блок интерфейса создаем в `widgets`.
+6. В `components`, `context`, `hooks`, `utils` новый код не добавляем.
+7. Перед переносом кода сначала определяем его роль, потом его адрес.
+
+---
+
+## Связанные документы
+
+- `plans/project-refactoring-plan.md` - поэтапный план рефакторинга
+- `plans/markdown-editor-implementation.md` - план внедрения markdown-редактора

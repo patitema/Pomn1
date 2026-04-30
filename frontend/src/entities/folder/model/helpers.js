@@ -1,11 +1,8 @@
-export const formatFolderDate = (dateString) => {
-  if (!dateString) return '';
-  return new Intl.DateTimeFormat('ru-RU', {
-    day: '2-digit',
-    month: 'short',
-  }).format(new Date(dateString));
-};
+export const getFolderTitle = (folder) => folder?.title || `Папка ${folder?.id ?? ''}`.trim();
 
-export const countFolderNotes = (folderId, allNotes) => {
-  return allNotes.filter((note) => note.parent === folderId).length;
-};
+export const folderMatchesSearch = (folder, search = '') =>
+  getFolderTitle(folder).toLowerCase().includes(search.toLowerCase());
+
+export const getChildFolders = (folder) => folder?.children || [];
+
+export const hasChildFolders = (folder) => getChildFolders(folder).length > 0;

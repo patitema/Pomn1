@@ -1,6 +1,7 @@
 import React from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
+import { MarkdownViewer } from '../../../shared/ui'
 
 export function DraggableNote({
   note,
@@ -65,9 +66,10 @@ export function DraggableNote({
       </div>
       {isNoteOpen && (
         <div className="note-content">
-          <div className="note-text">
-            {note.text || 'Содержимое отсутствует'}
-          </div>
+          <MarkdownViewer
+            content={note.text}
+            className="note-text"
+          />
           <div className="note-info">
             {note.created_at && formatDate(note.created_at)}
           </div>

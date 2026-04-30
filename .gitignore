@@ -10,6 +10,7 @@ __pycache__/
 *.so
 .Python
 /backend/.venv
+/backend/venv
 /backend/db.sqlite3
 
 # dependencies
@@ -36,6 +37,9 @@ __pycache__/
 .env.test.local
 .env.production.local
 /frontend/.env
+CLAUDE.md
+AGENTS.md
+PLANS.md
 
 npm-debug.log*
 yarn-debug.log*

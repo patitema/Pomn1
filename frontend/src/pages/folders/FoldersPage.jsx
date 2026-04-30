@@ -2,18 +2,16 @@ import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { selectUser } from '@entities/user'
-import { useGetNotesQuery, useGetFoldersQuery } from '@shared/api'
+import { isFolderNote, isRegularNote } from '@entities/note'
 import {
-  useUpdateNoteMutation,
-  useDeleteNoteMutation,
   useDeleteFolderMutation,
+  useDeleteNoteMutation,
+  useGetFoldersQuery,
+  useGetNotesQuery,
+  useUpdateNoteMutation,
 } from '@shared/api'
-import {
-  DraggableNote,
-  DroppableFolder,
-  RootDropZone,
-} from '@widgets/folder-tree'
-import { CreateNoteToggle } from '@features/create-note-toggle'
+import { formatDateTime } from '@shared/lib'
+import { FolderBrowser } from '@widgets/folder-browser'
 import { EditToggle } from '@features/edit-item'
 import { Footer } from '@widgets/footer'
 import './FoldersPage.css'
@@ -22,9 +20,9 @@ const FoldersPage = () => {
   document.title = 'POMNI - FOLDER'
   const user = useSelector(selectUser)
 
-  // Загружаем данные с сервера
   const { data: notes = [], isLoading: notesLoading } = useGetNotesQuery()
   const { data: folders = [], isLoading: foldersLoading } = useGetFoldersQuery()
+  const regularNotes = notes.filter(isRegularNote)
 
   const [updateNote] = useUpdateNoteMutation()
   const [deleteNoteMutation] = useDeleteNoteMutation()
@@ -53,10 +51,17 @@ const FoldersPage = () => {
     const noteId = Number(active.id)
     const targetId = over.id
 
-    const currentNote = notes.find((n) => n.id === noteId)
+    const currentNote = regularNotes.find((note) => note.id === noteId)
     if (!currentNote) return
 
     const newFolderId = targetId === 'root' ? null : Number(targetId)
+    const targetFolderExists = newFolderId === null || notes.some(
+      (note) => note.id === newFolderId && isFolderNote(note)
+    )
+
+    if (!targetFolderExists || noteId === newFolderId) {
+      return
+    }
 
     if (currentNote.folder === newFolderId) {
       return
@@ -68,40 +73,33 @@ const FoldersPage = () => {
         body: { folder_id: newFolderId },
       }).unwrap()
     } catch (err) {
-      console.error('Ошибка перемещения заметки:', err)
-      alert('Не удалось переместить заметку.')
+      console.error('РћС€РёР±РєР° РїРµСЂРµРјРµС‰РµРЅРёСЏ Р·Р°РјРµС‚РєРё:', err)
+      alert('РќРµ СѓРґР°Р»РѕСЃСЊ РїРµСЂРµРјРµСЃС‚РёС‚СЊ Р·Р°РјРµС‚РєСѓ.')
     }
   }
 
   const toggleNote = (noteId) => {
     const newOpenNotes = new Set(openNotes)
+
     if (newOpenNotes.has(noteId)) {
       newOpenNotes.delete(noteId)
     } else {
       newOpenNotes.add(noteId)
     }
+
     setOpenNotes(newOpenNotes)
   }
 
   const toggleFolder = (folderId) => {
     const newOpenFolders = new Set(openFolders)
+
     if (newOpenFolders.has(folderId)) {
       newOpenFolders.delete(folderId)
     } else {
       newOpenFolders.add(folderId)
     }
-    setOpenFolders(newOpenFolders)
-  }
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('ru-RU', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
+    setOpenFolders(newOpenFolders)
   }
 
   const openEdit = (item, type) => {
@@ -120,8 +118,8 @@ const FoldersPage = () => {
     try {
       await deleteNoteMutation(noteId).unwrap()
     } catch (err) {
-      console.error('Ошибка удаления заметки:', err)
-      alert('Не удалось удалить заметку.')
+      console.error('РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ Р·Р°РјРµС‚РєРё:', err)
+      alert('РќРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ Р·Р°РјРµС‚РєСѓ.')
     }
   }
 
@@ -129,18 +127,12 @@ const FoldersPage = () => {
     try {
       await deleteFolderMutation(folderId).unwrap()
     } catch (err) {
-      console.error('Ошибка удаления папки:', err)
-      alert('Не удалось удалить папку.')
+      console.error('РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ РїР°РїРєРё:', err)
+      alert('РќРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ РїР°РїРєСѓ.')
     }
   }
 
-  const unfolderNotes = notes.filter(
-    (note) =>
-      note.folder === null &&
-      note.title.toLowerCase().includes(search.toLowerCase())
-  )
-
-  if (notesLoading || foldersLoading) return <p>Загрузка...</p>
+  if (notesLoading || foldersLoading) return <p>Р—Р°РіСЂСѓР·РєР°...</p>
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
@@ -155,59 +147,20 @@ const FoldersPage = () => {
         </header>
 
         <main>
-          <div className="FolderContainer">
-            <div className="navFolderView">
-              <input
-                className="SearchInput"
-                type="text"
-                placeholder="Search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-
-            <ul className="FileList">
-              {folders.map((folder) => (
-                <DroppableFolder
-                  key={folder.id}
-                  folder={folder}
-                  level={0}
-                  notes={notes}
-                  openFolders={openFolders}
-                  openNotes={openNotes}
-                  toggleFolder={toggleFolder}
-                  toggleNote={toggleNote}
-                  openEdit={openEdit}
-                  deleteFolder={handleDeleteFolder}
-                  deleteNote={handleDeleteNote}
-                  formatDate={formatDate}
-                  search={search}
-                />
-              ))}
-
-              <RootDropZone>
-                {unfolderNotes.map((note) => {
-                  const isNoteOpen = openNotes.has(note.id)
-                  return (
-                    <DraggableNote
-                      key={`unfolder-note-${note.id}`}
-                      note={note}
-                      isNoteOpen={isNoteOpen}
-                      toggleNote={toggleNote}
-                      openEdit={openEdit}
-                      deleteNote={handleDeleteNote}
-                      formatDate={formatDate}
-                      className="unfolder-stroke"
-                    />
-                  )
-                })}
-              </RootDropZone>
-            </ul>
-
-            <CreateNoteToggle
-              onNoteCreated={(note) => console.log('Новая заметка:', note)}
-            />
-          </div>
+          <FolderBrowser
+            folders={folders}
+            notes={regularNotes}
+            openFolders={openFolders}
+            openNotes={openNotes}
+            search={search}
+            onSearchChange={setSearch}
+            onToggleFolder={toggleFolder}
+            onToggleNote={toggleNote}
+            onOpenEdit={openEdit}
+            onDeleteFolder={handleDeleteFolder}
+            onDeleteNote={handleDeleteNote}
+            formatDate={formatDateTime}
+          />
         </main>
 
         <EditToggle

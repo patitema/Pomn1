@@ -1,0 +1,27 @@
+.markdown-editor {
+  width: 100%;
+  margin: 1rem 0;
+}
+
+/* Переопределение стилей библиотеки под дизайн Pomni */
+.markdown-editor .w-md-editor {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.markdown-editor .w-md-editor-toolbar {
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Темная тема (если нужно) */
+@media (prefers-color-scheme: dark) {
+  .markdown-editor .w-md-editor {
+    border-color: #333;
+  }
+
+  .markdown-editor .w-md-editor-toolbar {
+    background-color: #2a2a2a;
+    border-bottom-color: #333;
+  }
+}
