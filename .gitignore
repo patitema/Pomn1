@@ -38,6 +38,7 @@ __pycache__/
 .env.production.local
 /frontend/.env
 CLAUDE.md
+QWEN.md
 AGENTS.md
 PLANS.md
 
