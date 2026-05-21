@@ -7,6 +7,7 @@ import { NotesReader } from '@widgets/notes-reader'
 import { NotesToolbar } from '@widgets/notes-toolbar'
 import { CreateNoteForm } from '@features/create-note'
 import { EditNoteModal } from '@features/update-note'
+import { EditFolderModal } from '@features/update-folder'
 import {
   useCreateLinkMutation,
   useDeleteNoteMutation,
@@ -30,6 +31,7 @@ const NotesPage = () => {
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false)
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false)
   const [isEditNoteModalOpen, setIsEditNoteModalOpen] = useState(false)
+  const [isEditFolderModalOpen, setIsEditFolderModalOpen] = useState(false)
   const [deleteNote] = useDeleteNoteMutation()
   const [createLink] = useCreateLinkMutation()
   const [connectionMode, setConnectionMode] = useState(CONNECTION_MODE.IDLE)
@@ -54,14 +56,22 @@ const NotesPage = () => {
   }
 
   const handleEditNote = () => {
-    if (selectedNote && !selectedNote.is_folder) {
+    if (!selectedNote) return
+
+    if (selectedNote.is_folder) {
+      setIsEditFolderModalOpen(true)
+    } else {
       setIsEditNoteModalOpen(true)
     }
   }
 
   const handleGraphNoteEdit = (note) => {
-    if (note && !note.is_folder) {
-      setSelectedNoteId(note.id)
+    if (!note) return
+
+    setSelectedNoteId(note.id)
+    if (note.is_folder) {
+      setIsEditFolderModalOpen(true)
+    } else {
       setIsEditNoteModalOpen(true)
     }
   }
@@ -217,6 +227,13 @@ const NotesPage = () => {
         note={selectedNote}
         isOpen={isEditNoteModalOpen}
         onClose={() => setIsEditNoteModalOpen(false)}
+        onUpdated={handleNoteUpdated}
+      />
+
+      <EditFolderModal
+        folder={selectedNote?.is_folder ? selectedNote : null}
+        isOpen={isEditFolderModalOpen}
+        onClose={() => setIsEditFolderModalOpen(false)}
         onUpdated={handleNoteUpdated}
       />
     </div>

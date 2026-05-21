@@ -8,7 +8,6 @@ const NotesToolbar = ({
   isConnectionModeActive = false,
 }) => {
   const hasSelection = Boolean(selectedNote);
-  const canEditNote = Boolean(selectedNote && !selectedNote.is_folder);
 
   return (
     <div className="EditToolsContainer">
@@ -24,12 +23,12 @@ const NotesToolbar = ({
           </svg>
         </button>
         <button
-          className={`toolButton ${canEditNote ? 'available' : ''}`}
+          className={`toolButton ${hasSelection ? 'available' : ''}`}
           title="Редактировать"
-          disabled={!canEditNote}
+          disabled={!hasSelection}
           onClick={onEditNote}
         >
-          <svg className={`toolIcon ${canEditNote ? 'available' : ''}`}>
+          <svg className={`toolIcon ${hasSelection ? 'available' : ''}`}>
             <use href="/images/icons.svg#ToolEdit"></use>
           </svg>
         </button>

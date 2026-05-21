@@ -14,6 +14,7 @@ import { formatDateTime } from '@shared/lib'
 import { FolderBrowser } from '@widgets/folder-browser'
 import { EditToggle } from '@features/edit-item'
 import { CreateNoteForm } from '@features/create-note'
+import { EditFolderModal } from '@features/update-folder'
 import { Footer } from '@widgets/footer'
 import './FoldersPage.css'
 
@@ -37,6 +38,7 @@ const FoldersPage = () => {
   const [openNotes, setOpenNotes] = useState(new Set())
   const [search, setSearch] = useState('')
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isFolderEditOpen, setIsFolderEditOpen] = useState(false)
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false)
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false)
   const [editItem, setEditItem] = useState(null)
@@ -110,6 +112,13 @@ const FoldersPage = () => {
   }
 
   const openEdit = (item, type) => {
+    if (type === 'folder') {
+      setEditItem(item)
+      setEditType(type)
+      setIsFolderEditOpen(true)
+      return
+    }
+
     setEditItem(item)
     setEditType(type)
     setIsEditOpen(true)
@@ -131,6 +140,12 @@ const FoldersPage = () => {
 
   const closeEdit = () => {
     setIsEditOpen(false)
+    setEditItem(null)
+    setEditType('')
+  }
+
+  const closeFolderEdit = () => {
+    setIsFolderEditOpen(false)
     setEditItem(null)
     setEditType('')
   }
@@ -190,6 +205,12 @@ const FoldersPage = () => {
           onClose={closeEdit}
           item={editItem}
           type={editType}
+        />
+
+        <EditFolderModal
+          folder={editType === 'folder' ? editItem : null}
+          isOpen={isFolderEditOpen}
+          onClose={closeFolderEdit}
         />
 
         <CreateNoteForm
