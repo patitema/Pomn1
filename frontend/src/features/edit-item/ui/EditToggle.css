@@ -39,6 +39,25 @@
   font-size: 14px;
 }
 
+.edit-form-field {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.edit-form-field span {
+  display: block;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.edit-form-field input,
+.edit-form-field textarea,
+.edit-form-field select {
+  margin-bottom: 0;
+}
+
 .edit-form-container form textarea {
   resize: vertical;
   min-height: 100px;

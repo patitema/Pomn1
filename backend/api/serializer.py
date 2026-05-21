@@ -70,9 +70,59 @@ class NoteSerializer(serializers.ModelSerializer):
 
 
 class LinkSerializer(serializers.ModelSerializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request') if hasattr(self, 'context') else None
+        user = getattr(request, 'user', None)
+        if user and user.is_authenticated:
+            self.fields['note_from'].queryset = Note.objects.filter(user=user)
+            self.fields['note_to'].queryset = Note.objects.filter(user=user)
+
     class Meta:
         model = Link
         fields = ('id', 'note_from', 'note_to', 'user', 'created_at')
+
+    def validate(self, attrs):
+        note_from = attrs.get('note_from')
+        note_to = attrs.get('note_to')
+
+        if not note_from or not note_to:
+            return attrs
+
+        if note_from.pk == note_to.pk:
+            raise serializers.ValidationError({
+                'note_to': 'Item cannot be linked to itself.'
+            })
+
+        if note_from.is_folder == note_to.is_folder:
+            raise serializers.ValidationError({
+                'note_to': 'Only note-folder links are allowed.'
+            })
+
+        request = self.context.get('request') if hasattr(self, 'context') else None
+        user = getattr(request, 'user', None)
+        if user and user.is_authenticated:
+            if note_from.user_id != user.id or note_to.user_id != user.id:
+                raise serializers.ValidationError({
+                    'note_to': 'Target item does not exist.'
+                })
+
+            duplicate_exists = Link.objects.filter(
+                user=user,
+                note_from=note_from,
+                note_to=note_to,
+            ).exists() or Link.objects.filter(
+                user=user,
+                note_from=note_to,
+                note_to=note_from,
+            ).exists()
+
+            if duplicate_exists:
+                raise serializers.ValidationError({
+                    'note_to': 'This link already exists.'
+                })
+
+        return attrs
 
 
 class StatusSerializer(serializers.ModelSerializer):

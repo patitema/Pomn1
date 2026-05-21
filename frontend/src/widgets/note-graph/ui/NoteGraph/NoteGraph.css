@@ -27,6 +27,13 @@
   overflow: hidden;
 }
 
+.note-graph__viewport {
+  width: 100%;
+  height: 100%;
+  padding-bottom: 130px;
+  transition: transform 0.5s ease-out;
+}
+
 .note-graph__svg {
   width: 100%;
   height: 100%;
@@ -66,4 +73,20 @@
 .note-graph__labels text {
   pointer-events: none;
   text-shadow: 1px 1px 2px #000;
+}
+
+.note-graph__connection-line {
+  pointer-events: none;
+}
+
+.note-graph__node--connection-source {
+  filter: drop-shadow(0 0 8px #FEB7FF);
+}
+
+.note-graph__node--connection-target {
+  filter: drop-shadow(0 0 8px #4CAF50);
+}
+
+.note-graph__node--connection-disabled {
+  opacity: 0.22;
 }

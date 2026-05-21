@@ -6,12 +6,38 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from .models import Note, Link, Profile
 from .serializer import NoteSerializer, LinkSerializer
 from .validators import (
     validate_username, validate_password,
     validate_phone, validate_email_unique,
 )
+
+
+def sync_parent_link(child, parent, user, previous_parent=None):
+    old_parent = previous_parent if previous_parent is not None else child.folder
+
+    if getattr(old_parent, 'id', None) != getattr(parent, 'id', None):
+        Link.objects.filter(
+            Q(note_from=child, note_to__is_folder=True) |
+            Q(note_to=child, note_from__is_folder=True),
+            user=user,
+        ).exclude(
+            note_from=child,
+            note_to=parent,
+        ).delete()
+
+    if getattr(child.folder, 'id', None) != getattr(parent, 'id', None):
+        child.folder = parent
+        child.save(update_fields=['folder', 'updated_at'])
+
+    if parent:
+        Link.objects.get_or_create(
+            note_from=child,
+            note_to=parent,
+            user=user,
+        )
 
 
 @api_view(['GET', 'POST'])
@@ -41,11 +67,7 @@ def notes_list(request):
 
             # Автоматически создать Link если заметка добавлена в папку
             if note.folder:
-                Link.objects.get_or_create(
-                    note_from=note,
-                    note_to=note.folder,
-                    user=request.user
-                )
+                sync_parent_link(note, note.folder, request.user, None)
 
             return Response(
                 NoteSerializer(note).data,
@@ -103,20 +125,9 @@ def note_detail(request, pk):
             # Если папка изменилась, обновить Link
             if note.folder != old_folder:
                 # Удалить старую связь с папкой
-                if old_folder:
-                    Link.objects.filter(
-                        note_from=note,
-                        note_to=old_folder,
-                        user=request.user
-                    ).delete()
+                sync_parent_link(note, note.folder, request.user, old_folder)
 
                 # Создать новую связь с папкой
-                if note.folder:
-                    Link.objects.get_or_create(
-                        note_from=note,
-                        note_to=note.folder,
-                        user=request.user
-                    )
 
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -178,9 +189,15 @@ def links_list(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        serializer = LinkSerializer(data=data)
+        serializer = LinkSerializer(data=data, context={'request': request})
         if serializer.is_valid():
             link = serializer.save()
+            source = link.note_from
+            target = link.note_to
+            child = target if source.is_folder else source
+            parent = source if source.is_folder else target
+            sync_parent_link(child, parent, request.user)
+
             return Response(
                 LinkSerializer(link).data,
                 status=status.HTTP_201_CREATED,

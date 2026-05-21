@@ -3,8 +3,9 @@ const NotesToolbar = ({
   onAddNote,
   onEditNote,
   onColorChange,
-  onAddFolder,
   onDelete,
+  onToggleConnectionMode,
+  isConnectionModeActive = false,
 }) => {
   const hasSelection = Boolean(selectedNote);
   const canEditNote = Boolean(selectedNote && !selectedNote.is_folder);
@@ -15,7 +16,7 @@ const NotesToolbar = ({
         <button
           className={`toolButton ${!hasSelection ? 'available' : ''}`}
           onClick={onAddNote}
-          title="Р”РѕР±Р°РІРёС‚СЊ Р·Р°РјРµС‚РєСѓ"
+          title="Добавить заметку"
           disabled={hasSelection}
         >
           <svg className={`toolIcon ${!hasSelection ? 'available' : ''}`}>
@@ -24,7 +25,7 @@ const NotesToolbar = ({
         </button>
         <button
           className={`toolButton ${canEditNote ? 'available' : ''}`}
-          title="Р РµРґР°РєС‚РёСЂРѕРІР°С‚СЊ"
+          title="Редактировать"
           disabled={!canEditNote}
           onClick={onEditNote}
         >
@@ -34,7 +35,7 @@ const NotesToolbar = ({
         </button>
         <button
           className={`toolButton ${hasSelection ? 'available' : ''}`}
-          title="РР·РјРµРЅРёС‚СЊ С†РІРµС‚"
+          title="Изменить цвет"
           disabled={!hasSelection}
           onClick={onColorChange}
         >
@@ -43,18 +44,17 @@ const NotesToolbar = ({
           </svg>
         </button>
         <button
-          className={`toolButton ${!hasSelection ? 'available' : ''}`}
-          onClick={onAddFolder}
-          title="Р”РѕР±Р°РІРёС‚СЊ РїР°РїРєСѓ"
-          disabled={hasSelection}
+          className={`toolButton available ${isConnectionModeActive ? 'active' : ''}`}
+          title={isConnectionModeActive ? 'Отменить связь' : 'Создать связь'}
+          onClick={onToggleConnectionMode}
         >
-          <svg className={`toolIcon ${!hasSelection ? 'available' : ''}`}>
-            <use href="/images/icons.svg#ToolFolder"></use>
+          <svg className={`toolIcon available ${isConnectionModeActive ? 'active' : ''}`}>
+            <use href="/images/icons.svg#pointView"></use>
           </svg>
         </button>
         <button
           className={`toolButton ${hasSelection ? 'available' : ''}`}
-          title="РЈРґР°Р»РёС‚СЊ"
+          title="Удалить"
           disabled={!hasSelection}
           onClick={onDelete}
         >

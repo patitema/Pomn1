@@ -6,11 +6,50 @@ import { getNoteTitle, isFolderNote } from '@entities/note';
 import { Loader } from '@shared/ui';
 import './NoteGraph.css';
 
-const NoteGraph = ({ selectedNoteId, onNoteSelect, onNoteEdit }) => {
+const CONNECTION_MODE = {
+  IDLE: 'idle',
+  PICK_SOURCE: 'pick-source',
+  PICK_TARGET: 'pick-target',
+};
+
+const GRAPH_PADDING = 30;
+const GRAPH_BOTTOM_SAFE_AREA = 130;
+
+const hasExistingConnection = (links, sourceId, targetId) =>
+  links.some((link) => {
+    const [from, to] = getLinkEndpoints(link);
+    return (
+      (from === sourceId && to === targetId) ||
+      (from === targetId && to === sourceId)
+    );
+  });
+
+const isValidConnectionTarget = (source, target, links) =>
+  Boolean(
+    source &&
+      target &&
+      source.id !== target.id &&
+      source.is_folder !== target.is_folder &&
+      !hasExistingConnection(links, source.id, target.id)
+  );
+
+const NoteGraph = ({
+  selectedNoteId,
+  connectionMode = CONNECTION_MODE.IDLE,
+  connectionSourceId = null,
+  onNoteSelect,
+  onNoteEdit,
+  onConnectionNodeClick,
+}) => {
   const svgRef = useRef(null);
-  const { data: notes = [], isLoading: notesLoading } = useGetNotesQuery();
-  const { data: links = [], isLoading: linksLoading } = useGetLinksQuery();
+  const { data: notes = [], isLoading: notesLoading } = useGetNotesQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
+  const { data: links = [], isLoading: linksLoading } = useGetLinksQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
   const nodesRef = useRef(null);
+  const nodePositionsRef = useRef(new Map());
   const loading = notesLoading || linksLoading;
 
   useEffect(() => {
@@ -19,6 +58,9 @@ const NoteGraph = ({ selectedNoteId, onNoteSelect, onNoteEdit }) => {
     const svg = d3.select(svgRef.current);
     const width = svg.node()?.clientWidth || 800;
     const height = svg.node()?.clientHeight || 600;
+    const isPickingSource = connectionMode === CONNECTION_MODE.PICK_SOURCE;
+    const isPickingTarget = connectionMode === CONNECTION_MODE.PICK_TARGET;
+    const connectionSource = notes.find((note) => note.id === connectionSourceId);
 
     svg
       .attr('width', width)
@@ -27,14 +69,19 @@ const NoteGraph = ({ selectedNoteId, onNoteSelect, onNoteEdit }) => {
 
     svg.selectAll('*').remove();
 
+    const hasNewNodes = notes.some((note) => !nodePositionsRef.current.has(note.id));
     const graphData = {
-      nodes: notes.map((note) => ({
-        id: note.id,
-        title: getNoteTitle(note),
-        group: note.folder || 0,
-        x: width / 2 + (Math.random() - 0.5) * 100,
-        y: height / 2 + (Math.random() - 0.5) * 100,
-      })),
+      nodes: notes.map((note) => {
+        const savedPosition = nodePositionsRef.current.get(note.id);
+
+        return {
+          id: note.id,
+          title: getNoteTitle(note),
+          group: note.folder || 0,
+          x: savedPosition?.x ?? width / 2 + (Math.random() - 0.5) * 100,
+          y: savedPosition?.y ?? height / 2 + (Math.random() - 0.5) * 100,
+        };
+      }),
       links: links.map((link) => {
         const [source, target] = getLinkEndpoints(link);
         return {
@@ -44,6 +91,11 @@ const NoteGraph = ({ selectedNoteId, onNoteSelect, onNoteEdit }) => {
         };
       }),
     };
+
+    const findNote = (id) => notes.find((note) => note.id === id);
+    const canUseAsTarget = (nodeData) =>
+      isPickingTarget &&
+      isValidConnectionTarget(connectionSource, findNote(nodeData.id), links);
 
     const simulation = d3
       .forceSimulation(graphData.nodes)
@@ -60,6 +112,7 @@ const NoteGraph = ({ selectedNoteId, onNoteSelect, onNoteEdit }) => {
       .force('collide', d3.forceCollide(35).strength(0.8))
       .force('x', d3.forceX(width / 2).strength(0.02))
       .force('y', d3.forceY(height / 2).strength(0.02))
+      .alpha(hasNewNodes ? 1 : 0.05)
       .alphaDecay(0.02)
       .on('tick', ticked);
 
@@ -73,6 +126,17 @@ const NoteGraph = ({ selectedNoteId, onNoteSelect, onNoteEdit }) => {
       .attr('stroke-opacity', 0.6)
       .attr('stroke-width', 2);
 
+    const tempLine =
+      isPickingTarget && connectionSource
+        ? svg
+            .append('line')
+            .attr('class', 'note-graph__connection-line')
+            .attr('stroke', '#FEB7FF')
+            .attr('stroke-opacity', 0.9)
+            .attr('stroke-width', 3)
+            .attr('stroke-dasharray', '8 6')
+        : null;
+
     const node = svg
       .append('g')
       .attr('class', 'note-graph__nodes')
@@ -81,20 +145,43 @@ const NoteGraph = ({ selectedNoteId, onNoteSelect, onNoteEdit }) => {
       .join('circle')
       .attr('r', 15)
       .attr('fill', (d) => {
-        const noteData = notes.find((note) => note.id === d.id);
+        const noteData = findNote(d.id);
         return isFolderNote(noteData) ? '#4CAF50' : '#FEB7FF';
       })
       .attr('stroke', '#fff')
       .attr('stroke-width', 2)
-      .style('cursor', 'pointer')
+      .classed('note-graph__node--connection-source', (d) => d.id === connectionSourceId)
+      .classed('note-graph__node--connection-target', (d) => canUseAsTarget(d))
+      .classed(
+        'note-graph__node--connection-disabled',
+        (d) => isPickingTarget && d.id !== connectionSourceId && !canUseAsTarget(d)
+      )
+      .style('cursor', (d) => {
+        if (isPickingSource) return 'crosshair';
+        if (isPickingTarget) return canUseAsTarget(d) ? 'crosshair' : 'not-allowed';
+        return 'pointer';
+      })
       .on('click', (event, d) => {
-        const note = notes.find((item) => item.id === d.id);
-        if (note && onNoteSelect) {
-          onNoteSelect(note);
+        const note = findNote(d.id);
+        if (!note) return;
+
+        if (connectionMode !== CONNECTION_MODE.IDLE) {
+          event.stopPropagation();
+          if (isPickingSource || canUseAsTarget(d)) {
+            onConnectionNodeClick?.(note);
+          }
+          return;
         }
+
+        onNoteSelect?.(note);
       })
       .on('dblclick', (event, d) => {
-        const note = notes.find((item) => item.id === d.id);
+        if (connectionMode !== CONNECTION_MODE.IDLE) {
+          event.stopPropagation();
+          return;
+        }
+
+        const note = findNote(d.id);
         if (note && onNoteEdit) {
           onNoteEdit(note);
         }
@@ -122,6 +209,13 @@ const NoteGraph = ({ selectedNoteId, onNoteSelect, onNoteEdit }) => {
       .style('pointer-events', 'none')
       .text((d) => d.title.slice(0, 20));
 
+    if (tempLine) {
+      svg.on('mousemove.connection-line', (event) => {
+        const [x, y] = d3.pointer(event, svg.node());
+        tempLine.attr('x2', x).attr('y2', y);
+      });
+    }
+
     function dragstarted(event) {
       if (!event.active) simulation.alphaTarget(0.3).restart();
       event.subject.fx = event.subject.x;
@@ -130,7 +224,14 @@ const NoteGraph = ({ selectedNoteId, onNoteSelect, onNoteEdit }) => {
 
     function dragged(event) {
       event.subject.fx = event.x;
-      event.subject.fy = event.y;
+      event.subject.fy = Math.max(
+        GRAPH_PADDING,
+        Math.min(height - GRAPH_BOTTOM_SAFE_AREA, event.y)
+      );
+      nodePositionsRef.current.set(event.subject.id, {
+        x: event.x,
+        y: event.subject.fy,
+      });
     }
 
     function dragended(event) {
@@ -148,21 +249,50 @@ const NoteGraph = ({ selectedNoteId, onNoteSelect, onNoteEdit }) => {
 
       node
         .attr('cx', (d) => {
-          d.x = Math.max(30, Math.min(width - 30, d.x));
+          d.x = Math.max(GRAPH_PADDING, Math.min(width - GRAPH_PADDING, d.x));
+          nodePositionsRef.current.set(d.id, {
+            x: d.x,
+            y: Math.max(GRAPH_PADDING, Math.min(height - GRAPH_BOTTOM_SAFE_AREA, d.y)),
+          });
           return d.x;
         })
         .attr('cy', (d) => {
-          d.y = Math.max(30, Math.min(height - 30, d.y));
+          d.y = Math.max(GRAPH_PADDING, Math.min(height - GRAPH_BOTTOM_SAFE_AREA, d.y));
+          nodePositionsRef.current.set(d.id, {
+            x: d.x,
+            y: d.y,
+          });
           return d.y;
         });
 
       labels.attr('x', (d) => d.x).attr('y', (d) => d.y);
+
+      if (tempLine && connectionSource) {
+        const sourceNode = graphData.nodes.find((nodeData) => nodeData.id === connectionSource.id);
+        if (sourceNode) {
+          tempLine
+            .attr('x1', sourceNode.x)
+            .attr('y1', sourceNode.y)
+            .attr('x2', tempLine.attr('x2') || sourceNode.x)
+            .attr('y2', tempLine.attr('y2') || sourceNode.y);
+        }
+      }
     }
 
     return () => {
+      svg.on('mousemove.connection-line', null);
       simulation.stop();
     };
-  }, [notes, links, loading, onNoteSelect, onNoteEdit]);
+  }, [
+    notes,
+    links,
+    loading,
+    connectionMode,
+    connectionSourceId,
+    onConnectionNodeClick,
+    onNoteSelect,
+    onNoteEdit,
+  ]);
 
   useEffect(() => {
     if (!nodesRef.current) return;
@@ -187,7 +317,9 @@ const NoteGraph = ({ selectedNoteId, onNoteSelect, onNoteEdit }) => {
             <p>Создайте первую заметку.</p>
           </div>
         ) : (
-          <svg ref={svgRef} className="note-graph__svg" />
+          <div className="note-graph__viewport">
+            <svg ref={svgRef} className="note-graph__svg" />
+          </div>
         )}
       </div>
     </div>

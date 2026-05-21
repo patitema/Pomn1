@@ -1,1 +1,1 @@
-export { NotesToolbar } from './ui/NotesToolbar';
+export { default as NotesToolbar } from './ui/NotesToolbar/NotesToolbar';

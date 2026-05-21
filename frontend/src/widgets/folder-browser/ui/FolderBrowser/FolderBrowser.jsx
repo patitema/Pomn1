@@ -3,7 +3,6 @@ import {
   DroppableFolder,
   RootDropZone,
 } from '@widgets/folder-tree'
-import { CreateNoteToggle } from '@features/create-note-toggle'
 import { isRegularNote, noteMatchesSearch } from '@entities/note'
 
 const FolderBrowser = ({
@@ -16,6 +15,7 @@ const FolderBrowser = ({
   onToggleFolder,
   onToggleNote,
   onOpenEdit,
+  onAddNote,
   onDeleteFolder,
   onDeleteNote,
   formatDate,
@@ -75,7 +75,12 @@ const FolderBrowser = ({
         </RootDropZone>
       </ul>
 
-      <CreateNoteToggle />
+      <button
+        className="FolderCreateButton"
+        type="button"
+        onClick={onAddNote}
+        aria-label="Создать заметку"
+      />
     </div>
   )
 }

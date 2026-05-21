@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useCreateFolderMutation } from '../../../../shared/api';
-import { Input, Button, Modal } from '../../../../shared/ui';
+import { useCreateFolderMutation } from '@shared/api';
+import { Input, Button, Modal } from '@shared/ui';
 import './CreateFolderForm.css';
 
 const CreateFolderForm = ({ isOpen, onClose, parentId = null }) => {
@@ -13,7 +13,7 @@ const CreateFolderForm = ({ isOpen, onClose, parentId = null }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       await createFolder({
         title: formData.name,
@@ -38,19 +38,20 @@ const CreateFolderForm = ({ isOpen, onClose, parentId = null }) => {
     <Modal isOpen={isOpen} onClose={onClose} title="Создать папку">
       <form className="create-folder-form" onSubmit={handleSubmit}>
         <Input
+          label="Название папки"
           type="text"
           placeholder="Название папки"
           value={formData.name}
           onChange={handleChange}
           required
         />
-        
+
         <div className="create-folder-form__actions">
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Создание...' : 'Создать'}
           </Button>
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             onClick={onClose}
             disabled={isSubmitting}
           >

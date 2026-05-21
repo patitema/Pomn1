@@ -53,15 +53,26 @@ export const api = createApi({
     }),
     createNote: builder.mutation({
       query: (body) => ({ url: 'notes/', method: 'POST', body }),
-      invalidatesTags: [{ type: 'Note', id: 'LIST' }],
+      invalidatesTags: [
+        { type: 'Note', id: 'LIST' },
+        { type: 'Link', id: 'LIST' },
+      ],
     }),
     updateNote: builder.mutation({
       query: ({ id, body }) => ({ url: `notes/${id}/`, method: 'PUT', body }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'Note', id }],
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Note', id },
+        { type: 'Note', id: 'LIST' },
+        { type: 'Link', id: 'LIST' },
+      ],
     }),
     deleteNote: builder.mutation({
       query: (id) => ({ url: `notes/${id}/`, method: 'DELETE' }),
-      invalidatesTags: (result, error, id) => [{ type: 'Note', id }],
+      invalidatesTags: (result, error, id) => [
+        { type: 'Note', id },
+        { type: 'Note', id: 'LIST' },
+        { type: 'Link', id: 'LIST' },
+      ],
     }),
 
     // === FOLDERS (обратная совместимость - возвращает notes с is_folder=true) ===
@@ -74,15 +85,26 @@ export const api = createApi({
     }),
     createFolder: builder.mutation({
       query: (body) => ({ url: 'folders/', method: 'POST', body }),
-      invalidatesTags: [{ type: 'Note', id: 'LIST' }],
+      invalidatesTags: [
+        { type: 'Note', id: 'LIST' },
+        { type: 'Link', id: 'LIST' },
+      ],
     }),
     updateFolder: builder.mutation({
       query: ({ id, body }) => ({ url: `folders/${id}/`, method: 'PUT', body }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'Note', id }],
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Note', id },
+        { type: 'Note', id: 'LIST' },
+        { type: 'Link', id: 'LIST' },
+      ],
     }),
     deleteFolder: builder.mutation({
       query: (id) => ({ url: `folders/${id}/`, method: 'DELETE' }),
-      invalidatesTags: (result, error, id) => [{ type: 'Note', id }],
+      invalidatesTags: (result, error, id) => [
+        { type: 'Note', id },
+        { type: 'Note', id: 'LIST' },
+        { type: 'Link', id: 'LIST' },
+      ],
     }),
 
     // === LINKS (связи между заметками) ===
@@ -95,7 +117,10 @@ export const api = createApi({
     }),
     createLink: builder.mutation({
       query: (body) => ({ url: 'links/', method: 'POST', body }),
-      invalidatesTags: [{ type: 'Link', id: 'LIST' }],
+      invalidatesTags: [
+        { type: 'Link', id: 'LIST' },
+        { type: 'Note', id: 'LIST' },
+      ],
     }),
     deleteLink: builder.mutation({
       query: (id) => ({ url: `links/${id}/`, method: 'DELETE' }),

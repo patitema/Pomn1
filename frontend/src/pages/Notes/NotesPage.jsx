@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { selectUser } from '@entities/user'
 import { Footer } from '@widgets/footer'
@@ -7,24 +7,50 @@ import { NotesReader } from '@widgets/notes-reader'
 import { NotesToolbar } from '@widgets/notes-toolbar'
 import { CreateNoteForm } from '@features/create-note'
 import { EditNoteModal } from '@features/update-note'
-import { useDeleteNoteMutation } from '@shared/api'
+import {
+  useCreateLinkMutation,
+  useDeleteNoteMutation,
+  useGetNotesQuery,
+} from '@shared/api'
 import './NotesPage.css'
+
+const CONNECTION_MODE = {
+  IDLE: 'idle',
+  PICK_SOURCE: 'pick-source',
+  PICK_TARGET: 'pick-target',
+}
 
 const NotesPage = () => {
   document.title = 'POMNI - NOTES'
   const user = useSelector(selectUser)
-  const [selectedNote, setSelectedNote] = useState(null)
+  const { data: notes = [] } = useGetNotesQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  })
+  const [selectedNoteId, setSelectedNoteId] = useState(null)
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false)
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false)
   const [isEditNoteModalOpen, setIsEditNoteModalOpen] = useState(false)
   const [deleteNote] = useDeleteNoteMutation()
+  const [createLink] = useCreateLinkMutation()
+  const [connectionMode, setConnectionMode] = useState(CONNECTION_MODE.IDLE)
+  const [connectionSourceId, setConnectionSourceId] = useState(null)
+
+  const selectedNote = notes.find((note) => note.id === selectedNoteId) || null
+  const isReaderOpen = Boolean(selectedNote)
+  const isConnectionModeActive = connectionMode !== CONNECTION_MODE.IDLE
 
   const handleAddNote = () => {
     setIsCreateNoteModalOpen(true)
   }
 
-  const handleAddFolder = () => {
+  const handleSwitchToFolderCreate = () => {
+    setIsCreateNoteModalOpen(false)
     setIsCreateFolderModalOpen(true)
+  }
+
+  const handleSwitchToNoteCreate = () => {
+    setIsCreateFolderModalOpen(false)
+    setIsCreateNoteModalOpen(true)
   }
 
   const handleEditNote = () => {
@@ -35,17 +61,83 @@ const NotesPage = () => {
 
   const handleGraphNoteEdit = (note) => {
     if (note && !note.is_folder) {
-      setSelectedNote(note)
+      setSelectedNoteId(note.id)
       setIsEditNoteModalOpen(true)
     }
   }
 
   const handleNoteSelect = (note) => {
-    setSelectedNote(note)
+    setSelectedNoteId(note?.id ?? null)
+  }
+
+  const cancelConnectionMode = () => {
+    setConnectionMode(CONNECTION_MODE.IDLE)
+    setConnectionSourceId(null)
+  }
+
+  const handleToggleConnectionMode = () => {
+    if (isConnectionModeActive) {
+      cancelConnectionMode()
+      return
+    }
+
+    if (selectedNote) {
+      setConnectionSourceId(selectedNote.id)
+      setSelectedNoteId(null)
+      setConnectionMode(CONNECTION_MODE.PICK_TARGET)
+      return
+    }
+
+    setConnectionMode(CONNECTION_MODE.PICK_SOURCE)
+  }
+
+  useEffect(() => {
+    if (!isConnectionModeActive) return undefined
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        cancelConnectionMode()
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isConnectionModeActive])
+
+  const handleConnectionNodeClick = async (note) => {
+    if (!note || connectionMode === CONNECTION_MODE.IDLE) return
+
+    if (connectionMode === CONNECTION_MODE.PICK_SOURCE) {
+      setConnectionSourceId(note.id)
+      setConnectionMode(CONNECTION_MODE.PICK_TARGET)
+      return
+    }
+
+    if (!connectionSourceId || note.id === connectionSourceId) return
+
+    try {
+      await createLink({
+        note_from: connectionSourceId,
+        note_to: note.id,
+      }).unwrap()
+      setSelectedNoteId(null)
+      cancelConnectionMode()
+    } catch (err) {
+      console.error('Failed to create link:', err)
+      alert('Не удалось создать связь.')
+      cancelConnectionMode()
+    }
+  }
+
+  const handleNoteUpdated = (note) => {
+    setSelectedNoteId(note?.id ?? selectedNoteId)
   }
 
   const handleClosePanel = () => {
-    setSelectedNote(null)
+    setSelectedNoteId(null)
   }
 
   const handleDelete = async () => {
@@ -58,7 +150,7 @@ const NotesPage = () => {
     if (confirmDelete) {
       try {
         await deleteNote(selectedNote.id).unwrap()
-        setSelectedNote(null)
+        setSelectedNoteId(null)
       } catch (err) {
         console.error('Failed to delete note:', err)
         alert('Не удалось удалить заметку.')
@@ -81,12 +173,16 @@ const NotesPage = () => {
           </div>
         </div>
       </header>
-      <main>
+      <main className={`notes-page__main ${isReaderOpen ? 'notes-page__main--reader-open' : ''}`}>
         <div className="NotesContainer">
           <NoteGraph
-            selectedNoteId={selectedNote?.id}
+            selectedNoteId={selectedNoteId}
+            isReaderOpen={isReaderOpen}
+            connectionMode={connectionMode}
+            connectionSourceId={connectionSourceId}
             onNoteSelect={handleNoteSelect}
             onNoteEdit={handleGraphNoteEdit}
+            onConnectionNodeClick={handleConnectionNodeClick}
           />
         </div>
 
@@ -97,8 +193,9 @@ const NotesPage = () => {
           onAddNote={handleAddNote}
           onEditNote={handleEditNote}
           onColorChange={handleColorChange}
-          onAddFolder={handleAddFolder}
           onDelete={handleDelete}
+          onToggleConnectionMode={handleToggleConnectionMode}
+          isConnectionModeActive={isConnectionModeActive}
         />
       </main>
       <Footer />
@@ -106,18 +203,21 @@ const NotesPage = () => {
       <CreateNoteForm
         isOpen={isCreateNoteModalOpen}
         onClose={() => setIsCreateNoteModalOpen(false)}
+        onSwitchToFolder={handleSwitchToFolderCreate}
       />
 
       <CreateNoteForm
         isOpen={isCreateFolderModalOpen}
         onClose={() => setIsCreateFolderModalOpen(false)}
         isFolder={true}
+        onSwitchToNote={handleSwitchToNoteCreate}
       />
 
       <EditNoteModal
         note={selectedNote}
         isOpen={isEditNoteModalOpen}
         onClose={() => setIsEditNoteModalOpen(false)}
+        onUpdated={handleNoteUpdated}
       />
     </div>
   )

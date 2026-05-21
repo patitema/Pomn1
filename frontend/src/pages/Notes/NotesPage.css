@@ -15,9 +15,21 @@
 }
 
 .NotesContainer{
-    min-height: 75vh;
-    height: auto;
+    height: calc(100vh - 110px);
+    min-height: 0;
     width: 100%;
+    overflow: hidden;
+}
+
+.notes-page__main{
+    position: relative;
+    height: calc(100vh - 110px);
+    min-height: 0;
+    overflow: hidden;
+}
+
+.notes-page__main--reader-open .note-graph__viewport{
+    transform: translateX(-250px);
 }
 
 .NotesContainer canvas{
@@ -40,7 +52,7 @@
 }
 
 .FileName.active h3{
-    width: 450px;
+    width: 550px;
 }
 
 .Info{
@@ -140,8 +152,10 @@
 
 .EditToolsContainer{
     display: flex;
-    position: sticky;
+    position: absolute;
+    left: 50%;
     bottom: 0;
+    transform: translateX(-50%);
     justify-content: center;
     align-items: center;
     background-color: #202020;
@@ -174,6 +188,12 @@
     color: #FFF;
     transition: all 0.1s ease-out;
 }
+
+.toolButton.active .toolIcon,
+.toolIcon.active{
+    color: #FEB7FF;
+    filter: drop-shadow(0 0 6px #FEB7FF);
+}
 .toolButton:hover .toolIcon{
     transform: scale(1.1);
 }
@@ -205,7 +225,7 @@
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
     height: 700px;
-    width: 500px;
+    width: 600px;
     padding-bottom: 20px;
     transition: all 0.5s ease-out;
 }
@@ -227,7 +247,7 @@
 }
 
 .FileName.active h3{
-    width: 450px;
+    width: 550px;
 }
 
 .Info{

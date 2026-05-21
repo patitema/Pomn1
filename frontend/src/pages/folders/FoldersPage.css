@@ -50,6 +50,43 @@
   height: inherit;
 }
 
+.FolderCreateButton {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  width: 52px;
+  height: 52px;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  background-color: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+}
+
+.FolderCreateButton::before,
+.FolderCreateButton::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22px;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+}
+
+.FolderCreateButton::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.FolderCreateButton:hover {
+  background-color: #333;
+  color: #FEB7FF;
+  border-color: #FEB7FF;
+}
+
 .stroke-folder {
   padding: 20px;
   width: 60vw;

@@ -13,6 +13,7 @@ import {
 import { formatDateTime } from '@shared/lib'
 import { FolderBrowser } from '@widgets/folder-browser'
 import { EditToggle } from '@features/edit-item'
+import { CreateNoteForm } from '@features/create-note'
 import { Footer } from '@widgets/footer'
 import './FoldersPage.css'
 
@@ -20,8 +21,12 @@ const FoldersPage = () => {
   document.title = 'POMNI - FOLDER'
   const user = useSelector(selectUser)
 
-  const { data: notes = [], isLoading: notesLoading } = useGetNotesQuery()
-  const { data: folders = [], isLoading: foldersLoading } = useGetFoldersQuery()
+  const { data: notes = [], isLoading: notesLoading } = useGetNotesQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  })
+  const { data: folders = [], isLoading: foldersLoading } = useGetFoldersQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  })
   const regularNotes = notes.filter(isRegularNote)
 
   const [updateNote] = useUpdateNoteMutation()
@@ -32,6 +37,8 @@ const FoldersPage = () => {
   const [openNotes, setOpenNotes] = useState(new Set())
   const [search, setSearch] = useState('')
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false)
+  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false)
   const [editItem, setEditItem] = useState(null)
   const [editType, setEditType] = useState('')
 
@@ -73,8 +80,8 @@ const FoldersPage = () => {
         body: { folder_id: newFolderId },
       }).unwrap()
     } catch (err) {
-      console.error('РћС€РёР±РєР° РїРµСЂРµРјРµС‰РµРЅРёСЏ Р·Р°РјРµС‚РєРё:', err)
-      alert('РќРµ СѓРґР°Р»РѕСЃСЊ РїРµСЂРµРјРµСЃС‚РёС‚СЊ Р·Р°РјРµС‚РєСѓ.')
+      console.error('Ошибка перемещения заметки:', err)
+      alert('Не удалось переместить заметку.')
     }
   }
 
@@ -108,6 +115,20 @@ const FoldersPage = () => {
     setIsEditOpen(true)
   }
 
+  const openCreateNote = () => {
+    setIsCreateNoteModalOpen(true)
+  }
+
+  const switchToFolderCreate = () => {
+    setIsCreateNoteModalOpen(false)
+    setIsCreateFolderModalOpen(true)
+  }
+
+  const switchToNoteCreate = () => {
+    setIsCreateFolderModalOpen(false)
+    setIsCreateNoteModalOpen(true)
+  }
+
   const closeEdit = () => {
     setIsEditOpen(false)
     setEditItem(null)
@@ -118,8 +139,8 @@ const FoldersPage = () => {
     try {
       await deleteNoteMutation(noteId).unwrap()
     } catch (err) {
-      console.error('РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ Р·Р°РјРµС‚РєРё:', err)
-      alert('РќРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ Р·Р°РјРµС‚РєСѓ.')
+      console.error('Ошибка удаления заметки:', err)
+      alert('Не удалось удалить заметку.')
     }
   }
 
@@ -127,12 +148,12 @@ const FoldersPage = () => {
     try {
       await deleteFolderMutation(folderId).unwrap()
     } catch (err) {
-      console.error('РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ РїР°РїРєРё:', err)
-      alert('РќРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ РїР°РїРєСѓ.')
+      console.error('Ошибка удаления папки:', err)
+      alert('Не удалось удалить папку.')
     }
   }
 
-  if (notesLoading || foldersLoading) return <p>Р—Р°РіСЂСѓР·РєР°...</p>
+  if (notesLoading || foldersLoading) return <p>Загрузка...</p>
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
@@ -157,6 +178,7 @@ const FoldersPage = () => {
             onToggleFolder={toggleFolder}
             onToggleNote={toggleNote}
             onOpenEdit={openEdit}
+            onAddNote={openCreateNote}
             onDeleteFolder={handleDeleteFolder}
             onDeleteNote={handleDeleteNote}
             formatDate={formatDateTime}
@@ -168,6 +190,19 @@ const FoldersPage = () => {
           onClose={closeEdit}
           item={editItem}
           type={editType}
+        />
+
+        <CreateNoteForm
+          isOpen={isCreateNoteModalOpen}
+          onClose={() => setIsCreateNoteModalOpen(false)}
+          onSwitchToFolder={switchToFolderCreate}
+        />
+
+        <CreateNoteForm
+          isOpen={isCreateFolderModalOpen}
+          onClose={() => setIsCreateFolderModalOpen(false)}
+          isFolder={true}
+          onSwitchToNote={switchToNoteCreate}
         />
 
         <Footer />

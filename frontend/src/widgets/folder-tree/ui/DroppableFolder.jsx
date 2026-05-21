@@ -132,7 +132,7 @@ export const DroppableFolder = React.memo(
                         marginLeft: `${marginLeft + 20}px`,
                       }}
                     >
-                      РќРµС‚ Р·Р°РјРµС‚РѕРє
+                      Здесь ещё ничего не было
                     </li>
                   )}
             </ul>
