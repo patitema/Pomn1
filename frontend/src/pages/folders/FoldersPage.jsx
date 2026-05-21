@@ -11,10 +11,10 @@ import {
   useUpdateNoteMutation,
 } from '@shared/api'
 import { formatDateTime } from '@shared/lib'
-import { FolderBrowser } from '@widgets/folder-browser'
-import { EditToggle } from '@features/edit-item'
 import { CreateNoteForm } from '@features/create-note'
+import { EditNoteModal } from '@features/update-note'
 import { EditFolderModal } from '@features/update-folder'
+import { FolderBrowser } from '@widgets/folder-browser'
 import { Footer } from '@widgets/footer'
 import './FoldersPage.css'
 
@@ -37,7 +37,7 @@ const FoldersPage = () => {
   const [openFolders, setOpenFolders] = useState(new Set())
   const [openNotes, setOpenNotes] = useState(new Set())
   const [search, setSearch] = useState('')
-  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isNoteEditOpen, setIsNoteEditOpen] = useState(false)
   const [isFolderEditOpen, setIsFolderEditOpen] = useState(false)
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false)
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false)
@@ -112,16 +112,14 @@ const FoldersPage = () => {
   }
 
   const openEdit = (item, type) => {
-    if (type === 'folder') {
-      setEditItem(item)
-      setEditType(type)
-      setIsFolderEditOpen(true)
-      return
-    }
-
     setEditItem(item)
     setEditType(type)
-    setIsEditOpen(true)
+
+    if (type === 'folder') {
+      setIsFolderEditOpen(true)
+    } else {
+      setIsNoteEditOpen(true)
+    }
   }
 
   const openCreateNote = () => {
@@ -138,8 +136,8 @@ const FoldersPage = () => {
     setIsCreateNoteModalOpen(true)
   }
 
-  const closeEdit = () => {
-    setIsEditOpen(false)
+  const closeNoteEdit = () => {
+    setIsNoteEditOpen(false)
     setEditItem(null)
     setEditType('')
   }
@@ -148,6 +146,10 @@ const FoldersPage = () => {
     setIsFolderEditOpen(false)
     setEditItem(null)
     setEditType('')
+  }
+
+  const handleItemUpdated = (updatedItem) => {
+    setEditItem(updatedItem ?? null)
   }
 
   const handleDeleteNote = async (noteId) => {
@@ -200,17 +202,18 @@ const FoldersPage = () => {
           />
         </main>
 
-        <EditToggle
-          isOpen={isEditOpen}
-          onClose={closeEdit}
-          item={editItem}
-          type={editType}
+        <EditNoteModal
+          note={editType === 'note' ? editItem : null}
+          isOpen={isNoteEditOpen}
+          onClose={closeNoteEdit}
+          onUpdated={handleItemUpdated}
         />
 
         <EditFolderModal
           folder={editType === 'folder' ? editItem : null}
           isOpen={isFolderEditOpen}
           onClose={closeFolderEdit}
+          onUpdated={handleItemUpdated}
         />
 
         <CreateNoteForm
