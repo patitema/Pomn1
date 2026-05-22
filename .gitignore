@@ -41,6 +41,7 @@ CLAUDE.md
 QWEN.md
 AGENTS.md
 PLANS.md
+.codex-docx-review
 
 npm-debug.log*
 yarn-debug.log*

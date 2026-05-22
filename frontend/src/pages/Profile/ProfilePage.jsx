@@ -1,26 +1,27 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { selectCurrentUser, logout as clearAuth } from '@entities/user';
-import { useLogoutMutation, useUpdateProfileMutation } from '@shared/api';
-import { Input, Button, PhoneInput } from '@shared/ui';
-import { routes } from '@shared/config';
-import './ProfilePage.css';
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useSelector, useDispatch } from 'react-redux'
+import { selectCurrentUser, logout as clearAuth } from '@entities/user'
+import { useLogoutMutation, useUpdateProfileMutation } from '@shared/api'
+import { Input, Button, PhoneInput } from '@shared/ui'
+import { routes } from '@shared/config'
+import { Footer } from '@widgets/footer'
+import './ProfilePage.css'
 
 const ProfilePage = () => {
-  const user = useSelector(selectCurrentUser);
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const [logout] = useLogoutMutation();
-  const [updateProfile] = useUpdateProfileMutation();
+  const user = useSelector(selectCurrentUser)
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const [logout] = useLogoutMutation()
+  const [updateProfile] = useUpdateProfileMutation()
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     phone_number: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
     if (user) {
@@ -28,97 +29,101 @@ const ProfilePage = () => {
         username: user.username || '',
         email: user.email || '',
         phone_number: user.phone_number || '',
-      });
+      })
     }
-  }, [user]);
+  }, [user])
 
   const handleLogout = async () => {
     try {
-      await logout().unwrap();
+      await logout().unwrap()
     } catch (err) {
-      console.error('Logout error:', err);
+      console.error('Logout error:', err)
     } finally {
-      dispatch(clearAuth());
-      navigate(routes.auth);
+      dispatch(clearAuth())
+      navigate(routes.auth)
     }
-  };
+  }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setSuccessMessage('');
-    setErrorMessage('');
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setIsSubmitting(true)
+    setSuccessMessage('')
+    setErrorMessage('')
 
     try {
-      await updateProfile(formData).unwrap();
-      setSuccessMessage('Профиль обновлён');
+      await updateProfile(formData).unwrap()
+      setSuccessMessage('Профиль обновлён')
     } catch (err) {
-      console.error('Failed to update profile:', err);
-      setErrorMessage(err.data?.error || 'Ошибка обновления');
+      console.error('Failed to update profile:', err)
+      setErrorMessage(err.data?.error || 'Ошибка обновления')
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
-  const handleChange = (field) => (e) => {
-    setFormData({ ...formData, [field]: e.target.value });
-  };
+  const handleChange = (field) => (event) => {
+    setFormData({ ...formData, [field]: event.target.value })
+  }
 
   return (
-    <div className="page-container">
-      <div className="profile-page">
-        <div className="profile-page__header">
-          <div className="profile-page__avatar">
-            {user?.username?.charAt(0).toUpperCase() || '?'}
+    <div className="page-container profile-page-shell">
+      <div className="profile-page-layout">
+        <div className="profile-page">
+          <div className="profile-page__header">
+            <div className="profile-page__avatar">
+              {user?.username?.charAt(0).toUpperCase() || '?'}
+            </div>
+            <div className="profile-page__info">
+              <h1 className="profile-page__name">{user?.username || 'Пользователь'}</h1>
+              <p className="profile-page__subtitle">Личный кабинет</p>
+            </div>
           </div>
-          <div className="profile-page__info">
-            <h1 className="profile-page__name">{user?.username || 'Пользователь'}</h1>
-            <p className="profile-page__subtitle">Личный кабинет</p>
+
+          {successMessage && (
+            <div className="profile-page__success">{successMessage}</div>
+          )}
+          {errorMessage && (
+            <div className="profile-page__error">{errorMessage}</div>
+          )}
+
+          <form className="profile-page__form" onSubmit={handleSubmit}>
+            <Input
+              type="text"
+              label="Имя пользователя"
+              value={formData.username}
+              onChange={handleChange('username')}
+            />
+
+            <Input
+              type="email"
+              label="Email"
+              value={formData.email}
+              onChange={handleChange('email')}
+            />
+
+            <PhoneInput
+              label="Телефон"
+              name="phone_number"
+              value={formData.phone_number}
+              onChange={handleChange('phone_number')}
+            />
+
+            <Button type="submit" fullWidth disabled={isSubmitting}>
+              {isSubmitting ? 'Сохранение...' : 'Сохранить'}
+            </Button>
+          </form>
+
+          <div className="profile-page__logout">
+            <Button variant="danger" onClick={handleLogout}>
+              Выйти
+            </Button>
           </div>
-        </div>
-
-        {successMessage && (
-          <div className="profile-page__success">{successMessage}</div>
-        )}
-        {errorMessage && (
-          <div className="profile-page__error">{errorMessage}</div>
-        )}
-
-        <form className="profile-page__form" onSubmit={handleSubmit}>
-          <Input
-            type="text"
-            label="Имя пользователя"
-            value={formData.username}
-            onChange={handleChange('username')}
-          />
-
-          <Input
-            type="email"
-            label="Email"
-            value={formData.email}
-            onChange={handleChange('email')}
-          />
-
-          <PhoneInput
-            label="Телефон"
-            name="phone_number"
-            value={formData.phone_number}
-            onChange={handleChange('phone_number')}
-          />
-
-          <Button type="submit" fullWidth disabled={isSubmitting}>
-            {isSubmitting ? 'Сохранение...' : 'Сохранить'}
-          </Button>
-        </form>
-
-        <div className="profile-page__logout">
-          <Button variant="danger" onClick={handleLogout}>
-            Выйти
-          </Button>
         </div>
       </div>
-    </div>
-  );
-};
 
-export default ProfilePage;
+      <Footer />
+    </div>
+  )
+}
+
+export default ProfilePage
