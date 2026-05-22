@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils import timezone
 from .models import Note, Link, Task, Status
 
 
@@ -132,6 +133,23 @@ class StatusSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
+    note_id = serializers.PrimaryKeyRelatedField(
+        source='note',
+        queryset=Note.objects.filter(is_folder=False),
+        allow_null=True,
+        required=False,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request') if hasattr(self, 'context') else None
+        user = getattr(request, 'user', None)
+        if user and user.is_authenticated:
+            self.fields['note_id'].queryset = Note.objects.filter(
+                user=user,
+                is_folder=False,
+            )
+
     class Meta:
         model = Task
         fields = (
@@ -139,10 +157,50 @@ class TaskSerializer(serializers.ModelSerializer):
             'title',
             'description',
             'note',
+            'note_id',
             'user',
             'status',
             'priority',
             'due_date',
             'completed_at',
             'created_at',
+            'updated_at',
         )
+        read_only_fields = ('id', 'note', 'user', 'completed_at', 'created_at', 'updated_at')
+
+    def validate_due_date(self, value):
+        current_minute = timezone.now().replace(second=0, microsecond=0)
+        if value and value < current_minute:
+            raise serializers.ValidationError('Due date cannot be in the past.')
+        return value
+
+    def validate(self, attrs):
+        note = attrs.get('note')
+        request = self.context.get('request') if hasattr(self, 'context') else None
+        user = getattr(request, 'user', None)
+
+        if note and user and user.is_authenticated:
+            if note.user_id != user.id or note.is_folder:
+                raise serializers.ValidationError({
+                    'note_id': 'Linked note does not exist.'
+                })
+
+        return attrs
+
+    def _sync_completed_at(self, instance):
+        if instance.status == Task.STATUS_DONE and instance.completed_at is None:
+            instance.completed_at = timezone.now()
+            instance.save(update_fields=['completed_at', 'updated_at'])
+        elif instance.status != Task.STATUS_DONE and instance.completed_at is not None:
+            instance.completed_at = None
+            instance.save(update_fields=['completed_at', 'updated_at'])
+
+    def create(self, validated_data):
+        task = super().create(validated_data)
+        self._sync_completed_at(task)
+        return task
+
+    def update(self, instance, validated_data):
+        task = super().update(instance, validated_data)
+        self._sync_completed_at(task)
+        return task

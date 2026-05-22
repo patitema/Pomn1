@@ -3,6 +3,13 @@ import { useSelector } from 'react-redux'
 import { DndContext, PointerSensor, useDraggable, useDroppable, useSensor, useSensors } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { selectUser } from '@entities/user'
+import {
+  useCreateTaskMutation,
+  useDeleteTaskMutation,
+  useGetNotesQuery,
+  useGetTasksQuery,
+  useUpdateTaskMutation,
+} from '@shared/api'
 import { Footer } from '@widgets/footer'
 import './TasksPage.css'
 
@@ -50,10 +57,6 @@ const MONTH_LABELS_GENITIVE = [
   'декабря',
 ]
 
-const NOTE_OPTIONS = ['План зож', 'Учёба', 'Расписание']
-
-const INITIAL_TASKS = []
-
 const emptyTaskForm = {
   title: '',
   description: '',
@@ -61,6 +64,15 @@ const emptyTaskForm = {
   time: '00:00',
   priority: 'low',
   status: 'planned',
+  note: '',
+}
+
+const emptyTaskFilters = {
+  search: '',
+  status: '',
+  priority: '',
+  dateFrom: '',
+  dateTo: '',
   note: '',
 }
 
@@ -170,18 +182,23 @@ const toInputDate = (date) => {
   return `${year}-${month}-${day}`
 }
 
-const toTaskDate = (date) => {
-  if (!date || date.includes('.')) return date
-
-  const [year, month, day] = date.split('-')
-  return `${day}.${month}.${year}`
-}
-
 const taskDateToDate = (date) => {
   const [day, month, year] = date.split('.').map(Number)
 
   return new Date(year, month - 1, day)
 }
+
+const apiDateToTaskDate = (date) => formatTaskDate(new Date(date))
+
+const apiDateToTaskTime = (date) => {
+  const parsedDate = new Date(date)
+  const hours = String(parsedDate.getHours()).padStart(2, '0')
+  const minutes = String(parsedDate.getMinutes()).padStart(2, '0')
+
+  return `${hours}:${minutes}`
+}
+
+const buildDueDate = (date, time) => new Date(`${date}T${time || '00:00'}:00`).toISOString()
 
 const getTodayInputDate = () => formatInputDate(new Date())
 
@@ -194,28 +211,81 @@ const getCurrentInputTime = () => {
 }
 
 const createTaskFromForm = (form) => ({
-  id: Date.now(),
   title: form.title.trim(),
   description: form.description.trim(),
-  date: toTaskDate(form.date),
-  time: form.time || '00:00',
+  due_date: buildDueDate(form.date, form.time),
   priority: form.priority,
   status: form.status,
-  note: form.note,
-  createdAt: new Date().toISOString(),
+  note_id: form.note ? Number(form.note) : null,
 })
+
+const buildTaskFilterParams = (filters) => {
+  const params = {}
+
+  if (filters.search.trim()) params.search = filters.search.trim()
+  if (filters.status) params.status = filters.status
+  if (filters.priority) params.priority = filters.priority
+  if (filters.dateFrom) params.date_from = filters.dateFrom
+  if (filters.dateTo) params.date_to = filters.dateTo
+  if (filters.note) params.note_id = filters.note
+
+  return params
+}
+
+const mapApiTasksToDisplay = (apiTasks, noteTitlesById) =>
+  apiTasks
+    .filter((task) => task.due_date)
+    .map((task) => ({
+      id: task.id,
+      title: task.title,
+      description: task.description || '',
+      date: apiDateToTaskDate(task.due_date),
+      time: apiDateToTaskTime(task.due_date),
+      priority: task.priority,
+      status: task.status,
+      note: task.note ? noteTitlesById[task.note] || '' : '',
+      noteId: task.note,
+      createdAt: task.created_at,
+    }))
+
+const sortTasksChronologically = (tasks) =>
+  [...tasks].sort((firstTask, secondTask) => {
+    const firstDate = taskDateToDate(firstTask.date).getTime()
+    const secondDate = taskDateToDate(secondTask.date).getTime()
+
+    if (firstDate !== secondDate) {
+      return firstDate - secondDate
+    }
+
+    const timeCompare = firstTask.time.localeCompare(secondTask.time)
+    if (timeCompare !== 0) {
+      return timeCompare
+    }
+
+    return String(firstTask.createdAt || '').localeCompare(String(secondTask.createdAt || ''))
+  })
 
 const TasksPage = () => {
   document.title = 'POMNI - TASKS'
 
   const user = useSelector(selectUser)
+  const { data: apiTasks = [], isLoading: tasksLoading } = useGetTasksQuery()
+  const { data: notes = [], isLoading: notesLoading } = useGetNotesQuery({ is_folder: false })
+  const [createTask] = useCreateTaskMutation()
+  const [updateTask] = useUpdateTaskMutation()
+  const [deleteTask] = useDeleteTaskMutation()
   const [view, setView] = useState('week')
   const [focusedDate, setFocusedDate] = useState(() => normalizeDate(new Date()))
-  const [tasks, setTasks] = useState(INITIAL_TASKS)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTaskId, setEditingTaskId] = useState(null)
   const [taskForm, setTaskForm] = useState(emptyTaskForm)
+  const [taskFilters, setTaskFilters] = useState(emptyTaskFilters)
   const [formError, setFormError] = useState('')
+  const taskFilterParams = useMemo(() => buildTaskFilterParams(taskFilters), [taskFilters])
+  const hasTaskFilters = Object.keys(taskFilterParams).length > 0
+  const { data: filteredApiTasks = [], isFetching: filteredTasksFetching } = useGetTasksQuery(taskFilterParams, {
+    skip: view !== 'all' || !hasTaskFilters,
+  })
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -230,6 +300,18 @@ const TasksPage = () => {
   const calendarDays = useMemo(() => buildCalendarDays(focusedDate), [focusedDate])
   const weekPeriodLabel = useMemo(() => formatWeekLabel(weekDays), [weekDays])
   const calendarPeriodLabel = useMemo(() => formatMonthLabel(focusedDate), [focusedDate])
+  const noteOptions = useMemo(() => notes.filter((note) => !note.is_folder), [notes])
+  const noteTitlesById = useMemo(() => {
+    return noteOptions.reduce((acc, note) => {
+      acc[note.id] = note.title
+      return acc
+    }, {})
+  }, [noteOptions])
+  const tasks = useMemo(() => mapApiTasksToDisplay(apiTasks, noteTitlesById), [apiTasks, noteTitlesById])
+  const filteredTasks = useMemo(
+    () => mapApiTasksToDisplay(filteredApiTasks, noteTitlesById),
+    [filteredApiTasks, noteTitlesById]
+  )
 
   const tasksByDate = useMemo(() => {
     const groupedTasks = tasks.reduce((acc, task) => {
@@ -251,6 +333,9 @@ const TasksPage = () => {
       done: tasks.filter((task) => task.status === 'done').length,
     }
   }, [tasks])
+  const sortedTasks = useMemo(() => sortTasksChronologically(tasks), [tasks])
+  const sortedFilteredTasks = useMemo(() => sortTasksChronologically(filteredTasks), [filteredTasks])
+  const allViewTasks = hasTaskFilters ? sortedFilteredTasks : sortedTasks
 
   const openCreateModal = (date = '') => {
     setEditingTaskId(null)
@@ -271,7 +356,7 @@ const TasksPage = () => {
       time: task.time,
       priority: task.priority,
       status: task.status,
-      note: task.note,
+      note: task.noteId ? String(task.noteId) : '',
     })
     setFormError('')
     setIsModalOpen(true)
@@ -291,7 +376,18 @@ const TasksPage = () => {
     setFormError('')
   }
 
-  const handleSaveTask = (event) => {
+  const handleFilterChange = (field, value) => {
+    setTaskFilters((currentFilters) => ({
+      ...currentFilters,
+      [field]: value,
+    }))
+  }
+
+  const resetTaskFilters = () => {
+    setTaskFilters(emptyTaskFilters)
+  }
+
+  const handleSaveTask = async (event) => {
     event.preventDefault()
 
     if (!taskForm.title.trim()) {
@@ -314,52 +410,56 @@ const TasksPage = () => {
       return
     }
 
-    if (editingTaskId) {
-      setTasks((currentTasks) =>
-        currentTasks.map((task) =>
-          task.id === editingTaskId
-            ? {
-                ...task,
-                ...createTaskFromForm(taskForm),
-                id: task.id,
-                createdAt: task.createdAt,
-              }
-            : task
-        )
-      )
-    } else {
-      setTasks((currentTasks) => [...currentTasks, createTaskFromForm(taskForm)])
+    try {
+      if (editingTaskId) {
+        await updateTask({
+          id: editingTaskId,
+          body: createTaskFromForm(taskForm),
+        }).unwrap()
+      } else {
+        await createTask(createTaskFromForm(taskForm)).unwrap()
+      }
+
+      closeTaskModal()
+    } catch (err) {
+      setFormError(err.data?.due_date?.[0] || err.data?.title?.[0] || 'Не удалось сохранить задачу')
     }
-
-    closeTaskModal()
   }
 
-  const handleDeleteTask = () => {
-    setTasks((currentTasks) => currentTasks.filter((task) => task.id !== editingTaskId))
-    closeTaskModal()
+  const handleDeleteTask = async () => {
+    try {
+      await deleteTask(editingTaskId).unwrap()
+      closeTaskModal()
+    } catch (err) {
+      setFormError(err.data?.detail || 'Не удалось удалить задачу')
+    }
   }
 
-  const handleCompleteTask = (taskId) => {
-    setTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === taskId ? { ...task, status: 'done' } : task
-      )
-    )
+  const handleCompleteTask = async (taskId) => {
+    try {
+      await updateTask({ id: taskId, body: { status: 'done' } }).unwrap()
+    } catch (err) {
+      setFormError(err.data?.detail || 'Не удалось завершить задачу')
+    }
   }
 
-  const handleRestoreTask = (taskId) => {
-    setTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === taskId ? { ...task, status: 'planned' } : task
-      )
-    )
+  const handleRestoreTask = async (taskId) => {
+    try {
+      await updateTask({ id: taskId, body: { status: 'planned' } }).unwrap()
+    } catch (err) {
+      setFormError(err.data?.detail || 'Не удалось вернуть задачу')
+    }
   }
 
-  const handleRemoveTask = (taskId) => {
-    setTasks((currentTasks) => currentTasks.filter((task) => task.id !== taskId))
+  const handleRemoveTask = async (taskId) => {
+    try {
+      await deleteTask(taskId).unwrap()
+    } catch (err) {
+      setFormError(err.data?.detail || 'Не удалось убрать задачу')
+    }
   }
 
-  const handleDragEnd = ({ active, over }) => {
+  const handleDragEnd = async ({ active, over }) => {
     if (!over) return
 
     const taskId = active.data.current?.taskId
@@ -377,11 +477,18 @@ const TasksPage = () => {
       return
     }
 
-    setTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === taskId && task.date !== targetDate ? { ...task, date: targetDate } : task
-      )
-    )
+    if (draggedTask.date === targetDate) return
+
+    try {
+      await updateTask({
+        id: taskId,
+        body: {
+          due_date: buildDueDate(targetInputDate, draggedTask.time),
+        },
+      }).unwrap()
+    } catch (err) {
+      setFormError(err.data?.detail || 'Не удалось переместить задачу')
+    }
   }
 
   const handlePreviousWeek = () => {
@@ -426,6 +533,13 @@ const TasksPage = () => {
                   Неделя
                 </button>
                 <button
+                  className={`tasks-view-toggle__button ${view === 'all' ? 'active' : ''}`}
+                  type="button"
+                  onClick={() => setView('all')}
+                >
+                  Все задачи
+                </button>
+                <button
                   className={`tasks-view-toggle__button ${view === 'calendar' ? 'active' : ''}`}
                   type="button"
                   onClick={() => setView('calendar')}
@@ -440,7 +554,9 @@ const TasksPage = () => {
             </button>
           </section>
 
-          {view === 'week' ? (
+          {tasksLoading || notesLoading ? (
+            <p className="tasks-page__loading">Загрузка задач...</p>
+          ) : view === 'week' ? (
             <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
               <WeekView
                 days={weekDays}
@@ -457,6 +573,25 @@ const TasksPage = () => {
                 onRestoreTask={handleRestoreTask}
               />
             </DndContext>
+          ) : view === 'all' ? (
+            <>
+              <TasksFilterBar
+                filters={taskFilters}
+                noteOptions={noteOptions}
+                onChange={handleFilterChange}
+                onReset={resetTaskFilters}
+              />
+              <AllTasksView
+                hasFilters={hasTaskFilters}
+                isLoading={filteredTasksFetching}
+                tasks={allViewTasks}
+                totalTasksCount={tasks.length}
+                onEditTask={openEditModal}
+                onCompleteTask={handleCompleteTask}
+                onRemoveTask={handleRemoveTask}
+                onRestoreTask={handleRestoreTask}
+              />
+            </>
           ) : (
             <CalendarView
               days={calendarDays}
@@ -482,6 +617,7 @@ const TasksPage = () => {
           error={formError}
           minDate={minDate}
           minTime={minTime}
+          noteOptions={noteOptions}
           onChange={handleFormChange}
           onClose={closeTaskModal}
           onDelete={handleDeleteTask}
@@ -636,6 +772,165 @@ const CalendarView = ({
       </div>
     </section>
   </>
+)
+
+const TasksFilterBar = ({ filters, noteOptions, onChange, onReset }) => (
+  <section className="tasks-filter-bar" aria-label="Фильтры задач">
+    <label className="tasks-filter-field tasks-filter-field--search">
+      <span>Поиск</span>
+      <input
+        type="search"
+        placeholder="Название или описание"
+        value={filters.search}
+        onChange={(event) => onChange('search', event.target.value)}
+      />
+    </label>
+
+    <label className="tasks-filter-field">
+      <span>Статус</span>
+      <select value={filters.status} onChange={(event) => onChange('status', event.target.value)}>
+        <option value="">Все</option>
+        {Object.entries(STATUSES).map(([statusKey, status]) => (
+          <option key={statusKey} value={statusKey}>
+            {status.label}
+          </option>
+        ))}
+      </select>
+    </label>
+
+    <label className="tasks-filter-field">
+      <span>Приоритет</span>
+      <select value={filters.priority} onChange={(event) => onChange('priority', event.target.value)}>
+        <option value="">Все</option>
+        {Object.entries(PRIORITIES).map(([priorityKey, priority]) => (
+          <option key={priorityKey} value={priorityKey}>
+            {priority.label}
+          </option>
+        ))}
+      </select>
+    </label>
+
+    <label className="tasks-filter-field">
+      <span>От</span>
+      <input type="date" value={filters.dateFrom} onChange={(event) => onChange('dateFrom', event.target.value)} />
+    </label>
+
+    <label className="tasks-filter-field">
+      <span>До</span>
+      <input type="date" value={filters.dateTo} onChange={(event) => onChange('dateTo', event.target.value)} />
+    </label>
+
+    <label className="tasks-filter-field tasks-filter-field--note">
+      <span>Заметка</span>
+      <select value={filters.note} onChange={(event) => onChange('note', event.target.value)}>
+        <option value="">Все</option>
+        {noteOptions.map((note) => (
+          <option key={note.id} value={note.id}>
+            {note.title}
+          </option>
+        ))}
+      </select>
+    </label>
+
+    <button className="tasks-filter-reset" type="button" onClick={onReset}>
+      Сбросить
+    </button>
+  </section>
+)
+
+const AllTasksView = ({
+  hasFilters,
+  isLoading,
+  tasks,
+  totalTasksCount,
+  onEditTask,
+  onCompleteTask,
+  onRemoveTask,
+  onRestoreTask,
+}) => (
+  <section className="tasks-all-list" aria-label="Все задачи">
+    {isLoading ? (
+      <p className="tasks-all-list__empty">Загрузка...</p>
+    ) : tasks.length === 0 ? (
+      <p className="tasks-all-list__empty">
+        {hasFilters && totalTasksCount > 0 ? 'Ничего не найдено' : 'Пока задач нет'}
+      </p>
+    ) : (
+      tasks.map((task) => {
+        const priority = PRIORITIES[task.priority]
+        const taskStatus = STATUSES[task.status]
+        const isDone = task.status === 'done'
+
+        return (
+          <article
+            className={`tasks-all-row ${isDone ? 'tasks-all-row--done' : ''}`}
+            key={task.id}
+            role="button"
+            tabIndex={0}
+            style={{ '--priority-color': priority.color }}
+            onClick={() => onEditTask(task)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                onEditTask(task)
+              }
+            }}
+          >
+            <div className="tasks-all-row__date">
+              <span>{task.date}</span>
+              <strong>{task.time}</strong>
+            </div>
+
+            <div className="tasks-all-row__main">
+              <strong>{task.title}</strong>
+              {task.description && <p>{task.description}</p>}
+            </div>
+
+            <div className="tasks-all-row__meta">
+              <span>{priority.label}</span>
+              <span>{taskStatus.label}</span>
+              {task.note && <span>{task.note}</span>}
+            </div>
+
+            <div className="tasks-all-row__actions">
+              {isDone ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      onRestoreTask(task.id)
+                    }}
+                  >
+                    Вернуть
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      onRemoveTask(task.id)
+                    }}
+                  >
+                    Убрать
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    onCompleteTask(task.id)
+                  }}
+                >
+                  Завершить
+                </button>
+              )}
+            </div>
+          </article>
+        )
+      })
+    )}
+  </section>
 )
 
 const DroppableWeekDay = ({
@@ -794,7 +1089,18 @@ const PeriodControls = ({ label, onNext, onPrevious }) => (
   </div>
 )
 
-const TaskModal = ({ taskForm, isEditing, error, minDate, minTime, onChange, onClose, onDelete, onSubmit }) => (
+const TaskModal = ({
+  taskForm,
+  isEditing,
+  error,
+  minDate,
+  minTime,
+  noteOptions,
+  onChange,
+  onClose,
+  onDelete,
+  onSubmit,
+}) => (
   <div className="tasks-modal-overlay" role="presentation">
     <section className="tasks-modal" role="dialog" aria-modal="true" aria-labelledby="task-modal-title">
       <button className="tasks-modal__close" type="button" onClick={onClose} aria-label="Закрыть">
@@ -874,9 +1180,9 @@ const TaskModal = ({ taskForm, isEditing, error, minDate, minTime, onChange, onC
           <span>Заметка</span>
           <select value={taskForm.note} onChange={(event) => onChange('note', event.target.value)}>
             <option value="">Выберите заметку (необязательно)</option>
-            {NOTE_OPTIONS.map((note) => (
-              <option key={note} value={note}>
-                {note}
+            {noteOptions.map((note) => (
+              <option key={note.id} value={note.id}>
+                {note.title}
               </option>
             ))}
           </select>

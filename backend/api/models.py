@@ -65,15 +65,48 @@ class Status(models.Model):
 
 
 class Task(models.Model):
+    STATUS_PLANNED = 'planned'
+    STATUS_IN_PROGRESS = 'in-progress'
+    STATUS_DONE = 'done'
+    STATUS_CHOICES = (
+        (STATUS_PLANNED, 'Планирую'),
+        (STATUS_IN_PROGRESS, 'В процессе'),
+        (STATUS_DONE, 'Завершено'),
+    )
+
+    PRIORITY_HIGH = 'high'
+    PRIORITY_MEDIUM = 'medium'
+    PRIORITY_LOW = 'low'
+    PRIORITY_CHOICES = (
+        (PRIORITY_HIGH, 'Высокий'),
+        (PRIORITY_MEDIUM, 'Средний'),
+        (PRIORITY_LOW, 'Низкий'),
+    )
+
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name='tasks')
+    note = models.ForeignKey(
+        Note,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='tasks',
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
-    status = models.ForeignKey(Status, on_delete=models.PROTECT)
-    priority = models.IntegerField(default=0)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_PLANNED,
+    )
+    priority = models.CharField(
+        max_length=10,
+        choices=PRIORITY_CHOICES,
+        default=PRIORITY_LOW,
+    )
     due_date = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['-created_at']

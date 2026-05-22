@@ -38,7 +38,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Note', 'Link', 'User'],
+  tagTypes: ['Note', 'Link', 'Task', 'User'],
   endpoints: (builder) => ({
     // === NOTES (включая папки) ===
     getNotes: builder.query({
@@ -127,6 +127,36 @@ export const api = createApi({
       invalidatesTags: (result, error, id) => [{ type: 'Link', id }],
     }),
 
+    // === TASKS ===
+    getTasks: builder.query({
+      query: (params) => ({
+        url: 'tasks/',
+        params,
+      }),
+      providesTags: (result) =>
+        result
+          ? [...result.map(({ id }) => ({ type: 'Task', id })), { type: 'Task', id: 'LIST' }]
+          : [{ type: 'Task', id: 'LIST' }],
+    }),
+    createTask: builder.mutation({
+      query: (body) => ({ url: 'tasks/', method: 'POST', body }),
+      invalidatesTags: [{ type: 'Task', id: 'LIST' }],
+    }),
+    updateTask: builder.mutation({
+      query: ({ id, body }) => ({ url: `tasks/${id}/`, method: 'PATCH', body }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Task', id },
+        { type: 'Task', id: 'LIST' },
+      ],
+    }),
+    deleteTask: builder.mutation({
+      query: (id) => ({ url: `tasks/${id}/`, method: 'DELETE' }),
+      invalidatesTags: (result, error, id) => [
+        { type: 'Task', id },
+        { type: 'Task', id: 'LIST' },
+      ],
+    }),
+
     // === USER ===
     getCurrentUser: builder.query({
       query: () => 'current-user/',
@@ -163,6 +193,10 @@ export const {
   useGetLinksQuery,
   useCreateLinkMutation,
   useDeleteLinkMutation,
+  useGetTasksQuery,
+  useCreateTaskMutation,
+  useUpdateTaskMutation,
+  useDeleteTaskMutation,
   useGetCurrentUserQuery,
   useLoginMutation,
   useRegisterMutation,

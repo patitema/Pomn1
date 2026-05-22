@@ -7,8 +7,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-from .models import Note, Link, Profile
-from .serializer import NoteSerializer, LinkSerializer
+from .models import Note, Link, Profile, Task
+from .serializer import NoteSerializer, LinkSerializer, TaskSerializer
 from .validators import (
     validate_username, validate_password,
     validate_phone, validate_email_unique,
@@ -218,6 +218,79 @@ def link_detail(request, pk):
     if request.method == 'DELETE':
         link.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', 'POST'])
+def tasks_list(request):
+    if request.method == 'GET':
+        tasks = Task.objects.filter(user=request.user)
+
+        search = request.query_params.get('search')
+        if search:
+            tasks = tasks.filter(
+                Q(title__icontains=search) |
+                Q(description__icontains=search)
+            )
+
+        task_status = request.query_params.get('status')
+        if task_status:
+            tasks = tasks.filter(status=task_status)
+
+        priority = request.query_params.get('priority')
+        if priority:
+            tasks = tasks.filter(priority=priority)
+
+        date_from = request.query_params.get('date_from')
+        if date_from:
+            tasks = tasks.filter(due_date__date__gte=date_from)
+
+        date_to = request.query_params.get('date_to')
+        if date_to:
+            tasks = tasks.filter(due_date__date__lte=date_to)
+
+        note_id = request.query_params.get('note_id')
+        if note_id:
+            tasks = tasks.filter(note_id=note_id, note__user=request.user)
+
+        serializer = TaskSerializer(tasks, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    data = request.data.copy()
+    serializer = TaskSerializer(data=data, context={'request': request})
+    if serializer.is_valid():
+        task = serializer.save(user=request.user)
+        return Response(
+            TaskSerializer(task, context={'request': request}).data,
+            status=status.HTTP_201_CREATED,
+        )
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+def task_detail(request, pk):
+    try:
+        task = Task.objects.get(pk=pk, user=request.user)
+    except Task.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = TaskSerializer(task, context={'request': request})
+        return Response(serializer.data)
+
+    if request.method in ('PUT', 'PATCH'):
+        serializer = TaskSerializer(
+            task,
+            data=request.data,
+            context={'request': request},
+            partial=request.method == 'PATCH',
+        )
+        if serializer.is_valid():
+            task = serializer.save()
+            return Response(TaskSerializer(task, context={'request': request}).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    task.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['POST'])
