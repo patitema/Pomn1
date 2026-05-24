@@ -1,10 +1,17 @@
 import React from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
+import { useNavigate } from 'react-router-dom'
+import {
+  getNearestTaskPreviews,
+  getTaskPreviewLabel,
+  getTaskWeekQuery,
+} from '@entities/task'
 import { MarkdownViewer } from '../../../shared/ui'
 
 export function DraggableNote({
   note,
+  tasks = [],
   isNoteOpen,
   toggleNote,
   openEdit,
@@ -13,9 +20,11 @@ export function DraggableNote({
   marginLeft = 0,
   className = '',
 }) {
+  const navigate = useNavigate()
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: note.id,
   })
+  const linkedTasks = isNoteOpen ? getNearestTaskPreviews(tasks, note.id) : []
 
   const style = {
     marginLeft: `${marginLeft}px`,
@@ -70,6 +79,20 @@ export function DraggableNote({
             content={note.text}
             className="note-text"
           />
+          {linkedTasks.length > 0 && (
+            <div className="linked-tasks linked-tasks--file" aria-label="Связанные задачи">
+              {linkedTasks.map((task) => (
+                <button
+                  className="linked-tasks__item"
+                  key={task.id}
+                  type="button"
+                  onClick={() => navigate(getTaskWeekQuery(task))}
+                >
+                  {getTaskPreviewLabel(task)}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="note-info">
             {note.created_at && formatDate(note.created_at)}
           </div>

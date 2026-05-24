@@ -1,242 +1,241 @@
-# Pomni — Система управления знаниями и задачами
+# Pomni
 
-[![Status](https://img.shields.io/badge/status-in%20development-yellow)]()
-[![Frontend](https://img.shields.io/badge/frontend-React%2019-blue)]()
-[![Backend](https://img.shields.io/badge/backend-Django%205-green)]()
-[![Architecture](https://img.shields.io/badge/architecture-FSD-purple)]()
+Pomni is a web application for managing notes, folders, knowledge links, and tasks. The frontend is a React 19 SPA, the backend is Django 5.2 + Django REST Framework, and MySQL is used in Docker/prod-style environments.
 
-**Pomni** — это веб-приложение для хранения, структурирования и визуализации персональных знаний. Объединяет управление заметками с интерактивным графом связей, помогая создать ваш «второй мозг».
+The frontend follows Feature-Sliced Design: `app -> pages -> widgets -> features -> entities -> shared`.
 
----
+## Current Features
 
-## Оглавление
+- User registration, login, logout, session restore, and protected private routes.
+- Notes and folders stored in one unified `Note` model with `is_folder`.
+- Folder/file view with nested folders, note expansion, note/folder editing modals, deletion, search, and drag-and-drop note moving.
+- Graph view for notes and folders with D3.js, node selection, reader panel, edit/delete toolbar actions, and link creation flow.
+- Markdown editing and rendering for notes through shared `MarkdownEditor` and `MarkdownViewer`.
+- Tasks page with week, calendar, and all-tasks views.
+- Task CRUD through backend API and RTK Query.
+- Task status, priority, scheduled date/time, optional deadline, filters, completion/restore/remove actions, and week drag-and-drop.
+- Linked task previews for regular notes in graph reader and file view; folders do not own tasks.
+- Profile page with phone input mask and backend validation.
 
-- [О проекте](#-о-проекте)
-- [Возможности](#-возможности)
-- [Технологический стек](#-технологический-стек)
-- [Архитектура](#-архитектура)
-- [Установка](#-установка)
-- [Использование](#-использование)
-- [API](#-api)
-- [Структура проекта](#-структура-проекта)
-- [Статус разработки](#-статус-разработки)
-- [Лицензия](#-лицензия)
-
----
-
-## О проекте
-
-Pomni решает проблему информационной перегрузки, объединяя:
-- **Заметки** с иерархической организацией по папкам
-- **Визуализацию связей** между идеями через граф знаний
-- **Управление задачами** с отслеживанием статусов
-- **Личный кабинет** для управления профилем
-
-Проект разрабатывается в рамках выпускной квалификационной работы студентом группы 1ИСП-21 Авхимовичем Артёмом.
-
----
-
-## Макет проекта
-[Figma](https://www.figma.com/design/NzO9621BwOjAhEfXcHInfy/POMNI?node-id=0-1&t=2uIEHR6eoZz5QBKO-1)
-
-### Реализовано
-- Главная страница (с адаптацией под авторизованных пользователей)
-- Страница управления заметками в виде файловой системы
-- Страница управления заметками графа
-- Страница личного кабинета
-- Защита приватных маршрутов (Auth Guard)
-- Маска ввода номера телефона (+7 формат)
-
-### В разработке
-- Страница управления задачами
-- Страница отслеживания задач
-
-## Возможности
-
-### Реализовано ✅
-- Создание, редактирование и удаление заметок
-- Организация заметок по папкам с поддержкой вложенности
-- Регистрация и аутентификация пользователей
-- Личный кабинет с управлением профилем
-- Визуализация графа знаний (D3.js)
-- Drag-and-drop для перемещения заметок между папками
-- Поиск по заметкам и папкам
-- Защита приватных маршрутов (ProtectedRoute)
-- Автоматический выход при истечении токена (401 interceptor)
-- Маска ввода телефона (+7(XXX)-XXX-XX-XX)
-
-### В разработке 🚧
-- Markdown-редактор для заметок
-- Теги для заметок
-- Полноценный таск-трекинг со статусами
-- Дедлайны для задач
-- Экспорт данных (JSON, PDF)
-- Автоматическое построение связей между заметками
-
----
-
-## Технологический стек
-
-### Backend
-| Технология | Версия | Назначение |
-|------------|--------|------------|
-| **Django** | 5.2.7 | Веб-фреймворк |
-| **Django REST Framework** | 3.16.1 | API |
-| **MySQL** | — | База данных |
-| **mysqlclient** | 2.2.7 | Драйвер БД |
-| **django-cors-headers** | 4.9.0 | CORS |
+## Tech Stack
 
 ### Frontend
-| Технология | Версия | Назначение |
-|------------|--------|------------|
-| **React** | 19.1.0 | UI-фреймворк |
-| **Redux Toolkit** | 2.11.2 | Управление состоянием |
-| **RTK Query** | 2.11.2 | API и кэширование |
-| **React Router DOM** | 7.6.0 | Роутинг |
-| **D3.js** | 7.9.0 | Визуализация графа |
-| **@dnd-kit/core** | 6.3.1 | Drag-and-drop |
 
----
+- React 19.1
+- React Router DOM 7.6
+- Redux Toolkit 2.11 + RTK Query
+- D3.js 7.9
+- dnd-kit 6.3
+- `@uiw/react-md-editor`
+- `react-markdown`
+- CRACO / react-scripts
 
-### Управление состоянием
+### Backend
 
-- **Redux Toolkit** — глобальное состояние
-- **RTK Query** — API запросы и кэширование
-- **Селекторы** — мемоизированный доступ к данным
-
-### Контроль сессии
-
-- **ProtectedRoute** — единый guard для всех приватных маршрутов
-- **UserInit** — восстановление сессии из localStorage при загрузке
-- **401 Interceptor** — автоматический выход и редирект при невалидном токене
-- **PhoneInput** — маска ввода телефона с валидацией на бэкенде (хранение чистых цифр)
-
-[Подробнее об архитектуре](ARCHITECTURE.md)
-
----
-
-## Установка
-
-### Требования
 - Python 3.10+
-- Node.js 18+
-- MySQL 8.0+
-- **Docker и Docker Compose** (для контейнеризации)
+- Django 5.2.7
+- Django REST Framework 3.16.1
+- DRF TokenAuthentication
+- MySQL via `mysqlclient`
+- `django-cors-headers`
+- flake8
 
----
+## Development Commands
 
-## Production деплой
+### Docker
 
 ```bash
-# Сборка и запуск
 docker-compose up -d --build
-
-# Просмотр логов
 docker-compose logs -f
-
-# Остановка
 docker-compose down
 ```
 
+### Frontend
 
-## 🚀 Использование
-
-После запуска:
-- **Frontend:** http://localhost:3000
-- **Backend API:** http://localhost:8000/api/
-
-### Основные маршруты
-| Страница | URL | Описание |
-|----------|-----|----------|
-| Главная | `/` | Лендинг проекта |
-| Заметки (граф) | `/notes` | Визуализация графа знаний (требует авторизации) |
-| Папки | `/folders` | Управление заметками и папками (требует авторизации) |
-| Задачи | `/tasks` | Трекер задач (требует авторизации, в разработке) |
-| Профиль | `/profile` | Личный кабинет (требует авторизации) |
-| Вход | `/auth` | Аутентификация |
-| Регистрация | `/registration` | Регистрация пользователя |
-
-**Приватные маршруты** (`/notes`, `/folders`, `/tasks`, `/profile`) защищены через `ProtectedRoute`. Неавторизованный пользователь будет перенаправлен на `/auth`.
-
----
-
-## Структура проекта
-
+```bash
+cd frontend
+npm ci
+npm start
+npm run build
+npm run start:prod
+npm test -- --watchAll=false --passWithNoTests
+npx eslint src/ --max-warnings=0
 ```
+
+Frontend dev server: `http://localhost:3000`.
+
+### Backend
+
+```bash
+cd backend
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+python manage.py check
+flake8 api/ backend/ --max-line-length=120 --exclude=migrations,__pycache__
+```
+
+Backend API: `http://localhost:8000/api/`.
+
+### API Tests
+
+```bash
+newman run tests/api/postman-collection.json --env-var baseUrl=http://localhost:8000/api --bail
+```
+
+## Environment
+
+Frontend `.env`:
+
+```env
+REACT_APP_API_URL=/api
+REACT_APP_API_URL=http://localhost:8000/api
+```
+
+Backend/Docker:
+
+```env
+DB_HOST=db
+DB_NAME=Pomni
+DB_USER=pomni
+DB_PASSWORD=pomnipassword
+```
+
+## Main Routes
+
+| Route | Purpose |
+| --- | --- |
+| `/` | Home page |
+| `/auth` | Login |
+| `/registration` | Registration |
+| `/notes` | Graph view for notes/folders |
+| `/folders` | File/folder view |
+| `/tasks` | Task tracker |
+| `/profile` | User profile |
+
+Private routes: `/notes`, `/folders`, `/tasks`, `/profile`.
+
+`/tasks` also supports task-week navigation:
+
+```text
+/tasks?view=week&date=YYYY-MM-DD&task=<task-id>
+```
+
+## API Overview
+
+All endpoints except login/register require:
+
+```http
+Authorization: Token <token>
+```
+
+Core endpoints:
+
+- `POST /api/register/`
+- `POST /api/login/`
+- `POST /api/logout/`
+- `GET /api/current-user/`
+- `PUT /api/update-profile/`
+- `GET|POST /api/notes/`
+- `GET|PUT|DELETE /api/notes/<id>/`
+- `GET|POST /api/folders/`
+- `GET|PUT|DELETE /api/folders/<id>/`
+- `GET|POST /api/links/`
+- `GET|DELETE /api/links/<id>/`
+- `GET|POST /api/tasks/`
+- `GET|PATCH|PUT|DELETE /api/tasks/<id>/`
+
+## Project Structure
+
+```text
 Pomn1/
-├── backend/
-│   ├── manage.py
-│   ├── requirements.txt
-│   ├── api/
-│   │   ├── models.py        # Модели данных
-│   │   ├── views.py         # API endpoints
-│   │   ├── urls.py          # Маршруты
-│   │   ├── serializer.py    # Сериализаторы
-│   │   └── ...
-│   └── backend/
-│       ├── settings.py      # Настройки Django
-│       ├── urls.py
-│       └── ...
-├── frontend/
-│   ├── package.json
-│   ├── public/
-│   └── src/
-│       ├── app/                 # Инициализация (провайдеры, роутинг)
-│       │   ├── providers/
-│       │   │   ├── ReduxProvider/
-│       │   │   └── Router/
-│       │   └── styles/
-│       ├── pages/               # Страницы
-│       │   ├── Auth/            # Авторизация (AuthPage.jsx)
-│       │   ├── home/            # Главная
-│       │   ├── registration/    # Регистрация
-│       │   ├── Notes/           # Граф заметок
-│       │   ├── folders/         # Файловая структура
-│       │   ├── Profile/         # Профиль
-│       │   └── Tasks/           # Задачи
-│       ├── widgets/             # Виджеты (Header, Footer, NoteGraph, Navigation)
-│       ├── features/            # Фичи (auth, CRUD, drag-and-drop)
-│       ├── entities/            # Сущности (Note, Folder, User)
-│       └── shared/              # Общее
-│           ├── api/             # RTK Query
-│           ├── config/          # Маршруты
-│           └── ui/              # UI (Button, Input, PhoneInput, Modal, Loader, ProtectedRoute)
-├── README.md
-└── ARCHITECTURE.md          # Документация по FSD
+  backend/
+    manage.py
+    requirements.txt
+    api/
+      models.py
+      serializer.py
+      views.py
+      urls.py
+      validators.py
+      migrations/
+    backend/
+      settings.py
+      urls.py
+  frontend/
+    package.json
+    public/
+    src/
+      app/
+      assets/
+      pages/
+      widgets/
+      features/
+      entities/
+        user/
+        note/
+        folder/
+        link/
+        task/
+      shared/
+        api/
+        config/
+        lib/
+        ui/
+  tests/
+  plans/
+  README.md
+  ARCHITECTURE.md
 ```
 
----
+## Architecture Notes
 
-## Статус разработки
+- `shared/api` owns RTK Query endpoints and the 401 interceptor.
+- Auth state lives in `entities/user`.
+- Domain helpers live in `entities/*/model`.
+- Reusable UI lives in `shared/ui`.
+- Page-level orchestration remains in `pages`, with larger visual blocks in `widgets`.
+- Legacy top-level frontend folders (`components`, `context`, `hooks`, `utils`) have been removed from `frontend/src`.
 
-| Модуль | Статус | Прогресс |
-|--------|--------|----------|
-| Аутентификация | ✅ Готово | 100% |
-| Управление заметками | ✅ Готово | 100% |
-| Управление папками | ✅ Готово | 100% |
-| Граф знаний | ⚠️ В разработке | 20% |
-| Таск-трекинг | ⚠️ В разработке | 10% |
-| Markdown-редактор | ❌ Не начато | 0% |
-| Экспорт данных | ❌ Не начато | 0% |
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the detailed architecture guide.
 
-**Общий прогресс:** ~60%
+## Current Status
 
-## Лицензия
+| Area | Status |
+| --- | --- |
+| Authentication/session | Working |
+| Notes/folders CRUD | Working |
+| Markdown editor/viewer | Working |
+| Graph view | Working, follow-up improvements planned |
+| Link creation in graph | Implemented, needs manual QA |
+| Tasks API and UI | Implemented, backend validation/manual QA still important |
+| Optional task deadlines | Implemented in working tree |
+| Linked task previews in notes | Implemented |
+| Export | Not started |
+| Tags | Not started |
 
-Проект разрабатывается в учебных целях в рамках выпускной квалификационной работы.
+## Validation Baseline
 
----
+Common frontend validation:
 
-## Контакты
+```bash
+cd frontend
+npx eslint src/ --max-warnings=0
+npm run build
+npm test -- --watchAll=false --passWithNoTests
+```
 
-**Студент:** Авхимович Артём Петрович  
-**Группа:** 1ИСП-21  
-**Научный руководитель:** Воробьёв Константин Владимирович  
-**Университет:** Алтайский государственный технический университет им. И.И. Ползунова
+Common backend validation:
 
----
+```bash
+cd backend
+python manage.py check
+python manage.py migrate
+```
 
-## 📚 Документация
+Run backend validation after model or migration changes.
 
-- [Теоретические требования](docs/THEORY_REPORT.md)
-- [Отчёт о реализации](docs/IMPLEMENTATION.md)
+## License
+
+The project is developed for educational purposes as part of a graduation qualification work.

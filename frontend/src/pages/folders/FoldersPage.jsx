@@ -8,6 +8,7 @@ import {
   useDeleteNoteMutation,
   useGetFoldersQuery,
   useGetNotesQuery,
+  useGetTasksQuery,
   useUpdateNoteMutation,
 } from '@shared/api'
 import { formatDateTime } from '@shared/lib'
@@ -26,6 +27,9 @@ const FoldersPage = () => {
     refetchOnMountOrArgChange: true,
   })
   const { data: folders = [], isLoading: foldersLoading } = useGetFoldersQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  })
+  const { data: tasks = [], isLoading: tasksLoading } = useGetTasksQuery(undefined, {
     refetchOnMountOrArgChange: true,
   })
   const regularNotes = notes.filter(isRegularNote)
@@ -170,7 +174,7 @@ const FoldersPage = () => {
     }
   }
 
-  if (notesLoading || foldersLoading) return <p>Загрузка...</p>
+  if (notesLoading || foldersLoading || tasksLoading) return <p>Загрузка...</p>
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
@@ -188,6 +192,7 @@ const FoldersPage = () => {
           <FolderBrowser
             folders={folders}
             notes={regularNotes}
+            tasks={tasks}
             openFolders={openFolders}
             openNotes={openNotes}
             search={search}

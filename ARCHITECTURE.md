@@ -1,440 +1,278 @@
-# Архитектура Pomni
+# Pomni Architecture
 
-## Обзор
+Pomni is a React SPA with a Django REST API. The current frontend is organized around Feature-Sliced Design (FSD), and the old top-level frontend folders have been removed from `frontend/src`.
 
-Pomni - SPA-приложение на React с backend API на Django REST Framework. Проект уже использует слои Feature-Sliced Design, но фронтенд пока находится в переходном состоянии: рядом с FSD-слоями еще живут директории старой структуры (`components`, `context`, `hooks`, `utils`).
+## Dependency Direction
 
-Поэтому корректно считать текущую архитектуру не "строгим FSD", а **гибридной структурой с миграцией в сторону FSD**.
-
-Этот документ фиксирует:
-- текущее состояние проекта;
-- целевую архитектурную модель;
-- правила раскладки кода по слоям;
-- допустимые зависимости между слоями;
-- зоны, которые еще требуют рефакторинга.
-
----
-
-## Архитектурный статус
-
-### Что уже внедрено
-
-- слои `app`, `pages`, `widgets`, `features`, `entities`, `shared`;
-- алиасы `@app`, `@pages`, `@widgets`, `@features`, `@entities`, `@shared`;
-- Redux Toolkit + RTK Query как базовый state/API слой;
-- единый auth flow с `UserInit` и `ProtectedRoute`;
-- разнесение части пользовательских сценариев по feature-модулям;
-- общие UI-компоненты в `shared/ui`.
-
-### Что еще не доведено
-
-- в `frontend/src` остаются `components`, `context`, `hooks`, `utils`, `assets`;
-- слой `entities` выражен только частично;
-- некоторые страницы перегружены логикой;
-- есть нарушения "чистого FSD" в направленности зависимостей;
-- документация и структура проекта до этого расходились.
-
----
-
-## Слои и зависимости
-
-### Целевая цепочка зависимостей
+Target dependency direction:
 
 ```text
 app -> pages -> widgets -> features -> entities -> shared
 ```
 
-Зависимости должны идти только сверху вниз.
+Rules:
 
-### Что считается нарушением
+- `shared` must not import from upper layers.
+- `entities` may use `shared`, but not `features`, `widgets`, or `pages`.
+- `features` may use `entities` and `shared`.
+- `widgets` compose `features`, `entities`, and `shared`.
+- `pages` compose widgets/features for a route.
+- Imports between modules should go through public `index.js` files where practical.
 
-- `shared` импортирует что-то из `entities`, `features`, `widgets`, `pages`, `app`
-- `entities` импортируют `features`, `widgets`, `pages`, `app`
-- `features` импортируют `widgets`, `pages`, `app`
-- `widgets` импортируют `pages` или `app`
-- модули одного слоя напрямую тянут внутренности друг друга без public API
-
-### Что допустимо как временное состояние
-
-- наличие старых директорий, если они еще не вычищены;
-- смешанная структура, пока модуль находится в миграции;
-- точечные компромиссы, если они явно зафиксированы и не маскируются под "готовую архитектуру".
-
----
-
-## Текущее дерево фронтенда
+## Current Frontend Tree
 
 ```text
 frontend/src/
   app/
   assets/
-  components/
-  context/
   entities/
-  features/
-  hooks/
-  pages/
-  shared/
-  utils/
-  widgets/
-```
-
-### Как это интерпретировать
-
-- `app`, `pages`, `widgets`, `features`, `entities`, `shared` - основа целевой архитектуры.
-- `components`, `context`, `hooks`, `utils` - остатки более ранней организации кода.
-- `assets` пока живет отдельно, но в целевом состоянии должен быть либо частью `shared`, либо локальным активом конкретного модуля.
-
----
-
-## Назначение слоев
-
-### `app`
-
-**Роль:** точка сборки приложения.
-
-**Сюда кладем:**
-- глобальные провайдеры;
-- router;
-- store setup;
-- инициализацию сессии;
-- глобальную композицию приложения.
-
-**Сюда не кладем:**
-- предметную бизнес-логику;
-- доменные helpers;
-- логику конкретных страниц и пользовательских сценариев.
-
-**Примеры из проекта:**
-- `frontend/src/app/providers/ReduxProvider`
-- `frontend/src/app/providers/Router`
-- `frontend/src/app/providers/UserInit`
-
-### `pages`
-
-**Роль:** страницы маршрутов.
-
-**Сюда кладем:**
-- композицию widgets и features под конкретный route;
-- локальное page-state, если он нужен только этой странице;
-- page-level layout.
-
-**Сюда не кладем:**
-- переиспользуемые UI-блоки;
-- общие доменные преобразования;
-- инфраструктурные утилиты;
-- тяжелую бизнес-логику, которую можно вынести в `features`, `widgets` или `entities`.
-
-### `widgets`
-
-**Роль:** крупные композиционные блоки, которые собирают несколько более мелких частей интерфейса.
-
-**Сюда кладем:**
-- визуально и структурно самостоятельные блоки страницы;
-- составные части экранов;
-- интеграцию нескольких features/entities в один UI-блок.
-
-**Сюда не кладем:**
-- глобальную инициализацию;
-- чисто доменные helpers;
-- слишком мелкие кнопки и формы, если это отдельный пользовательский сценарий.
-
-**Примеры из проекта:**
-- `frontend/src/widgets/note-graph`
-- `frontend/src/widgets/folder-tree`
-- `frontend/src/widgets/navigation`
-- `frontend/src/widgets/header`
-- `frontend/src/widgets/footer`
-
-### `features`
-
-**Роль:** пользовательские сценарии.
-
-**Сюда кладем:**
-- действия пользователя: создать, обновить, удалить, переместить, авторизоваться;
-- формы, модалки и кнопки, если они являются частью конкретного сценария;
-- локальную model-логику сценария.
-
-**Сюда не кладем:**
-- базовые сущности предметной области;
-- глобальные shared-хелперы;
-- композицию целой страницы.
-
-**Примеры из проекта:**
-- `frontend/src/features/auth-by-login`
-- `frontend/src/features/auth-by-registration`
-- `frontend/src/features/create-note`
-- `frontend/src/features/update-note`
-- `frontend/src/features/edit-item`
-
-### `entities`
-
-**Роль:** предметные сущности.
-
-**Сюда кладем:**
-- селекторы;
-- доменные helpers;
-- базовые мапперы;
-- минимальные представления сущности, если они переиспользуются;
-- локальную model-логику, описывающую саму сущность, а не сценарий.
-
-**Состояние сейчас:**
-- слой есть, но развит слабо;
-- явно оформлен `entities/user`;
-- для `note`, `folder`, `link`, `task` слой еще предстоит укрепить.
-
-### `shared`
-
-**Роль:** базовый переиспользуемый слой без знания о конкретных сценариях и предметных модулях верхних уровней.
-
-**Сюда кладем:**
-- UI primitives;
-- API infrastructure;
-- config;
-- универсальные helpers;
-- универсальные hooks;
-- общие assets.
-
-**Сюда не кладем:**
-- auth feature-логику;
-- note/folder/task сценарии;
-- page-specific код.
-
-**Текущие сегменты:**
-- `frontend/src/shared/api`
-- `frontend/src/shared/config`
-- `frontend/src/shared/ui`
-
-**Целевые дополнительные сегменты:**
-- `frontend/src/shared/lib`
-- `frontend/src/shared/assets`
-
----
-
-## Правила для старых директорий
-
-Следующие каталоги считаются временными и подлежат переразложению:
-
-### `frontend/src/components`
-
-Использовать как место для нового кода нельзя.
-
-**Что делать с содержимым:**
-- общий UI -> `shared/ui`
-- сценарный UI -> `features/*/ui`
-- крупный составной блок -> `widgets/*/ui`
-
-### `frontend/src/context`
-
-Использовать как место для нового кода нельзя.
-
-**Правило:**
-- глобальные провайдеры -> `app/providers`
-- локальный контекст фичи -> внутрь соответствующего модуля
-- если контекст дублирует Redux/RTK Query, его нужно убирать
-
-### `frontend/src/hooks`
-
-Использовать как общую папку для новых хуков нельзя.
-
-**Правило:**
-- общий хук -> `shared/lib`
-- доменный хук -> `entities/*/lib` или `entities/*/model`
-- сценарный хук -> `features/*/model`
-
-### `frontend/src/utils`
-
-Использовать как общую папку для новых утилит нельзя.
-
-**Правило:**
-- универсальная утилита -> `shared/lib`
-- доменная утилита -> `entities/*/lib`
-- сценарная утилита -> `features/*/lib` или `features/*/model`
-
-### `frontend/src/assets`
-
-Пока допустимо существование, но новые ассеты стоит размещать так:
-- глобально используемые -> `shared/assets`
-- модульные -> рядом с модулем, который их использует
-
----
-
-## Сегменты внутри модулей
-
-Для `features`, `entities`, `widgets` желательно придерживаться одинаковой структуры.
-
-### `ui/`
-
-Содержит React-компоненты и стили модуля.
-
-### `model/`
-
-Содержит:
-- state;
-- selectors;
-- hooks состояния;
-- reducers/slices, если они реально относятся к модулю.
-
-### `lib/`
-
-Содержит:
-- helper-функции модуля;
-- адаптеры;
-- форматирование и преобразования, привязанные к модулю.
-
-### `index.js`
-
-Public API модуля.
-
-**Правило:**
-по умолчанию импортируем модуль через его `index.js`, а не через глубокий путь.
-
-**Допустимое исключение:**
-внутренние импорты внутри самого модуля.
-
----
-
-## Public API
-
-### Правило импорта
-
-Предпочтительный импорт:
-
-```js
-import { MarkdownViewer } from '@shared/ui';
-import { LoginForm } from '@features/auth-by-login';
-import { NoteGraph } from '@widgets/note-graph';
-```
-
-Менее желательный импорт:
-
-```js
-import MarkdownViewer from '@shared/ui/MarkdownViewer/MarkdownViewer';
-```
-
-### Зачем это нужно
-
-- упрощает перемещение внутренних файлов;
-- фиксирует внешнюю поверхность модуля;
-- уменьшает связность;
-- упрощает рефакторинг без переписывания импорта по всему проекту.
-
----
-
-## Состояние ключевых модулей
-
-### Auth flow
-
-**Сейчас:**
-- state хранится в `features/auth-by-login/model/authSlice.js`;
-- session initialization находится в `app/providers/UserInit`;
-- API работает через `shared/api`.
-
-**Проблема:**
-- `shared/api` знает о `features/auth-by-login`, что нарушает направленность зависимостей.
-
-**Целевое направление:**
-- либо вынести auth model ближе к `entities/user` или `app/model`;
-- либо убрать знание `shared/api` о feature-слое другим способом.
-
-### Notes / Folders
-
-**Сейчас:**
-- страницы `NotesPage` и `FoldersPage` содержат заметную долю состояния и orchestration-логики;
-- часть сценариев уже вынесена в features;
-- часть крупных блоков уже вынесена в widgets.
-
-**Проблема:**
-- page-слой пока перегружен;
-- доменная логика заметок и папок недостаточно выражена в `entities`.
-
-### Markdown
-
-**Сейчас:**
-- `MarkdownEditor` и `MarkdownViewer` уже вынесены в `shared/ui`;
-- это хороший пример reusable UI-компонентов без привязки к конкретной feature.
-
----
-
-## Backend-архитектура в текущем виде
-
-Backend построен проще, чем фронтенд, и пока не дробится на глубокие внутренние слои.
-
-### Что уже есть
-
-- Django REST Framework;
-- token auth;
-- endpoints для auth, notes, folders, links, profile;
-- единая модель `Note` с `is_folder`;
-- модели `Task` и `Status` как задел на будущий модуль задач.
-
-### Что важно понимать
-
-- код backend API пока концентрируется в `models.py`, `serializer.py`, `views.py`, `urls.py`;
-- это приемлемо для текущего масштаба, но по мере роста задач может понадобиться дополнительное разбиение;
-- в коде остаются переходные модели `FolderOld` и `NoteOld`, которые надо либо убрать, либо явно изолировать.
-
----
-
-## Целевое дерево фронтенда
-
-```text
-frontend/src/
-  app/
-  pages/
-  widgets/
-  features/
-  entities/
-    user/
-    note/
     folder/
     link/
+    note/
     task/
+    user/
+  features/
+    auth-by-login/
+    auth-by-registration/
+    create-folder/
+    create-note/
+    create-task/
+    delete-folder/
+    delete-note/
+    delete-task/
+    drag-and-drop-note/
+    update-folder/
+    update-note/
+    update-task/
+  pages/
+    Auth/
+    Notes/
+    Profile/
+    Tasks/
+    folders/
+    home/
+    registration/
   shared/
     api/
     config/
-    ui/
     lib/
-    assets/
+    ui/
+  widgets/
 ```
 
-### Что должно исчезнуть из корня `src`
+## Layer Responsibilities
 
-- `components`
-- `context`
-- `hooks`
-- `utils`
+### `app`
 
-Не обязательно одномоментно, но как самостоятельные точки роста нового кода они должны перестать использоваться.
+Application bootstrap:
 
----
+- Redux provider.
+- Router.
+- Session initialization through `UserInit`.
+- Global styles.
 
-## Критерии архитектурной готовности
+### `pages`
 
-Архитектуру фронтенда можно считать выровненной, если:
+Route-level composition and page state:
 
-- новые модули создаются только в рамках FSD-слоев;
-- `shared` не зависит от `features`;
-- `pages` в основном собирают блоки, а не хранят большую бизнес-логику;
-- `entities` отражают ключевые сущности проекта;
-- старые директории перестают использоваться для нового кода;
-- импорт между модулями идет через public API, а не через случайные внутренние пути.
+- `NotesPage` composes graph, reader, toolbar, and note/folder modals.
+- `FoldersPage` composes the folder browser and drag-and-drop context.
+- `TasksPage` owns task view state, filters, week/calendar/all views, and task modal orchestration.
 
----
+If page logic becomes reusable domain logic, move it into `entities/*/model` or a feature/widget.
 
-## Практические правила для разработки
+### `widgets`
 
-1. Новый пользовательский сценарий создаем в `features`.
-2. Новый reusable UI создаем в `shared/ui`.
-3. Новый domain helper создаем в `entities/*` или `shared/lib`, в зависимости от привязки к домену.
-4. Новый route собираем в `pages`.
-5. Новый крупный составной блок интерфейса создаем в `widgets`.
-6. В `components`, `context`, `hooks`, `utils` новый код не добавляем.
-7. Перед переносом кода сначала определяем его роль, потом его адрес.
+Large UI blocks:
 
----
+- `note-graph`
+- `notes-reader`
+- `notes-toolbar`
+- `folder-browser`
+- `folder-tree`
+- `header`, `footer`, `navigation`
 
-## Связанные документы
+Widgets may compose lower layers and expose route-independent UI blocks.
 
-- `plans/project-refactoring-plan.md` - поэтапный план рефакторинга
-- `plans/markdown-editor-implementation.md` - план внедрения markdown-редактора
+### `features`
+
+User scenarios:
+
+- Auth forms.
+- Create/update/delete note and folder flows.
+- Task create/update/delete feature folders.
+- Drag-and-drop note feature code.
+
+Feature modules should not become page containers.
+
+### `entities`
+
+Domain modules:
+
+- `user`: auth slice, selectors, user helpers.
+- `note`: note/folder detection and note helpers.
+- `folder`: folder tree helpers.
+- `link`: graph/link helpers.
+- `task`: linked task preview helpers and task URL helpers.
+
+Entities should contain domain helpers, selectors, and small reusable entity UI.
+
+### `shared`
+
+Reusable infrastructure:
+
+- `shared/api`: RTK Query API and auth-aware base query.
+- `shared/config`: route constants.
+- `shared/lib`: generic helpers such as date formatting.
+- `shared/ui`: reusable UI primitives and Markdown components.
+
+## State And API
+
+State management:
+
+- Redux Toolkit for global user/auth state.
+- RTK Query for server state.
+- Route-local React state for page view state and modal state.
+
+RTK Query tag types:
+
+- `Note`
+- `Link`
+- `Task`
+- `User`
+
+The API layer also performs 401 handling. When a protected endpoint returns 401, auth state is cleared and the user is redirected to `/auth`.
+
+## Session Flow
+
+1. `UserInit` checks `localStorage.getItem('token')`.
+2. If a token exists, it calls `GET /api/current-user/`.
+3. On success, Redux receives the token and user.
+4. On missing/invalid token, local auth state is cleared.
+5. `ProtectedRoute` guards `/notes`, `/folders`, `/tasks`, and `/profile`.
+
+## Backend Model Overview
+
+Main models:
+
+- `Note`: unified note/folder record. Folders are notes with `is_folder=True`.
+- `Link`: graph links between two `Note` records.
+- `Task`: user task with title, description, status, priority, optional linked regular note, scheduled date, optional deadline, and completion timestamp.
+- `Profile`: user profile extension with phone number.
+
+Important task rule:
+
+- Tasks may link to regular notes.
+- Folders do not own tasks for now.
+- UI task previews are shown only for regular notes.
+
+## Backend Endpoints
+
+Auth/profile:
+
+- `POST /api/register/`
+- `POST /api/login/`
+- `POST /api/logout/`
+- `GET /api/current-user/`
+- `PUT /api/update-profile/`
+
+Notes/folders/links:
+
+- `GET|POST /api/notes/`
+- `GET|PUT|DELETE /api/notes/<id>/`
+- `GET|POST /api/folders/`
+- `GET|PUT|DELETE /api/folders/<id>/`
+- `GET|POST /api/links/`
+- `GET|DELETE /api/links/<id>/`
+
+Tasks:
+
+- `GET|POST /api/tasks/`
+- `GET|PATCH|PUT|DELETE /api/tasks/<id>/`
+
+## Notes And Folders
+
+Notes and folders are represented by the same backend model. On the frontend:
+
+- `entities/note` contains helpers such as regular-note vs folder checks.
+- `entities/folder` contains tree helpers.
+- `FoldersPage` uses `FolderBrowser`, `DroppableFolder`, and `DraggableNote`.
+- `NotesPage` uses `NoteGraph`, `NotesReader`, and `NotesToolbar`.
+
+## Graph View
+
+Graph view uses D3.js inside `widgets/note-graph`.
+
+Current behavior:
+
+- Shows notes and folders as nodes.
+- Supports selecting a regular note to open the reader panel.
+- Supports toolbar edit/delete actions.
+- Supports a connection mode for creating links.
+- Uses backend links and note data through RTK Query.
+
+Follow-up work remains for richer folder reader behavior and manual QA of link creation.
+
+## Tasks
+
+Task functionality includes:
+
+- Backend CRUD API.
+- RTK Query endpoints.
+- Week view.
+- Calendar view.
+- All-tasks list view.
+- Filters by search, status, priority, date range, and linked note.
+- Status transitions.
+- Optional deadlines.
+- Week drag-and-drop.
+- Linked task previews in graph reader and file view for regular notes.
+
+The Tasks page supports week navigation from other UI areas:
+
+```text
+/tasks?view=week&date=YYYY-MM-DD&task=<task-id>
+```
+
+The `task` parameter is currently used as navigation context. Highlighting can be added later.
+
+## Markdown
+
+Markdown support is implemented with:
+
+- `shared/ui/MarkdownEditor`
+- `shared/ui/MarkdownViewer`
+- `@uiw/react-md-editor`
+- `react-markdown`
+
+Markdown is stored in `Note.text`. Backend changes are not required for Markdown itself.
+
+## Development Guidance
+
+- Keep new reusable UI in `shared/ui`.
+- Keep domain helpers in `entities/*/model`.
+- Keep page-only state in `pages`.
+- Keep large route blocks in `widgets`.
+- Do not reintroduce `components`, `context`, `hooks`, or `utils` at the root of `frontend/src`.
+- Prefer aliases: `@shared`, `@entities`, `@features`, `@widgets`, `@pages`, `@app`.
+
+## Validation
+
+Frontend:
+
+```bash
+cd frontend
+npx eslint src/ --max-warnings=0
+npm run build
+npm test -- --watchAll=false --passWithNoTests
+```
+
+Backend:
+
+```bash
+cd backend
+python manage.py check
+python manage.py migrate
+```
+
+Backend validation is required after changing models, serializers, views, or migrations.

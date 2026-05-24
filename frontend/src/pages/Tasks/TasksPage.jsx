@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { useSearchParams } from 'react-router-dom'
 import { DndContext, PointerSensor, useDraggable, useDroppable, useSensor, useSensors } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { selectUser } from '@entities/user'
@@ -60,8 +61,11 @@ const MONTH_LABELS_GENITIVE = [
 const emptyTaskForm = {
   title: '',
   description: '',
+  hasDeadline: false,
   date: '',
   time: '00:00',
+  deadlineDate: '',
+  deadlineTime: '00:00',
   priority: 'low',
   status: 'planned',
   note: '',
@@ -114,6 +118,23 @@ const isSameDate = (firstDate, secondDate) =>
 
 const formatInputDate = (date) =>
   `${date.getFullYear()}-${padDatePart(date.getMonth() + 1)}-${padDatePart(date.getDate())}`
+
+const parseInputDate = (value) => {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null
+
+  const [year, month, day] = value.split('-').map(Number)
+  const parsedDate = new Date(year, month - 1, day)
+
+  if (
+    parsedDate.getFullYear() !== year ||
+    parsedDate.getMonth() !== month - 1 ||
+    parsedDate.getDate() !== day
+  ) {
+    return null
+  }
+
+  return parsedDate
+}
 
 const formatTaskDate = (date) =>
   `${padDatePart(date.getDate())}.${padDatePart(date.getMonth() + 1)}.${date.getFullYear()}`
@@ -214,6 +235,7 @@ const createTaskFromForm = (form) => ({
   title: form.title.trim(),
   description: form.description.trim(),
   due_date: buildDueDate(form.date, form.time),
+  deadline: form.hasDeadline ? buildDueDate(form.deadlineDate, form.deadlineTime) : null,
   priority: form.priority,
   status: form.status,
   note_id: form.note ? Number(form.note) : null,
@@ -233,20 +255,27 @@ const buildTaskFilterParams = (filters) => {
 }
 
 const mapApiTasksToDisplay = (apiTasks, noteTitlesById) =>
-  apiTasks
-    .filter((task) => task.due_date)
-    .map((task) => ({
+  apiTasks.map((task) => {
+    const hasDeadline = Boolean(task.deadline)
+
+    return {
       id: task.id,
       title: task.title,
       description: task.description || '',
+      hasDeadline,
       date: apiDateToTaskDate(task.due_date),
       time: apiDateToTaskTime(task.due_date),
+      deadlineDate: hasDeadline ? apiDateToTaskDate(task.deadline) : '',
+      deadlineTime: hasDeadline ? apiDateToTaskTime(task.deadline) : '',
+      deadlineLabel: hasDeadline ? `${apiDateToTaskDate(task.deadline)} ${apiDateToTaskTime(task.deadline)}` : 'Без дедлайна',
       priority: task.priority,
       status: task.status,
       note: task.note ? noteTitlesById[task.note] || '' : '',
       noteId: task.note,
       createdAt: task.created_at,
-    }))
+      updatedAt: task.updated_at,
+    }
+  })
 
 const sortTasksChronologically = (tasks) =>
   [...tasks].sort((firstTask, secondTask) => {
@@ -269,6 +298,7 @@ const TasksPage = () => {
   document.title = 'POMNI - TASKS'
 
   const user = useSelector(selectUser)
+  const [searchParams] = useSearchParams()
   const { data: apiTasks = [], isLoading: tasksLoading } = useGetTasksQuery()
   const { data: notes = [], isLoading: notesLoading } = useGetNotesQuery({ is_folder: false })
   const [createTask] = useCreateTaskMutation()
@@ -295,6 +325,8 @@ const TasksPage = () => {
   )
   const minDate = getTodayInputDate()
   const minTime = taskForm.date === minDate ? getCurrentInputTime() : undefined
+  const minDeadlineTime =
+    taskForm.hasDeadline && taskForm.deadlineDate === minDate ? getCurrentInputTime() : undefined
 
   const weekDays = useMemo(() => buildWeekDays(focusedDate), [focusedDate])
   const calendarDays = useMemo(() => buildCalendarDays(focusedDate), [focusedDate])
@@ -337,11 +369,27 @@ const TasksPage = () => {
   const sortedFilteredTasks = useMemo(() => sortTasksChronologically(filteredTasks), [filteredTasks])
   const allViewTasks = hasTaskFilters ? sortedFilteredTasks : sortedTasks
 
+  useEffect(() => {
+    const targetView = searchParams.get('view')
+    const targetDate = parseInputDate(searchParams.get('date'))
+
+    if (targetView === 'week') {
+      setView('week')
+    }
+
+    if (targetDate) {
+      setFocusedDate((currentDate) => (isSameDate(currentDate, targetDate) ? currentDate : targetDate))
+    }
+  }, [searchParams])
+
   const openCreateModal = (date = '') => {
+    const selectedDate = toInputDate(date)
+
     setEditingTaskId(null)
     setTaskForm({
       ...emptyTaskForm,
-      date: toInputDate(date),
+      date: selectedDate,
+      time: selectedDate === minDate ? getCurrentInputTime() : emptyTaskForm.time,
     })
     setFormError('')
     setIsModalOpen(true)
@@ -352,8 +400,11 @@ const TasksPage = () => {
     setTaskForm({
       title: task.title,
       description: task.description,
+      hasDeadline: task.hasDeadline,
       date: toInputDate(task.date),
       time: task.time,
+      deadlineDate: task.hasDeadline ? toInputDate(task.deadlineDate) : '',
+      deadlineTime: task.hasDeadline ? task.deadlineTime : emptyTaskForm.deadlineTime,
       priority: task.priority,
       status: task.status,
       note: task.noteId ? String(task.noteId) : '',
@@ -371,6 +422,21 @@ const TasksPage = () => {
   const handleFormChange = (field, value) => {
     setTaskForm((currentForm) => ({
       ...currentForm,
+      ...(field === 'hasDeadline' && value
+        ? {
+            deadlineDate: currentForm.deadlineDate || currentForm.date || minDate,
+            deadlineTime:
+              currentForm.deadlineDate === minDate || (!currentForm.deadlineDate && currentForm.date === minDate)
+                ? getCurrentInputTime()
+                : currentForm.deadlineTime,
+          }
+        : {}),
+      ...(field === 'hasDeadline' && !value
+        ? {
+            deadlineDate: '',
+            deadlineTime: emptyTaskForm.deadlineTime,
+          }
+        : {}),
       [field]: value,
     }))
     setFormError('')
@@ -410,6 +476,21 @@ const TasksPage = () => {
       return
     }
 
+    if (taskForm.hasDeadline && !taskForm.deadlineDate) {
+      setFormError('Выберите дату дедлайна')
+      return
+    }
+
+    if (taskForm.hasDeadline && taskForm.deadlineDate < minDate) {
+      setFormError('Нельзя выбрать дедлайн раньше текущей даты')
+      return
+    }
+
+    if (taskForm.hasDeadline && taskForm.deadlineDate === minDate && taskForm.deadlineTime < getCurrentInputTime()) {
+      setFormError('Для текущего дня выберите дедлайн не раньше текущего времени')
+      return
+    }
+
     try {
       if (editingTaskId) {
         await updateTask({
@@ -422,7 +503,12 @@ const TasksPage = () => {
 
       closeTaskModal()
     } catch (err) {
-      setFormError(err.data?.due_date?.[0] || err.data?.title?.[0] || 'Не удалось сохранить задачу')
+      setFormError(
+        err.data?.deadline?.[0] ||
+          err.data?.due_date?.[0] ||
+          err.data?.title?.[0] ||
+          'Не удалось сохранить задачу'
+      )
     }
   }
 
@@ -622,6 +708,7 @@ const TasksPage = () => {
           onClose={closeTaskModal}
           onDelete={handleDeleteTask}
           onSubmit={handleSaveTask}
+          minDeadlineTime={minDeadlineTime}
         />
       )}
 
@@ -889,6 +976,7 @@ const AllTasksView = ({
             <div className="tasks-all-row__meta">
               <span>{priority.label}</span>
               <span>{taskStatus.label}</span>
+              <span>{task.deadlineLabel}</span>
               {task.note && <span>{task.note}</span>}
             </div>
 
@@ -1007,6 +1095,7 @@ const TaskCard = ({ task, mode, onEdit, onComplete, onRemove, onRestore }) => {
       {mode === 'week' && (
         <span className="tasks-card__meta">
           <span>{priority.label}</span>
+          {task.hasDeadline && <small>Дедлайн: {task.deadlineLabel}</small>}
           {task.note && <small>{task.note}</small>}
         </span>
       )}
@@ -1094,6 +1183,7 @@ const TaskModal = ({
   isEditing,
   error,
   minDate,
+  minDeadlineTime,
   minTime,
   noteOptions,
   onChange,
@@ -1147,6 +1237,39 @@ const TaskModal = ({
               min={minTime}
               value={taskForm.time}
               onChange={(event) => onChange('time', event.target.value)}
+            />
+          </label>
+        </div>
+
+        <label className="tasks-modal-deadline-toggle">
+          <input
+            type="checkbox"
+            checked={taskForm.hasDeadline}
+            onChange={(event) => onChange('hasDeadline', event.target.checked)}
+          />
+          <span>С дедлайном</span>
+        </label>
+
+        <div className={`tasks-modal__row ${!taskForm.hasDeadline ? 'tasks-modal__row--disabled' : ''}`}>
+          <label className="tasks-modal-field">
+            <span>Дедлайн дата</span>
+            <input
+              type="date"
+              min={minDate}
+              value={taskForm.deadlineDate}
+              disabled={!taskForm.hasDeadline}
+              onChange={(event) => onChange('deadlineDate', event.target.value)}
+            />
+          </label>
+
+          <label className="tasks-modal-field">
+            <span>Дедлайн время</span>
+            <input
+              type="time"
+              min={minDeadlineTime}
+              value={taskForm.deadlineTime}
+              disabled={!taskForm.hasDeadline}
+              onChange={(event) => onChange('deadlineTime', event.target.value)}
             />
           </label>
         </div>

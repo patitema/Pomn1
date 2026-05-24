@@ -8,6 +8,7 @@ import { isRegularNote, noteMatchesSearch } from '@entities/note'
 const FolderBrowser = ({
   folders,
   notes,
+  tasks = [],
   openFolders,
   openNotes,
   search,
@@ -44,6 +45,7 @@ const FolderBrowser = ({
             folder={folder}
             level={0}
             notes={regularNotes}
+            tasks={tasks}
             openFolders={openFolders}
             openNotes={openNotes}
             toggleFolder={onToggleFolder}
@@ -63,6 +65,7 @@ const FolderBrowser = ({
               <DraggableNote
                 key={`unfolder-note-${note.id}`}
                 note={note}
+                tasks={tasks}
                 isNoteOpen={isNoteOpen}
                 toggleNote={onToggleNote}
                 openEdit={onOpenEdit}

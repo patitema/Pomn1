@@ -787,6 +787,26 @@
   gap: 16px;
 }
 
+.tasks-modal__row--disabled {
+  opacity: 0.55;
+}
+
+.tasks-modal-deadline-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--tasks-white);
+  cursor: pointer;
+  font-size: 15px;
+  text-transform: uppercase;
+}
+
+.tasks-modal-deadline-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--tasks-pink);
+}
+
 .tasks-modal-priority {
   border: 0;
   display: grid;

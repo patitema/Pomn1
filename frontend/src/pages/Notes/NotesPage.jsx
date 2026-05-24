@@ -12,6 +12,7 @@ import {
   useCreateLinkMutation,
   useDeleteNoteMutation,
   useGetNotesQuery,
+  useGetTasksQuery,
 } from '@shared/api'
 import './NotesPage.css'
 
@@ -25,6 +26,9 @@ const NotesPage = () => {
   document.title = 'POMNI - NOTES'
   const user = useSelector(selectUser)
   const { data: notes = [] } = useGetNotesQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  })
+  const { data: tasks = [] } = useGetTasksQuery(undefined, {
     refetchOnMountOrArgChange: true,
   })
   const [selectedNoteId, setSelectedNoteId] = useState(null)
@@ -196,7 +200,7 @@ const NotesPage = () => {
           />
         </div>
 
-        <NotesReader selectedNote={selectedNote} onClose={handleClosePanel} />
+        <NotesReader selectedNote={selectedNote} tasks={tasks} onClose={handleClosePanel} />
 
         <NotesToolbar
           selectedNote={selectedNote}

@@ -162,6 +162,7 @@ class TaskSerializer(serializers.ModelSerializer):
             'status',
             'priority',
             'due_date',
+            'deadline',
             'completed_at',
             'created_at',
             'updated_at',
@@ -172,6 +173,12 @@ class TaskSerializer(serializers.ModelSerializer):
         current_minute = timezone.now().replace(second=0, microsecond=0)
         if value and value < current_minute:
             raise serializers.ValidationError('Due date cannot be in the past.')
+        return value
+
+    def validate_deadline(self, value):
+        current_minute = timezone.now().replace(second=0, microsecond=0)
+        if value and value < current_minute:
+            raise serializers.ValidationError('Deadline cannot be in the past.')
         return value
 
     def validate(self, attrs):

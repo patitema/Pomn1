@@ -227,6 +227,42 @@
   width: 100%;
 }
 
+.linked-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.linked-tasks--file {
+  margin: 12px 0;
+  padding: 10px;
+  border: 1px solid #555;
+  border-radius: 5px;
+  background-color: rgba(10, 10, 10, 0.2);
+}
+
+.linked-tasks__item {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background-color: transparent;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.35;
+  padding: 7px 8px;
+  text-align: left;
+  transition: border-color 0.15s ease-out, background-color 0.15s ease-out;
+}
+
+.linked-tasks__item:hover,
+.linked-tasks__item:focus-visible {
+  border-color: #FEB7FF;
+  background-color: rgba(254, 183, 255, 0.1);
+  outline: none;
+}
+
 .folder-content {
   width: 100%;
   overflow: hidden;

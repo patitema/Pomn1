@@ -9,6 +9,7 @@ export const DroppableFolder = React.memo(
     folder,
     level,
     notes,
+    tasks = [],
     openFolders,
     openNotes,
     toggleFolder,
@@ -97,6 +98,7 @@ export const DroppableFolder = React.memo(
                   folder={childFolder}
                   level={level + 1}
                   notes={notes}
+                  tasks={tasks}
                   openFolders={openFolders}
                   openNotes={openNotes}
                   toggleFolder={toggleFolder}
@@ -116,6 +118,7 @@ export const DroppableFolder = React.memo(
                       <DraggableNote
                         key={note.id}
                         note={note}
+                        tasks={tasks}
                         isNoteOpen={isNoteOpen}
                         toggleNote={toggleNote}
                         openEdit={openEdit}
