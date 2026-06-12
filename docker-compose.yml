@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: mysql:8.0
@@ -20,6 +18,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 20s
 
   backend:
     build:
@@ -43,7 +42,8 @@ services:
     networks:
       - pomni_network
     command: >
-      sh -c "python manage.py migrate &&
+      sh -c "python manage.py wait_for_db --timeout 90 &&
+             python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
 
   frontend:
