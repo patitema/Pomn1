@@ -24,12 +24,27 @@ const hasExistingConnection = (links, sourceId, targetId) =>
     );
   });
 
+const getPairKey = (sourceId, targetId) => [sourceId, targetId].sort().join(':');
+
+const getNoteFolderPair = (source, target) => {
+  const items = [source, target];
+  const childNote = items.find((item) => item && !item.is_folder);
+  const folderNote = items.find((item) => item?.is_folder);
+
+  return { childNote, folderNote };
+};
+
+const isCurrentFolderPair = (source, target) => {
+  const { childNote, folderNote } = getNoteFolderPair(source, target);
+  return Boolean(childNote && folderNote && childNote.folder === folderNote.id);
+};
+
 const isValidConnectionTarget = (source, target, links) =>
   Boolean(
     source &&
       target &&
       source.id !== target.id &&
-      source.is_folder !== target.is_folder &&
+      !isCurrentFolderPair(source, target) &&
       !hasExistingConnection(links, source.id, target.id)
   );
 
@@ -40,6 +55,7 @@ const NoteGraph = ({
   onNoteSelect,
   onNoteEdit,
   onConnectionNodeClick,
+  onConnectionEdgeClick,
 }) => {
   const svgRef = useRef(null);
   const { data: notes = [], isLoading: notesLoading } = useGetNotesQuery(undefined, {
@@ -70,6 +86,31 @@ const NoteGraph = ({
     svg.selectAll('*').remove();
 
     const hasNewNodes = notes.some((note) => !nodePositionsRef.current.has(note.id));
+    const folderEdges = notes
+      .filter((note) => note.folder && notes.some((folder) => folder.id === note.folder))
+      .map((note) => ({
+        source: note.folder,
+        target: note.id,
+        id: `folder-${note.folder}-${note.id}`,
+        type: 'folder',
+        folderId: note.folder,
+        noteId: note.id,
+      }));
+    const folderEdgePairs = new Set(
+      folderEdges.map((edge) => getPairKey(edge.source, edge.target))
+    );
+    const semanticEdges = links
+      .map((link) => {
+        const [source, target] = getLinkEndpoints(link);
+        return {
+          source,
+          target,
+          id: `semantic-${link.id}`,
+          type: 'semantic',
+          linkId: link.id,
+        };
+      })
+      .filter((edge) => !folderEdgePairs.has(getPairKey(edge.source, edge.target)));
     const graphData = {
       nodes: notes.map((note) => {
         const savedPosition = nodePositionsRef.current.get(note.id);
@@ -82,14 +123,7 @@ const NoteGraph = ({
           y: savedPosition?.y ?? height / 2 + (Math.random() - 0.5) * 100,
         };
       }),
-      links: links.map((link) => {
-        const [source, target] = getLinkEndpoints(link);
-        return {
-          source,
-          target,
-          id: link.id,
-        };
-      }),
+      links: [...folderEdges, ...semanticEdges],
     };
 
     const findNote = (id) => notes.find((note) => note.id === id);
@@ -122,9 +156,62 @@ const NoteGraph = ({
       .selectAll('line')
       .data(graphData.links)
       .join('line')
-      .attr('stroke', '#999')
-      .attr('stroke-opacity', 0.6)
-      .attr('stroke-width', 2);
+      .attr('class', (d) => `note-graph__link note-graph__link--${d.type}`)
+      .attr('stroke', (d) => (d.type === 'folder' ? '#999' : '#777'))
+      .attr('stroke-opacity', (d) => (d.type === 'folder' ? 0.65 : 0.55))
+      .attr('stroke-width', (d) => (d.type === 'folder' ? 2 : 1.75))
+      .attr('stroke-dasharray', (d) => (d.type === 'semantic' ? '7 7' : null))
+      .style('cursor', connectionMode !== CONNECTION_MODE.IDLE ? 'pointer' : 'default')
+      .on('mouseenter', function handleEdgeMouseEnter() {
+        if (connectionMode === CONNECTION_MODE.IDLE) return;
+        d3.select(this)
+          .attr('stroke', '#ff4d4d')
+          .attr('stroke-opacity', 1)
+          .attr('stroke-width', 4);
+      })
+      .on('mouseleave', function handleEdgeMouseLeave(event, d) {
+        d3.select(this)
+          .attr('stroke', d.type === 'folder' ? '#999' : '#777')
+          .attr('stroke-opacity', d.type === 'folder' ? 0.65 : 0.55)
+          .attr('stroke-width', d.type === 'folder' ? 2 : 1.75);
+      })
+      .on('click', (event, d) => {
+        if (connectionMode === CONNECTION_MODE.IDLE) return;
+        event.stopPropagation();
+        onConnectionEdgeClick?.(d);
+      });
+
+    const setEdgeActiveState = (edge, isActive) => {
+      svg.selectAll('.note-graph__link')
+        .filter((linkData) => linkData.id === edge.id)
+        .attr('stroke', isActive ? '#ff4d4d' : edge.type === 'folder' ? '#999' : '#777')
+        .attr('stroke-opacity', isActive ? 1 : edge.type === 'folder' ? 0.65 : 0.55)
+        .attr('stroke-width', isActive ? 4 : edge.type === 'folder' ? 2 : 1.75);
+    };
+
+    const linkHitbox = svg
+      .append('g')
+      .attr('class', 'note-graph__link-hitboxes')
+      .selectAll('line')
+      .data(graphData.links)
+      .join('line')
+      .attr('class', 'note-graph__link-hitbox')
+      .attr('stroke', 'transparent')
+      .attr('stroke-width', 18)
+      .style('cursor', connectionMode !== CONNECTION_MODE.IDLE ? 'pointer' : 'default')
+      .style('pointer-events', connectionMode !== CONNECTION_MODE.IDLE ? 'stroke' : 'none')
+      .on('mouseenter', (event, d) => {
+        if (connectionMode === CONNECTION_MODE.IDLE) return;
+        setEdgeActiveState(d, true);
+      })
+      .on('mouseleave', (event, d) => {
+        setEdgeActiveState(d, false);
+      })
+      .on('click', (event, d) => {
+        if (connectionMode === CONNECTION_MODE.IDLE) return;
+        event.stopPropagation();
+        onConnectionEdgeClick?.(d);
+      });
 
     const tempLine =
       isPickingTarget && connectionSource
@@ -247,6 +334,12 @@ const NoteGraph = ({
         .attr('x2', (d) => d.target.x)
         .attr('y2', (d) => d.target.y);
 
+      linkHitbox
+        .attr('x1', (d) => d.source.x)
+        .attr('y1', (d) => d.source.y)
+        .attr('x2', (d) => d.target.x)
+        .attr('y2', (d) => d.target.y);
+
       node
         .attr('cx', (d) => {
           d.x = Math.max(GRAPH_PADDING, Math.min(width - GRAPH_PADDING, d.x));
@@ -290,6 +383,7 @@ const NoteGraph = ({
     connectionMode,
     connectionSourceId,
     onConnectionNodeClick,
+    onConnectionEdgeClick,
     onNoteSelect,
     onNoteEdit,
   ]);

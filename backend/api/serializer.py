@@ -95,11 +95,6 @@ class LinkSerializer(serializers.ModelSerializer):
                 'note_to': 'Item cannot be linked to itself.'
             })
 
-        if note_from.is_folder == note_to.is_folder:
-            raise serializers.ValidationError({
-                'note_to': 'Only note-folder links are allowed.'
-            })
-
         request = self.context.get('request') if hasattr(self, 'context') else None
         user = getattr(request, 'user', None)
         if user and user.is_authenticated:

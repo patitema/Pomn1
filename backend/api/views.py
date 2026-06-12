@@ -65,10 +65,6 @@ def notes_list(request):
         if serializer.is_valid():
             note = serializer.save()
 
-            # Автоматически создать Link если заметка добавлена в папку
-            if note.folder:
-                sync_parent_link(note, note.folder, request.user, None)
-
             return Response(
                 NoteSerializer(note).data,
                 status=status.HTTP_201_CREATED,
@@ -113,22 +109,12 @@ def note_detail(request, pk):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        old_folder = note.folder  # Сохраняем старую папку
-
         serializer = NoteSerializer(
             note, data=request.data,
             context={'request': request}, partial=True,
         )
         if serializer.is_valid():
-            note = serializer.save()
-
-            # Если папка изменилась, обновить Link
-            if note.folder != old_folder:
-                # Удалить старую связь с папкой
-                sync_parent_link(note, note.folder, request.user, old_folder)
-
-                # Создать новую связь с папкой
-
+            serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -192,12 +178,6 @@ def links_list(request):
         serializer = LinkSerializer(data=data, context={'request': request})
         if serializer.is_valid():
             link = serializer.save()
-            source = link.note_from
-            target = link.note_to
-            child = target if source.is_folder else source
-            parent = source if source.is_folder else target
-            sync_parent_link(child, parent, request.user)
-
             return Response(
                 LinkSerializer(link).data,
                 status=status.HTTP_201_CREATED,

@@ -6,6 +6,7 @@ import { LinkedTaskActions } from '@features/linked-task-actions';
 
 const NotesReader = ({
   selectedNote,
+  notes = [],
   tasks = [],
   onClose,
   onDeleteTask,
@@ -13,9 +14,13 @@ const NotesReader = ({
   onOpenTaskWeek,
   onToggleTaskDone,
 }) => {
-  const isActive = Boolean(selectedNote && !selectedNote.is_folder);
+  const isActive = Boolean(selectedNote);
+  const isFolder = Boolean(selectedNote?.is_folder);
   const activeClass = isActive ? 'active' : '';
-  const linkedTasks = isActive ? getNearestTaskPreviews(tasks, selectedNote.id) : [];
+  const linkedTasks = isActive && !isFolder ? getNearestTaskPreviews(tasks, selectedNote.id) : [];
+  const folderNotes = isFolder
+    ? notes.filter((note) => note.folder === selectedNote.id && !note.is_folder)
+    : [];
 
   return (
     <div className={`ReadFile ${activeClass}`}>
@@ -32,10 +37,27 @@ const NotesReader = ({
         </div>
         <div className={`FileInfo ${activeClass}`}>
           <div className="notes-page__reader-content">
-            <MarkdownViewer
-              content={selectedNote?.text || ''}
-              className="notes-page__viewer"
-            />
+            {isFolder ? (
+              <div className="notes-page__folder-reader">
+                <h4 className="notes-page__folder-reader-title">Заметки в папке</h4>
+                {folderNotes.length > 0 ? (
+                  <ul className="notes-page__folder-reader-list">
+                    {folderNotes.map((note) => (
+                      <li key={note.id} className="notes-page__folder-reader-item">
+                        {note.title}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="notes-page__folder-reader-empty">В папке нет заметок.</p>
+                )}
+              </div>
+            ) : (
+              <MarkdownViewer
+                content={selectedNote?.text || ''}
+                className="notes-page__viewer"
+              />
+            )}
 
             {linkedTasks.length > 0 && (
               <div className="linked-tasks linked-tasks--reader" aria-label="Связанные задачи">

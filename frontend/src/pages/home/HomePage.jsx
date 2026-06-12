@@ -2,9 +2,9 @@ import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '@entities/user';
 import { Button } from '@shared/ui';
-import { Footer } from '../../widgets/footer';
-import { routes } from '../../shared/config';
-import '../../assets/styles/HomePage.css';
+import { Footer } from '@widgets/footer';
+import { routes } from '@shared/config';
+import './HomePage.css';
 
 const HomePage = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);

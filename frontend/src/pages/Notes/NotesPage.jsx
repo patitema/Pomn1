@@ -13,10 +13,13 @@ import { EditNoteModal } from '@features/update-note'
 import { EditFolderModal } from '@features/update-folder'
 import {
   useCreateLinkMutation,
+  useDeleteLinkMutation,
   useDeleteTaskMutation,
   useDeleteNoteMutation,
+  useGetLinksQuery,
   useGetNotesQuery,
   useGetTasksQuery,
+  useUpdateNoteMutation,
   useUpdateTaskMutation,
 } from '@shared/api'
 import './NotesPage.css'
@@ -37,6 +40,9 @@ const NotesPage = () => {
   const { data: tasks = [] } = useGetTasksQuery(undefined, {
     refetchOnMountOrArgChange: true,
   })
+  const { data: links = [] } = useGetLinksQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  })
   const [selectedNoteId, setSelectedNoteId] = useState(null)
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false)
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false)
@@ -45,6 +51,8 @@ const NotesPage = () => {
   const [deleteNote] = useDeleteNoteMutation()
   const [deleteTask] = useDeleteTaskMutation()
   const [createLink] = useCreateLinkMutation()
+  const [deleteLink] = useDeleteLinkMutation()
+  const [updateNote] = useUpdateNoteMutation()
   const [updateTask] = useUpdateTaskMutation()
   const [connectionMode, setConnectionMode] = useState(CONNECTION_MODE.IDLE)
   const [connectionSourceId, setConnectionSourceId] = useState(null)
@@ -143,10 +151,28 @@ const NotesPage = () => {
     if (!connectionSourceId || note.id === connectionSourceId) return
 
     try {
-      await createLink({
-        note_from: connectionSourceId,
-        note_to: note.id,
-      }).unwrap()
+      const sourceNote = notes.find((item) => item.id === connectionSourceId)
+      const targetNote = note
+      const noteFolderPair = [sourceNote, targetNote]
+      const childNote = noteFolderPair.find((item) => item && !item.is_folder)
+      const folderNote = noteFolderPair.find((item) => item?.is_folder)
+
+      if (childNote && folderNote && childNote.folder === folderNote.id) {
+        cancelConnectionMode()
+        return
+      }
+
+      if (childNote && folderNote && !childNote.folder) {
+        await updateNote({
+          id: childNote.id,
+          body: { folder_id: folderNote.id },
+        }).unwrap()
+      } else {
+        await createLink({
+          note_from: connectionSourceId,
+          note_to: note.id,
+        }).unwrap()
+      }
       setSelectedNoteId(null)
       cancelConnectionMode()
     } catch (err) {
@@ -199,6 +225,24 @@ const NotesPage = () => {
     }
   }
 
+  const handleConnectionEdgeClick = async (edge) => {
+    if (!edge || connectionMode === CONNECTION_MODE.IDLE) return
+
+    try {
+      if (edge.type === 'folder') {
+        await updateNote({
+          id: edge.noteId,
+          body: { folder_id: null },
+        }).unwrap()
+      } else if (edge.linkId) {
+        await deleteLink(edge.linkId).unwrap()
+      }
+    } catch (err) {
+      console.error('Failed to delete graph edge:', err)
+      alert('Не удалось удалить связь.')
+    }
+  }
+
   const handleDeleteTask = async (task) => {
     if (!window.confirm(`Удалить задачу "${task.title}"?`)) return
 
@@ -234,11 +278,13 @@ const NotesPage = () => {
             onNoteSelect={handleNoteSelect}
             onNoteEdit={handleGraphNoteEdit}
             onConnectionNodeClick={handleConnectionNodeClick}
+            onConnectionEdgeClick={handleConnectionEdgeClick}
           />
         </div>
 
         <NotesReader
           selectedNote={selectedNote}
+          notes={notes}
           tasks={tasks}
           onClose={handleClosePanel}
           onDeleteTask={handleDeleteTask}
@@ -274,7 +320,9 @@ const NotesPage = () => {
 
       <EditNoteModal
         note={selectedNote}
+        folderOptions={notes.filter((note) => note.is_folder)}
         isOpen={isEditNoteModalOpen}
+        links={links}
         onClose={() => setIsEditNoteModalOpen(false)}
         onUpdated={handleNoteUpdated}
       />

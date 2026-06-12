@@ -3,7 +3,7 @@ import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { getNearestTaskPreviews } from '@entities/task'
 import { LinkedTaskActions } from '@features/linked-task-actions'
-import { MarkdownViewer } from '../../../shared/ui'
+import { MarkdownViewer } from '@shared/ui'
 
 export function DraggableNote({
   note,

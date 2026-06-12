@@ -1,13 +1,29 @@
 import { useState, useEffect } from 'react';
-import { useUpdateNoteMutation } from '@shared/api';
+import { useCreateLinkMutation, useDeleteLinkMutation, useUpdateNoteMutation } from '@shared/api';
 import { Input, Button, Modal, MarkdownEditor } from '@shared/ui';
 import './EditNoteModal.css';
 
-const EditNoteModal = ({ note, isOpen, onClose, onUpdated }) => {
+const getLinkedFolderLink = (links, noteId, folderId) =>
+  links.find((link) =>
+    (link.note_from === noteId && link.note_to === folderId) ||
+    (link.note_from === folderId && link.note_to === noteId)
+  );
+
+const EditNoteModal = ({
+  note,
+  folderOptions = [],
+  isOpen,
+  links = [],
+  onClose,
+  onUpdated,
+}) => {
+  const [createLink] = useCreateLinkMutation();
+  const [deleteLink] = useDeleteLinkMutation();
   const [updateNote] = useUpdateNoteMutation();
   const [formData, setFormData] = useState({
     title: '',
     content: '',
+    folderId: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -16,6 +32,7 @@ const EditNoteModal = ({ note, isOpen, onClose, onUpdated }) => {
       setFormData({
         title: note.title || '',
         content: note.text || '',
+        folderId: note.folder ? String(note.folder) : '',
       });
     }
   }, [note]);
@@ -25,13 +42,32 @@ const EditNoteModal = ({ note, isOpen, onClose, onUpdated }) => {
     setIsSubmitting(true);
 
     try {
+      const nextFolderId = formData.folderId ? Number(formData.folderId) : null;
+      const previousFolderId = note.folder || null;
       const updatedNote = await updateNote({
         id: note.id,
         body: {
           title: formData.title,
           text: formData.content,
+          folder_id: nextFolderId,
         },
       }).unwrap();
+
+      if (previousFolderId && nextFolderId && previousFolderId !== nextFolderId) {
+        const linkToNextFolder = getLinkedFolderLink(links, note.id, nextFolderId);
+        const linkToPreviousFolder = getLinkedFolderLink(links, note.id, previousFolderId);
+
+        if (linkToNextFolder) {
+          await deleteLink(linkToNextFolder.id).unwrap();
+        }
+
+        if (!linkToPreviousFolder) {
+          await createLink({
+            note_from: note.id,
+            note_to: previousFolderId,
+          }).unwrap();
+        }
+      }
 
       onUpdated?.(updatedNote);
       onClose();
@@ -64,6 +100,22 @@ const EditNoteModal = ({ note, isOpen, onClose, onUpdated }) => {
           onChange={handleChange('title')}
           required
         />
+
+        <label className="edit-note-modal__field">
+          <span className="edit-note-modal__label">Папка</span>
+          <select
+            className="edit-note-modal__select"
+            value={formData.folderId}
+            onChange={handleChange('folderId')}
+          >
+            <option value="">Без папки</option>
+            {folderOptions.map((folder) => (
+              <option key={folder.id} value={folder.id}>
+                {folder.title}
+              </option>
+            ))}
+          </select>
+        </label>
 
         <label className="edit-note-modal__field">
           <span className="edit-note-modal__label">Содержимое</span>
