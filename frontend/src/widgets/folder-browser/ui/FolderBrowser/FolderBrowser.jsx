@@ -19,6 +19,10 @@ const FolderBrowser = ({
   onAddNote,
   onDeleteFolder,
   onDeleteNote,
+  onDeleteTask,
+  onEditTask,
+  onOpenTaskWeek,
+  onToggleTaskDone,
   formatDate,
 }) => {
   const regularNotes = notes.filter(isRegularNote)
@@ -53,6 +57,10 @@ const FolderBrowser = ({
             openEdit={onOpenEdit}
             deleteFolder={onDeleteFolder}
             deleteNote={onDeleteNote}
+            onDeleteTask={onDeleteTask}
+            onEditTask={onEditTask}
+            onOpenTaskWeek={onOpenTaskWeek}
+            onToggleTaskDone={onToggleTaskDone}
             formatDate={formatDate}
             search={search}
           />
@@ -70,6 +78,10 @@ const FolderBrowser = ({
                 toggleNote={onToggleNote}
                 openEdit={onOpenEdit}
                 deleteNote={onDeleteNote}
+                onDeleteTask={onDeleteTask}
+                onEditTask={onEditTask}
+                onOpenTaskWeek={onOpenTaskWeek}
+                onToggleTaskDone={onToggleTaskDone}
                 formatDate={formatDate}
                 className="unfolder-stroke"
               />

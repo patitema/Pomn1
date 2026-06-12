@@ -1,12 +1,8 @@
 import React from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import { useNavigate } from 'react-router-dom'
-import {
-  getNearestTaskPreviews,
-  getTaskPreviewLabel,
-  getTaskWeekQuery,
-} from '@entities/task'
+import { getNearestTaskPreviews } from '@entities/task'
+import { LinkedTaskActions } from '@features/linked-task-actions'
 import { MarkdownViewer } from '../../../shared/ui'
 
 export function DraggableNote({
@@ -17,10 +13,13 @@ export function DraggableNote({
   openEdit,
   deleteNote,
   formatDate,
+  onDeleteTask,
+  onEditTask,
+  onOpenTaskWeek,
+  onToggleTaskDone,
   marginLeft = 0,
   className = '',
 }) {
-  const navigate = useNavigate()
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: note.id,
   })
@@ -82,14 +81,14 @@ export function DraggableNote({
           {linkedTasks.length > 0 && (
             <div className="linked-tasks linked-tasks--file" aria-label="Связанные задачи">
               {linkedTasks.map((task) => (
-                <button
-                  className="linked-tasks__item"
+                <LinkedTaskActions
                   key={task.id}
-                  type="button"
-                  onClick={() => navigate(getTaskWeekQuery(task))}
-                >
-                  {getTaskPreviewLabel(task)}
-                </button>
+                  task={task}
+                  onDelete={onDeleteTask}
+                  onEdit={onEditTask}
+                  onOpenWeek={onOpenTaskWeek}
+                  onToggleDone={onToggleTaskDone}
+                />
               ))}
             </div>
           )}

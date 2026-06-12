@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { getTaskWeekQuery } from '@entities/task'
 import { selectUser } from '@entities/user'
 import { Footer } from '@widgets/footer'
 import { NoteGraph } from '@widgets/note-graph'
 import { NotesReader } from '@widgets/notes-reader'
 import { NotesToolbar } from '@widgets/notes-toolbar'
+import { TASK_PRIORITIES, TASK_STATUSES, TaskModal, useTaskModalController } from '@features/manage-task'
 import { CreateNoteForm } from '@features/create-note'
 import { EditNoteModal } from '@features/update-note'
 import { EditFolderModal } from '@features/update-folder'
 import {
   useCreateLinkMutation,
+  useDeleteTaskMutation,
   useDeleteNoteMutation,
   useGetNotesQuery,
   useGetTasksQuery,
+  useUpdateTaskMutation,
 } from '@shared/api'
 import './NotesPage.css'
 
@@ -24,6 +29,7 @@ const CONNECTION_MODE = {
 
 const NotesPage = () => {
   document.title = 'POMNI - NOTES'
+  const navigate = useNavigate()
   const user = useSelector(selectUser)
   const { data: notes = [] } = useGetNotesQuery(undefined, {
     refetchOnMountOrArgChange: true,
@@ -37,13 +43,17 @@ const NotesPage = () => {
   const [isEditNoteModalOpen, setIsEditNoteModalOpen] = useState(false)
   const [isEditFolderModalOpen, setIsEditFolderModalOpen] = useState(false)
   const [deleteNote] = useDeleteNoteMutation()
+  const [deleteTask] = useDeleteTaskMutation()
   const [createLink] = useCreateLinkMutation()
+  const [updateTask] = useUpdateTaskMutation()
   const [connectionMode, setConnectionMode] = useState(CONNECTION_MODE.IDLE)
   const [connectionSourceId, setConnectionSourceId] = useState(null)
 
   const selectedNote = notes.find((note) => note.id === selectedNoteId) || null
+  const noteOptions = notes.filter((note) => !note.is_folder)
   const isReaderOpen = Boolean(selectedNote)
   const isConnectionModeActive = connectionMode !== CONNECTION_MODE.IDLE
+  const taskModal = useTaskModalController({ deleteTask, updateTask })
 
   const handleAddNote = () => {
     setIsCreateNoteModalOpen(true)
@@ -177,6 +187,33 @@ const NotesPage = () => {
     alert('Изменение цвета пока в разработке.')
   }
 
+  const handleToggleTaskDone = async (task) => {
+    try {
+      await updateTask({
+        id: task.id,
+        body: { status: task.status === 'done' ? 'planned' : 'done' },
+      }).unwrap()
+    } catch (err) {
+      console.error('Failed to update task:', err)
+      alert('Не удалось обновить задачу.')
+    }
+  }
+
+  const handleDeleteTask = async (task) => {
+    if (!window.confirm(`Удалить задачу "${task.title}"?`)) return
+
+    try {
+      await deleteTask(task.id).unwrap()
+    } catch (err) {
+      console.error('Failed to delete task:', err)
+      alert('Не удалось удалить задачу.')
+    }
+  }
+
+  const handleOpenTaskWeek = (task) => {
+    navigate(getTaskWeekQuery(task))
+  }
+
   return (
     <div className="page-container">
       <header>
@@ -200,7 +237,15 @@ const NotesPage = () => {
           />
         </div>
 
-        <NotesReader selectedNote={selectedNote} tasks={tasks} onClose={handleClosePanel} />
+        <NotesReader
+          selectedNote={selectedNote}
+          tasks={tasks}
+          onClose={handleClosePanel}
+          onDeleteTask={handleDeleteTask}
+          onEditTask={taskModal.openTaskModal}
+          onOpenTaskWeek={handleOpenTaskWeek}
+          onToggleTaskDone={handleToggleTaskDone}
+        />
 
         <NotesToolbar
           selectedNote={selectedNote}
@@ -240,6 +285,27 @@ const NotesPage = () => {
         onClose={() => setIsEditFolderModalOpen(false)}
         onUpdated={handleNoteUpdated}
       />
+
+      {taskModal.isTaskModalOpen && (
+        <TaskModal
+          taskForm={taskModal.taskForm}
+          isEditing={true}
+          error={taskModal.taskFormError}
+          minDate={taskModal.minDate}
+          minTime={taskModal.minTime}
+          minDeadlineTime={taskModal.minDeadlineTime}
+          noteOptions={noteOptions}
+          priorities={TASK_PRIORITIES}
+          statuses={TASK_STATUSES}
+          onAddChecklistItem={taskModal.handleAddChecklistItem}
+          onChange={taskModal.handleTaskFormChange}
+          onChecklistItemChange={taskModal.handleChecklistItemChange}
+          onClose={taskModal.closeTaskModal}
+          onDelete={taskModal.handleDeleteTask}
+          onRemoveChecklistItem={taskModal.handleRemoveChecklistItem}
+          onSubmit={taskModal.handleSaveTask}
+        />
+      )}
     </div>
   )
 }

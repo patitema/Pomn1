@@ -1,18 +1,23 @@
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { selectUser } from '@entities/user'
+import { getTaskWeekQuery } from '@entities/task'
 import { isFolderNote, isRegularNote } from '@entities/note'
 import {
+  useDeleteTaskMutation,
   useDeleteFolderMutation,
   useDeleteNoteMutation,
   useGetFoldersQuery,
   useGetNotesQuery,
   useGetTasksQuery,
+  useUpdateTaskMutation,
   useUpdateNoteMutation,
 } from '@shared/api'
 import { formatDateTime } from '@shared/lib'
 import { CreateNoteForm } from '@features/create-note'
+import { TASK_PRIORITIES, TASK_STATUSES, TaskModal, useTaskModalController } from '@features/manage-task'
 import { EditNoteModal } from '@features/update-note'
 import { EditFolderModal } from '@features/update-folder'
 import { FolderBrowser } from '@widgets/folder-browser'
@@ -21,6 +26,7 @@ import './FoldersPage.css'
 
 const FoldersPage = () => {
   document.title = 'POMNI - FOLDER'
+  const navigate = useNavigate()
   const user = useSelector(selectUser)
 
   const { data: notes = [], isLoading: notesLoading } = useGetNotesQuery(undefined, {
@@ -35,8 +41,10 @@ const FoldersPage = () => {
   const regularNotes = notes.filter(isRegularNote)
 
   const [updateNote] = useUpdateNoteMutation()
+  const [updateTask] = useUpdateTaskMutation()
   const [deleteNoteMutation] = useDeleteNoteMutation()
   const [deleteFolderMutation] = useDeleteFolderMutation()
+  const [deleteTask] = useDeleteTaskMutation()
 
   const [openFolders, setOpenFolders] = useState(new Set())
   const [openNotes, setOpenNotes] = useState(new Set())
@@ -47,6 +55,7 @@ const FoldersPage = () => {
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false)
   const [editItem, setEditItem] = useState(null)
   const [editType, setEditType] = useState('')
+  const taskModal = useTaskModalController({ deleteTask, updateTask })
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -174,6 +183,33 @@ const FoldersPage = () => {
     }
   }
 
+  const handleToggleTaskDone = async (task) => {
+    try {
+      await updateTask({
+        id: task.id,
+        body: { status: task.status === 'done' ? 'planned' : 'done' },
+      }).unwrap()
+    } catch (err) {
+      console.error('Failed to update task:', err)
+      alert('Не удалось обновить задачу.')
+    }
+  }
+
+  const handleDeleteTask = async (task) => {
+    if (!window.confirm(`Удалить задачу "${task.title}"?`)) return
+
+    try {
+      await deleteTask(task.id).unwrap()
+    } catch (err) {
+      console.error('Failed to delete task:', err)
+      alert('Не удалось удалить задачу.')
+    }
+  }
+
+  const handleOpenTaskWeek = (task) => {
+    navigate(getTaskWeekQuery(task))
+  }
+
   if (notesLoading || foldersLoading || tasksLoading) return <p>Загрузка...</p>
 
   return (
@@ -203,6 +239,10 @@ const FoldersPage = () => {
             onAddNote={openCreateNote}
             onDeleteFolder={handleDeleteFolder}
             onDeleteNote={handleDeleteNote}
+            onDeleteTask={handleDeleteTask}
+            onEditTask={taskModal.openTaskModal}
+            onOpenTaskWeek={handleOpenTaskWeek}
+            onToggleTaskDone={handleToggleTaskDone}
             formatDate={formatDateTime}
           />
         </main>
@@ -233,6 +273,27 @@ const FoldersPage = () => {
           isFolder={true}
           onSwitchToNote={switchToNoteCreate}
         />
+
+        {taskModal.isTaskModalOpen && (
+          <TaskModal
+            taskForm={taskModal.taskForm}
+            isEditing={true}
+            error={taskModal.taskFormError}
+            minDate={taskModal.minDate}
+            minTime={taskModal.minTime}
+            minDeadlineTime={taskModal.minDeadlineTime}
+            noteOptions={regularNotes}
+            priorities={TASK_PRIORITIES}
+            statuses={TASK_STATUSES}
+            onAddChecklistItem={taskModal.handleAddChecklistItem}
+            onChange={taskModal.handleTaskFormChange}
+            onChecklistItemChange={taskModal.handleChecklistItemChange}
+            onClose={taskModal.closeTaskModal}
+            onDelete={taskModal.handleDeleteTask}
+            onRemoveChecklistItem={taskModal.handleRemoveChecklistItem}
+            onSubmit={taskModal.handleSaveTask}
+          />
+        )}
 
         <Footer />
       </div>

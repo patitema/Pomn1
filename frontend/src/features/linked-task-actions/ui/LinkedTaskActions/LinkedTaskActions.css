@@ -1,0 +1,62 @@
+.linked-task-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  background: rgba(255, 190, 239, 0.08);
+  color: #fff;
+  cursor: pointer;
+  padding: 8px 8px 8px 10px;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.linked-task-actions:hover,
+.linked-task-actions:focus-visible {
+  border-color: #ffbeef;
+  background: rgba(255, 190, 239, 0.14);
+  outline: none;
+}
+
+.linked-task-actions--done {
+  opacity: 0.72;
+}
+
+.linked-task-actions--done .linked-task-actions__label {
+  color: #aaa;
+  text-decoration: line-through;
+}
+
+.linked-task-actions__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.linked-task-actions__buttons {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.linked-task-actions__buttons button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.18);
+  color: #fff;
+  cursor: pointer;
+  padding: 0;
+}
+
+.linked-task-actions__buttons button:hover,
+.linked-task-actions__buttons button:focus-visible {
+  border-color: #ffbeef;
+  color: #ffbeef;
+  outline: none;
+}

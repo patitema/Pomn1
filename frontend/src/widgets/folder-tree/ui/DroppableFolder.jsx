@@ -17,6 +17,10 @@ export const DroppableFolder = React.memo(
     openEdit,
     deleteFolder,
     deleteNote,
+    onDeleteTask,
+    onEditTask,
+    onOpenTaskWeek,
+    onToggleTaskDone,
     formatDate,
     search,
   }) => {
@@ -106,6 +110,10 @@ export const DroppableFolder = React.memo(
                   openEdit={openEdit}
                   deleteFolder={deleteFolder}
                   deleteNote={deleteNote}
+                  onDeleteTask={onDeleteTask}
+                  onEditTask={onEditTask}
+                  onOpenTaskWeek={onOpenTaskWeek}
+                  onToggleTaskDone={onToggleTaskDone}
                   formatDate={formatDate}
                   search={search}
                 />
@@ -123,6 +131,10 @@ export const DroppableFolder = React.memo(
                         toggleNote={toggleNote}
                         openEdit={openEdit}
                         deleteNote={deleteNote}
+                        onDeleteTask={onDeleteTask}
+                        onEditTask={onEditTask}
+                        onOpenTaskWeek={onOpenTaskWeek}
+                        onToggleTaskDone={onToggleTaskDone}
                         formatDate={formatDate}
                         marginLeft={marginLeft + 20}
                       />
