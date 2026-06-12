@@ -71,6 +71,14 @@
   text-decoration: underline;
 }
 
+.markdown-viewer img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 1em 0;
+}
+
 .markdown-viewer table {
   border-collapse: collapse;
   width: 100%;

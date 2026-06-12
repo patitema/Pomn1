@@ -72,7 +72,7 @@ const EditNoteModal = ({ note, isOpen, onClose, onUpdated }) => {
             onChange={(value) => setFormData({ ...formData, content: value || '' })}
             placeholder="Содержимое заметки (поддерживается Markdown)..."
             height={300}
-            preview="edit"
+            preview="live"
           />
         </label>
 

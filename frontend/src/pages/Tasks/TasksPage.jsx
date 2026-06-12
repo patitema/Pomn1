@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
 import { DndContext, PointerSensor, useDraggable, useDroppable, useSensor, useSensors } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
+import CloseIcon from '@mui/icons-material/Close'
 import { selectUser } from '@entities/user'
 import {
   useCreateTaskMutation,
@@ -61,6 +62,7 @@ const MONTH_LABELS_GENITIVE = [
 const emptyTaskForm = {
   title: '',
   description: '',
+  checklistItems: [],
   hasDeadline: false,
   date: '',
   time: '00:00',
@@ -221,6 +223,8 @@ const apiDateToTaskTime = (date) => {
 
 const buildDueDate = (date, time) => new Date(`${date}T${time || '00:00'}:00`).toISOString()
 
+const createChecklistClientId = () => `checklist-${Date.now()}-${Math.random().toString(36).slice(2)}`
+
 const getTodayInputDate = () => formatInputDate(new Date())
 
 const getCurrentInputTime = () => {
@@ -234,6 +238,12 @@ const getCurrentInputTime = () => {
 const createTaskFromForm = (form) => ({
   title: form.title.trim(),
   description: form.description.trim(),
+  checklist_items: form.checklistItems.map((item, index) => ({
+    ...(item.id ? { id: item.id } : {}),
+    title: item.title.trim(),
+    is_completed: item.isCompleted,
+    position: index,
+  })),
   due_date: buildDueDate(form.date, form.time),
   deadline: form.hasDeadline ? buildDueDate(form.deadlineDate, form.deadlineTime) : null,
   priority: form.priority,
@@ -262,6 +272,13 @@ const mapApiTasksToDisplay = (apiTasks, noteTitlesById) =>
       id: task.id,
       title: task.title,
       description: task.description || '',
+      checklistItems: (task.checklist_items || []).map((item) => ({
+        id: item.id,
+        clientId: String(item.id),
+        title: item.title || '',
+        isCompleted: Boolean(item.is_completed),
+        position: item.position,
+      })),
       hasDeadline,
       date: apiDateToTaskDate(task.due_date),
       time: apiDateToTaskTime(task.due_date),
@@ -400,6 +417,7 @@ const TasksPage = () => {
     setTaskForm({
       title: task.title,
       description: task.description,
+      checklistItems: task.checklistItems,
       hasDeadline: task.hasDeadline,
       date: toInputDate(task.date),
       time: task.time,
@@ -442,6 +460,39 @@ const TasksPage = () => {
     setFormError('')
   }
 
+  const handleAddChecklistItem = () => {
+    setTaskForm((currentForm) => ({
+      ...currentForm,
+      checklistItems: [
+        ...currentForm.checklistItems,
+        {
+          clientId: createChecklistClientId(),
+          title: '',
+          isCompleted: false,
+        },
+      ],
+    }))
+    setFormError('')
+  }
+
+  const handleChecklistItemChange = (clientId, field, value) => {
+    setTaskForm((currentForm) => ({
+      ...currentForm,
+      checklistItems: currentForm.checklistItems.map((item) =>
+        item.clientId === clientId ? { ...item, [field]: value } : item
+      ),
+    }))
+    setFormError('')
+  }
+
+  const handleRemoveChecklistItem = (clientId) => {
+    setTaskForm((currentForm) => ({
+      ...currentForm,
+      checklistItems: currentForm.checklistItems.filter((item) => item.clientId !== clientId),
+    }))
+    setFormError('')
+  }
+
   const handleFilterChange = (field, value) => {
     setTaskFilters((currentFilters) => ({
       ...currentFilters,
@@ -455,6 +506,11 @@ const TasksPage = () => {
 
   const handleSaveTask = async (event) => {
     event.preventDefault()
+
+    if (taskForm.checklistItems.some((item) => !item.title.trim())) {
+      setFormError('Заполните все пункты чек-листа или удалите пустые')
+      return
+    }
 
     if (!taskForm.title.trim()) {
       setFormError('Введите название задачи')
@@ -705,6 +761,9 @@ const TasksPage = () => {
           minTime={minTime}
           noteOptions={noteOptions}
           onChange={handleFormChange}
+          onAddChecklistItem={handleAddChecklistItem}
+          onChecklistItemChange={handleChecklistItemChange}
+          onRemoveChecklistItem={handleRemoveChecklistItem}
           onClose={closeTaskModal}
           onDelete={handleDeleteTask}
           onSubmit={handleSaveTask}
@@ -1186,15 +1245,18 @@ const TaskModal = ({
   minDeadlineTime,
   minTime,
   noteOptions,
+  onAddChecklistItem,
   onChange,
+  onChecklistItemChange,
   onClose,
   onDelete,
+  onRemoveChecklistItem,
   onSubmit,
 }) => (
   <div className="tasks-modal-overlay" role="presentation">
     <section className="tasks-modal" role="dialog" aria-modal="true" aria-labelledby="task-modal-title">
       <button className="tasks-modal__close" type="button" onClick={onClose} aria-label="Закрыть">
-        ×
+        <CloseIcon fontSize="small" />
       </button>
 
       <h2 id="task-modal-title">{isEditing ? 'Редактировать задачу' : 'Создать задачу'}</h2>
@@ -1218,6 +1280,47 @@ const TaskModal = ({
             onChange={(event) => onChange('description', event.target.value)}
           />
         </label>
+
+        <section className="tasks-modal-checklist" aria-label="Чек-лист задачи">
+          <div className="tasks-modal-checklist__header">
+            <span>Чек-лист</span>
+            <button type="button" onClick={onAddChecklistItem}>
+              Добавить
+            </button>
+          </div>
+
+          {taskForm.checklistItems.length > 0 ? (
+            <div className="tasks-modal-checklist__items">
+              {taskForm.checklistItems.map((item) => (
+                <div className="tasks-modal-checklist__item" key={item.clientId}>
+                  <input
+                    type="checkbox"
+                    checked={item.isCompleted}
+                    onChange={(event) =>
+                      onChecklistItemChange(item.clientId, 'isCompleted', event.target.checked)
+                    }
+                    aria-label="Отметить пункт чек-листа"
+                  />
+                  <input
+                    type="text"
+                    value={item.title}
+                    placeholder="Пункт чек-листа"
+                    onChange={(event) => onChecklistItemChange(item.clientId, 'title', event.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => onRemoveChecklistItem(item.clientId)}
+                    aria-label="Удалить пункт чек-листа"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="tasks-modal-checklist__empty">Пунктов пока нет</p>
+          )}
+        </section>
 
         <div className="tasks-modal__row">
           <label className="tasks-modal-field">

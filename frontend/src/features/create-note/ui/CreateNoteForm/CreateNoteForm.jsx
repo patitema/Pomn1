@@ -40,7 +40,7 @@ const CreateNoteForm = ({
     try {
       await createNote({
         title: formData.title,
-        text: formData.content,
+        text: isFolder ? '' : formData.content,
         folder_id: isFolder || formData.folderId === NO_FOLDER
           ? parentId
           : Number(formData.folderId),
@@ -113,7 +113,7 @@ const CreateNoteForm = ({
               onChange={(value) => setFormData({ ...formData, content: value || '' })}
               placeholder="Содержимое заметки (поддерживается Markdown)..."
               height={300}
-              preview="edit"
+              preview="live"
             />
           </label>
         )}

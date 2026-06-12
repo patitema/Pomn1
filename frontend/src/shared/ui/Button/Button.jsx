@@ -1,4 +1,20 @@
+import MuiButton from '@mui/material/Button';
 import './Button.css';
+
+const variantMap = {
+  primary: {
+    muiVariant: 'contained',
+    color: 'primary',
+  },
+  secondary: {
+    muiVariant: 'contained',
+    color: 'secondary',
+  },
+  danger: {
+    muiVariant: 'contained',
+    color: 'error',
+  },
+};
 
 const Button = ({
   children,
@@ -10,16 +26,24 @@ const Button = ({
   type = 'button',
   className = '',
   ...props
-}) => (
-  <button
-    className={`button button--${variant} button--${size} ${fullWidth ? 'button--full-width' : ''} ${className}`}
-    disabled={disabled}
-    onClick={onClick}
-    type={type}
-    {...props}
-  >
-    {children}
-  </button>
-);
+}) => {
+  const mappedVariant = variantMap[variant] || variantMap.primary;
+
+  return (
+    <MuiButton
+      className={`button button--${variant} button--${size} ${fullWidth ? 'button--full-width' : ''} ${className}`.trim()}
+      color={mappedVariant.color}
+      disabled={disabled}
+      fullWidth={fullWidth}
+      onClick={onClick}
+      size={size}
+      type={type}
+      variant={mappedVariant.muiVariant}
+      {...props}
+    >
+      {children}
+    </MuiButton>
+  );
+};
 
 export default Button;

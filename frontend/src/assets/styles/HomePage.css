@@ -32,21 +32,6 @@ header{
     font-size: 25px;
 }
 
-.header-container button{
-    width: 250px;
-    height: 60px;
-    border: none;
-    border-radius: 10px;
-    background-color: #FEB7FF;
-    font-size: 20px;
-    font-weight: bold;
-    transition: all 0.1s ease-in-out;
-}
-
-.header-container button:hover{
-    box-shadow: 0 0 5px #FFF;
-}
-
 main{
     display: flex;
     flex-direction: column;
@@ -69,24 +54,39 @@ main{
     margin-top: 50px;
     font-size: 35px;
     flex-wrap: wrap;
-    width: 1000px;
+    max-width: 1000px;
+    width: 100%;
+    padding-inline: 16px;
     text-align: center;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
 }
 
-.main-container button{
-    margin-top: 50px;
-    width: 400px;
-    height: 50px;
-    border: none;
+.main-container h3:last-of-type{
+    margin-bottom: 50px;
+}
+
+.home-cta.MuiButton-root{
+    min-height: 50px;
     border-radius: 10px;
-    background-color: #FEB7FF;
     font-size: 20px;
     font-weight: bold;
     transition: all 0.1s ease-in-out;
+    text-align: center;
+    white-space: nowrap;
 }
 
-.main-container button:hover{
+.home-cta.MuiButton-root:hover{
     box-shadow: 0 0 5px #FFF;
+}
+
+.home-cta--header.MuiButton-root{
+    width: min(100%, 300px);
+    min-height: 60px;
+}
+
+.home-cta--main.MuiButton-root{
+    width: min(100%, 400px);
 }
 
 .support{

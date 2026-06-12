@@ -1,3 +1,4 @@
+import TextField from '@mui/material/TextField';
 import './Input.css';
 
 const Input = ({
@@ -6,11 +7,14 @@ const Input = ({
   className = '',
   ...props
 }) => (
-  <div className={`input-wrapper ${className}`}>
-    {label && <label className="input-wrapper__label">{label}</label>}
-    <input className="input-wrapper__input" {...props} />
-    {error && <span className="input-wrapper__error">{error}</span>}
-  </div>
+  <TextField
+    className={`input-wrapper ${className}`.trim()}
+    error={Boolean(error)}
+    fullWidth
+    helperText={error || undefined}
+    label={label}
+    {...props}
+  />
 );
 
 export default Input;

@@ -80,3 +80,7 @@
 .create-note-form__note-button:hover:not(:disabled) {
   background-color: #ff99f5;
 }
+
+.css-kg6qyf{
+  background-color: #252525 !important;
+}

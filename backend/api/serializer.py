@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.utils import timezone
-from .models import Note, Link, Task, Status
+from .models import Note, Link, Task, TaskChecklistItem, Status
 
 
 class NoteSerializer(serializers.ModelSerializer):
@@ -132,7 +132,21 @@ class StatusSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
+class TaskChecklistItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskChecklistItem
+        fields = ('id', 'title', 'is_completed', 'position', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'created_at', 'updated_at')
+
+    def validate_title(self, value):
+        title = value.strip()
+        if not title:
+            raise serializers.ValidationError('Checklist item title cannot be blank.')
+        return title
+
+
 class TaskSerializer(serializers.ModelSerializer):
+    checklist_items = TaskChecklistItemSerializer(many=True, required=False)
     note_id = serializers.PrimaryKeyRelatedField(
         source='note',
         queryset=Note.objects.filter(is_folder=False),
@@ -163,6 +177,7 @@ class TaskSerializer(serializers.ModelSerializer):
             'priority',
             'due_date',
             'deadline',
+            'checklist_items',
             'completed_at',
             'created_at',
             'updated_at',
@@ -202,12 +217,31 @@ class TaskSerializer(serializers.ModelSerializer):
             instance.completed_at = None
             instance.save(update_fields=['completed_at', 'updated_at'])
 
+    def _sync_checklist_items(self, task, checklist_items):
+        if checklist_items is None:
+            return
+
+        task.checklist_items.all().delete()
+        TaskChecklistItem.objects.bulk_create([
+            TaskChecklistItem(
+                task=task,
+                title=item['title'],
+                is_completed=item.get('is_completed', False),
+                position=index,
+            )
+            for index, item in enumerate(checklist_items)
+        ])
+
     def create(self, validated_data):
+        checklist_items = validated_data.pop('checklist_items', None)
         task = super().create(validated_data)
+        self._sync_checklist_items(task, checklist_items)
         self._sync_completed_at(task)
         return task
 
     def update(self, instance, validated_data):
+        checklist_items = validated_data.pop('checklist_items', None)
         task = super().update(instance, validated_data)
+        self._sync_checklist_items(task, checklist_items)
         self._sync_completed_at(task)
         return task
