@@ -152,10 +152,31 @@
     border: 1px solid #555;
     border-radius: 5px;
     background-color: rgba(255, 255, 255, 0.04);
+    overflow: hidden;
+    transition: border-color 0.15s ease-out, background-color 0.15s ease-out;
+}
+
+.notes-page__folder-reader-item:hover,
+.notes-page__folder-reader-item:focus-within{
+    border-color: #FEB7FF;
+    background-color: rgba(254, 183, 255, 0.1);
+}
+
+.notes-page__folder-reader-button{
+    width: 100%;
+    padding: 10px 12px;
+    border: 0;
+    background: transparent;
     color: #FFF;
+    cursor: pointer;
+    font: inherit;
     font-size: 16px;
     line-height: 1.35;
-    padding: 10px 12px;
+    text-align: left;
+}
+
+.notes-page__folder-reader-button:focus-visible{
+    outline: none;
 }
 
 .notes-page__folder-reader-empty{

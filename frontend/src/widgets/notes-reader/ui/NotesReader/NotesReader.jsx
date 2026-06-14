@@ -12,6 +12,7 @@ const NotesReader = ({
   onDeleteTask,
   onEditTask,
   onOpenTaskWeek,
+  onSelectNote,
   onToggleTaskDone,
 }) => {
   const isActive = Boolean(selectedNote);
@@ -44,7 +45,13 @@ const NotesReader = ({
                   <ul className="notes-page__folder-reader-list">
                     {folderNotes.map((note) => (
                       <li key={note.id} className="notes-page__folder-reader-item">
-                        {note.title}
+                        <button
+                          type="button"
+                          className="notes-page__folder-reader-button"
+                          onClick={() => onSelectNote?.(note)}
+                        >
+                          {note.title}
+                        </button>
                       </li>
                     ))}
                   </ul>

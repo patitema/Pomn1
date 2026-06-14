@@ -290,6 +290,7 @@ const NotesPage = () => {
           onDeleteTask={handleDeleteTask}
           onEditTask={taskModal.openTaskModal}
           onOpenTaskWeek={handleOpenTaskWeek}
+          onSelectNote={handleNoteSelect}
           onToggleTaskDone={handleToggleTaskDone}
         />
 
