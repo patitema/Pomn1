@@ -1,7 +1,12 @@
 import React from 'react'
 import { useDroppable } from '@dnd-kit/core'
 import { getChildFolders, getFolderTitle, hasChildFolders } from '@entities/folder'
-import { noteMatchesSearch } from '@entities/note'
+import {
+  DEFAULT_FOLDER_VIEW_FILTERS,
+  folderBranchMatchesFilters,
+  hasActiveFolderViewFilters,
+  noteMatchesFolderViewFilters,
+} from '../model/filtering'
 import { DraggableNote } from './DraggableNote'
 
 export const DroppableFolder = React.memo(
@@ -22,7 +27,7 @@ export const DroppableFolder = React.memo(
     onOpenTaskWeek,
     onToggleTaskDone,
     formatDate,
-    search,
+    filters = DEFAULT_FOLDER_VIEW_FILTERS,
   }) => {
     const droppableId = Number(folder.id)
 
@@ -31,10 +36,13 @@ export const DroppableFolder = React.memo(
     })
 
     const folderNotes = notes.filter(
-      (note) => note.folder === folder.id && noteMatchesSearch(note, search)
+      (note) => note.folder === folder.id && noteMatchesFolderViewFilters(note, filters, tasks)
     )
-    const childFolders = getChildFolders(folder)
-    const isOpen = openFolders.has(folder.id)
+    const activeFilters = hasActiveFolderViewFilters(filters)
+    const childFolders = getChildFolders(folder).filter((childFolder) =>
+      folderBranchMatchesFilters({ folder: childFolder, filters, notes, tasks })
+    )
+    const isOpen = activeFilters || openFolders.has(folder.id)
     const marginLeft = level * 20
 
     return (
@@ -115,7 +123,7 @@ export const DroppableFolder = React.memo(
                   onOpenTaskWeek={onOpenTaskWeek}
                   onToggleTaskDone={onToggleTaskDone}
                   formatDate={formatDate}
-                  search={search}
+                  filters={filters}
                 />
               ))}
 
@@ -140,7 +148,7 @@ export const DroppableFolder = React.memo(
                       />
                     )
                   })
-                : !hasChildFolders(folder) && (
+                : !activeFilters && !hasChildFolders(folder) && (
                     <li
                       style={{
                         fontStyle: 'italic',

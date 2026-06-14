@@ -21,6 +21,7 @@ import { TASK_PRIORITIES, TASK_STATUSES, TaskModal, useTaskModalController } fro
 import { EditNoteModal } from '@features/update-note'
 import { EditFolderModal } from '@features/update-folder'
 import { FolderBrowser } from '@widgets/folder-browser'
+import { DEFAULT_FOLDER_VIEW_FILTERS } from '@widgets/folder-tree'
 import { Footer } from '@widgets/footer'
 import './FoldersPage.css'
 
@@ -48,7 +49,7 @@ const FoldersPage = () => {
 
   const [openFolders, setOpenFolders] = useState(new Set())
   const [openNotes, setOpenNotes] = useState(new Set())
-  const [search, setSearch] = useState('')
+  const [folderFilters, setFolderFilters] = useState(DEFAULT_FOLDER_VIEW_FILTERS)
   const [isNoteEditOpen, setIsNoteEditOpen] = useState(false)
   const [isFolderEditOpen, setIsFolderEditOpen] = useState(false)
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false)
@@ -122,6 +123,17 @@ const FoldersPage = () => {
     }
 
     setOpenFolders(newOpenFolders)
+  }
+
+  const handleFolderFilterChange = (name, value) => {
+    setFolderFilters((currentFilters) => ({
+      ...currentFilters,
+      [name]: value,
+    }))
+  }
+
+  const resetFolderFilters = () => {
+    setFolderFilters(DEFAULT_FOLDER_VIEW_FILTERS)
   }
 
   const openEdit = (item, type) => {
@@ -231,8 +243,9 @@ const FoldersPage = () => {
             tasks={tasks}
             openFolders={openFolders}
             openNotes={openNotes}
-            search={search}
-            onSearchChange={setSearch}
+            filters={folderFilters}
+            onFilterChange={handleFolderFilterChange}
+            onResetFilters={resetFolderFilters}
             onToggleFolder={toggleFolder}
             onToggleNote={toggleNote}
             onOpenEdit={openEdit}

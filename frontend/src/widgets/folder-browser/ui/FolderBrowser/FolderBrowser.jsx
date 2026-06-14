@@ -1,9 +1,13 @@
 import {
   DraggableNote,
   DroppableFolder,
+  DEFAULT_FOLDER_VIEW_FILTERS,
+  folderBranchMatchesFilters,
+  hasActiveFolderViewFilters,
+  noteMatchesFolderViewFilters,
   RootDropZone,
 } from '@widgets/folder-tree'
-import { isRegularNote, noteMatchesSearch } from '@entities/note'
+import { isRegularNote } from '@entities/note'
 
 const FolderBrowser = ({
   folders,
@@ -11,8 +15,9 @@ const FolderBrowser = ({
   tasks = [],
   openFolders,
   openNotes,
-  search,
-  onSearchChange,
+  filters = DEFAULT_FOLDER_VIEW_FILTERS,
+  onFilterChange,
+  onResetFilters,
   onToggleFolder,
   onToggleNote,
   onOpenEdit,
@@ -26,24 +31,63 @@ const FolderBrowser = ({
   formatDate,
 }) => {
   const regularNotes = notes.filter(isRegularNote)
-  const unfolderNotes = regularNotes.filter(
-    (note) => note.folder === null && noteMatchesSearch(note, search)
+  const hasActiveFilters = hasActiveFolderViewFilters(filters)
+  const visibleFolders = folders.filter((folder) =>
+    folderBranchMatchesFilters({ folder, filters, notes: regularNotes, tasks })
   )
+  const unfolderNotes = regularNotes.filter(
+    (note) => note.folder === null && noteMatchesFolderViewFilters(note, filters, tasks)
+  )
+  const hasVisibleResults = visibleFolders.length > 0 || unfolderNotes.length > 0
 
   return (
     <div className="FolderContainer">
       <div className="navFolderView">
         <input
           className="SearchInput"
-          type="text"
-          placeholder="Search"
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
+          type="search"
+          placeholder="Поиск"
+          value={filters.search}
+          onChange={(e) => onFilterChange('search', e.target.value)}
         />
+        <div className="FolderFilters" aria-label="Фильтры файлового вида">
+          <label className="FolderFilter">
+            <span>Тип</span>
+            <select
+              className="FolderFilterSelect"
+              value={filters.itemType}
+              onChange={(event) => onFilterChange('itemType', event.target.value)}
+            >
+              <option value="all">Все</option>
+              <option value="notes">Заметки</option>
+              <option value="folders">Папки</option>
+            </select>
+          </label>
+          <label className="FolderFilter">
+            <span>Задачи</span>
+            <select
+              className="FolderFilterSelect"
+              value={filters.taskState}
+              onChange={(event) => onFilterChange('taskState', event.target.value)}
+            >
+              <option value="all">Все</option>
+              <option value="hasTasks">Есть задачи</option>
+              <option value="withoutTasks">Без задач</option>
+            </select>
+          </label>
+          <button
+            className="FolderFilterReset"
+            type="button"
+            onClick={onResetFilters}
+            disabled={!hasActiveFilters}
+          >
+            Сбросить
+          </button>
+        </div>
       </div>
 
       <ul className="FileList">
-        {folders.map((folder) => (
+        {visibleFolders.map((folder) => (
           <DroppableFolder
             key={folder.id}
             folder={folder}
@@ -62,7 +106,7 @@ const FolderBrowser = ({
             onOpenTaskWeek={onOpenTaskWeek}
             onToggleTaskDone={onToggleTaskDone}
             formatDate={formatDate}
-            search={search}
+            filters={filters}
           />
         ))}
 
@@ -88,6 +132,12 @@ const FolderBrowser = ({
             )
           })}
         </RootDropZone>
+
+        {!hasVisibleResults && (
+          <li className="FolderSearchEmpty">
+            {hasActiveFilters ? 'Ничего не найдено' : 'Здесь ещё ничего не было'}
+          </li>
+        )}
       </ul>
 
       <button

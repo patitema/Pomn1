@@ -10,5 +10,14 @@ export const getNotePreview = (content, maxLength = 100) => {
   return `${content.slice(0, maxLength)}...`;
 };
 
+const normalizeSearchText = (value = '') => value.toString().trim().toLowerCase();
+
+const stripMarkdownImagePayloads = (value = '') =>
+  value.replace(/!\[[^\]]*]\(data:image\/[^)]+\)/gi, '');
+
 export const noteMatchesSearch = (note, search = '') =>
-  getNoteTitle(note).toLowerCase().includes(search.toLowerCase());
+  !normalizeSearchText(search) ||
+  [
+    getNoteTitle(note),
+    stripMarkdownImagePayloads(note?.text || ''),
+  ].some((value) => normalizeSearchText(value).includes(normalizeSearchText(search)));
