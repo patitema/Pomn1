@@ -1,29 +1,24 @@
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Копируем package файлы
-COPY package.json package-lock.json ./
+ARG REACT_APP_API_URL=http://localhost:8000/api
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+ENV GENERATE_SOURCEMAP=false
 
-# Установка всех зависимостей
+COPY package.json package-lock.json ./
 RUN npm ci && npm cache clean --force
 
-# Копируем исходный код
 COPY . .
-
-# Сборка через npx craco build (явно указываем craco)
 RUN npx craco build
 
-# Production stage
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Копируем build
-COPY --from=builder /app/build ./build
-
-# Устанавливаем serve
 RUN npm install --global serve
+
+COPY --from=builder /app/build ./build
 
 EXPOSE 3000
 
