@@ -24,6 +24,7 @@ __pycache__/
 
 # production
 /frontend/build
+/frontend/dist
 /docs
 /plans
 /reports

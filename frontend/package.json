@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@craco/craco": "^7.1.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/utilities": "^3.2.2",
     "@emotion/react": "^11.14.0",
@@ -26,22 +25,14 @@
     "react-markdown": "^10.1.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.0",
-    "react-scripts": "^5.0.1",
     "serve": "^14.2.6",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "craco start",
-    "start:prod": "serve -s build -l 3000",
-    "build": "craco build",
-    "test": "craco test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "start": "vite --host 0.0.0.0 --port 3000",
+    "start:prod": "serve -s dist -l 3000",
+    "build": "vite build",
+    "test": "vitest run"
   },
   "browserslist": {
     "production": [
@@ -57,14 +48,15 @@
       "last 1 safari version"
     ]
   },
-  "jest": {
-    "moduleNameMapper": {
-      "^@app/(.*)$": "<rootDir>/src/app/$1",
-      "^@pages/(.*)$": "<rootDir>/src/pages/$1",
-      "^@widgets/(.*)$": "<rootDir>/src/widgets/$1",
-      "^@features/(.*)$": "<rootDir>/src/features/$1",
-      "^@entities/(.*)$": "<rootDir>/src/entities/$1",
-      "^@shared/(.*)$": "<rootDir>/src/shared/$1"
-    }
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@vitejs/plugin-react": "^6.0.2",
+    "eslint": "^10.5.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.6.0",
+    "jsdom": "^29.1.1",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
   }
 }

@@ -34,7 +34,7 @@ const RegistrationForm = () => {
     }
 
     try {
-      const { confirmPassword, ...registerData } = formData;
+      const { confirmPassword: _confirmPassword, ...registerData } = formData;
       const result = await register(registerData).unwrap();
       dispatch(setToken(result.token));
       dispatch(setUser(result.user));

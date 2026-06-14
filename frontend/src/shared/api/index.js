@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { logout as clearAuth } from '@entities/user';
 import { routes } from '@shared/config';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api';
+const API_URL = import.meta.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
 /**
  * Кастомный baseQuery с перехватом 401.
@@ -13,7 +13,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api';
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   const result = await fetchBaseQuery({
     baseUrl: API_URL,
-    prepareHeaders: (headers, { getState, endpoint }) => {
+    prepareHeaders: (headers, { endpoint }) => {
       const publicEndpoints = ['login', 'register'];
       if (publicEndpoints.includes(endpoint)) {
         return headers;
