@@ -20,16 +20,23 @@ header{
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-    height: 60vh;
+    min-height: 420px;
+    height: 56vh;
     border-bottom: 1px solid #FFF;
+    padding: 36px 20px;
 }
 
 .header-container > h1{
-    font-size: 40px;
+    font-size: var(--ui-font-3xl);
+    line-height: 1.1;
 }
 
 .header-container p{
-    font-size: 25px;
+    font-size: var(--ui-font-xl);
+    line-height: 1.3;
+    max-width: 900px;
+    padding-inline: 16px;
+    text-align: center;
 }
 
 main{
@@ -39,22 +46,25 @@ main{
 }
 
 .main-container{
-    margin-top: 30px;
+    margin-top: 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-bottom: 30px;
+    padding-bottom: 24px;
 }
 
 .main-container h2{
-    font-size: 30px;
+    font-size: var(--ui-font-2xl);
+    line-height: 1.2;
+    padding-inline: 16px;
+    text-align: center;
 }
 
 .main-container h3{
-    margin-top: 50px;
-    font-size: 35px;
+    margin-top: 36px;
+    font-size: 28px;
     flex-wrap: wrap;
-    max-width: 1000px;
+    max-width: 840px;
     width: 100%;
     padding-inline: 16px;
     text-align: center;
@@ -63,13 +73,13 @@ main{
 }
 
 .main-container h3:last-of-type{
-    margin-bottom: 50px;
+    margin-bottom: 36px;
 }
 
 .home-cta.MuiButton-root{
-    min-height: 50px;
-    border-radius: 10px;
-    font-size: 20px;
+    min-height: var(--ui-control-height-lg);
+    border-radius: var(--ui-radius-lg);
+    font-size: var(--ui-font-lg);
     font-weight: bold;
     transition: all 0.1s ease-in-out;
     text-align: center;
@@ -81,16 +91,16 @@ main{
 }
 
 .home-cta--header.MuiButton-root{
-    width: min(100%, 300px);
-    min-height: 60px;
+    width: min(100%, 260px);
+    min-height: var(--ui-control-height-lg);
 }
 
 .home-cta--main.MuiButton-root{
-    width: min(100%, 400px);
+    width: min(100%, 340px);
 }
 
 .support{
-    margin-top: 30px;
+    margin-top: 24px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -98,14 +108,14 @@ main{
 }
 
 .support p{
-    font-size: 25px;
+    font-size: var(--ui-font-xl);
 }
 
 #boosty{
-    margin-top: 20px;
+    margin-top: 16px;
     background-color: #FFF;
-    width: 300px;
-    height: 100px;
+    width: 240px;
+    height: 80px;
     background: url(/public/images/boosty.png);
     background-repeat: no-repeat;
     background-size: cover;

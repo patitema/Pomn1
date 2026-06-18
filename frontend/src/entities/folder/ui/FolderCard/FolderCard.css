@@ -1,20 +1,20 @@
 .folder-card {
-  background-color: #222;
-  border-radius: 12px;
-  padding: 16px;
-  border: 1px solid #333;
+  background-color: var(--ui-panel);
+  border-radius: var(--ui-radius-lg);
+  padding: var(--ui-space-md);
+  border: 1px solid var(--ui-border);
   display: flex;
-  gap: 12px;
+  gap: var(--ui-space-md);
   cursor: pointer;
   transition: border-color 0.2s ease;
 }
 
 .folder-card:hover {
-  border-color: #FEB7FF;
+  border-color: var(--ui-accent);
 }
 
 .folder-card__icon {
-  font-size: 32px;
+  font-size: var(--ui-font-2xl);
   flex-shrink: 0;
 }
 
@@ -24,9 +24,9 @@
 }
 
 .folder-card__title {
-  margin: 0 0 4px;
-  font-size: 16px;
-  color: #fff;
+  margin: 0 0 var(--ui-space-xs);
+  font-size: var(--ui-font-md);
+  color: var(--ui-text);
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -34,36 +34,36 @@
 }
 
 .folder-card__date {
-  font-size: 12px;
+  font-size: var(--ui-font-xs);
   color: #888;
   display: block;
 }
 
 .folder-card__count {
-  font-size: 12px;
-  color: #FEB7FF;
-  margin-left: 8px;
+  font-size: var(--ui-font-xs);
+  color: var(--ui-accent);
+  margin-left: var(--ui-space-sm);
 }
 
 .folder-card__actions {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--ui-space-xs);
   flex-shrink: 0;
 }
 
 .folder-card__button {
   background: none;
   border: none;
-  font-size: 16px;
+  font-size: var(--ui-font-md);
   cursor: pointer;
   padding: 4px;
-  border-radius: 4px;
+  border-radius: var(--ui-radius-sm);
   transition: background-color 0.2s;
 }
 
 .folder-card__button:hover {
-  background-color: #333;
+  background-color: var(--ui-border);
 }
 
 .folder-card__button--delete:hover {

@@ -1,31 +1,32 @@
 .phone-input {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--ui-space-xs);
   width: 100%;
 }
 
 .phone-input__label {
-  font-size: 14px;
-  color: #fff;
-  margin-bottom: 4px;
+  font-size: var(--ui-font-sm);
+  color: var(--ui-text);
+  margin-bottom: var(--ui-space-xs);
   font-weight: 500;
 }
 
 .phone-input__input {
-  padding: 10px 14px;
-  border: 1px solid #333;
-  border-radius: 8px;
-  background-color: #222;
-  color: #fff;
-  font-size: 16px;
+  min-height: var(--ui-control-height-md);
+  padding: 8px 12px;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-panel);
+  color: var(--ui-text);
+  font-size: var(--ui-font-md);
   font-family: inherit;
   transition: border-color 0.2s ease;
 }
 
 .phone-input__input:focus {
   outline: none;
-  border-color: #FEB7FF;
+  border-color: var(--ui-accent);
 }
 
 .phone-input__input::placeholder {
@@ -34,5 +35,5 @@
 
 .phone-input__error {
   color: #ff4444;
-  font-size: 12px;
+  font-size: var(--ui-font-xs);
 }

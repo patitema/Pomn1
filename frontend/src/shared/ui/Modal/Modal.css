@@ -1,7 +1,7 @@
 .modal {
-  background-color: #222222;
+  background-color: var(--ui-panel);
   background-image: none;
-  padding: 24px;
+  padding: 20px;
   max-width: 500px;
   width: 90%;
   max-height: 90vh;
@@ -10,15 +10,16 @@
 }
 
 .modal.MuiPaper-root {
-  background-color: #222222;
+  background-color: var(--ui-panel);
   background-image: none;
 }
 
 .modal .modal__title {
-  margin: 0 0 20px;
+  margin: 0 36px 18px 0;
   padding: 0;
-  color: #fff;
-  font-size: 20px;
+  color: var(--ui-text);
+  font-size: var(--ui-font-xl);
+  line-height: 1.2;
 }
 
 .modal .modal__close.MuiIconButton-root {
@@ -26,10 +27,10 @@
 }
 
 .modal .modal__close.MuiIconButton-root:hover {
-  color: #FEB7FF;
+  color: var(--ui-accent);
 }
 
 .modal .modal__content {
   padding: 0;
-  color: #fff;
+  color: var(--ui-text);
 }

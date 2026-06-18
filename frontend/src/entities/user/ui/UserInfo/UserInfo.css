@@ -1,20 +1,20 @@
 .user-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--ui-space-sm);
 }
 
 .user-info__avatar {
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background-color: #FEB7FF;
-  color: #151515;
+  background-color: var(--ui-accent);
+  color: var(--ui-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 16px;
+  font-size: var(--ui-font-sm);
 }
 
 .user-info__details {
@@ -24,12 +24,12 @@
 }
 
 .user-info__name {
-  font-size: 14px;
-  color: #fff;
+  font-size: var(--ui-font-sm);
+  color: var(--ui-text);
   font-weight: 600;
 }
 
 .user-info__email {
-  font-size: 12px;
+  font-size: var(--ui-font-xs);
   color: #888;
 }

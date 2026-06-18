@@ -4,13 +4,46 @@
   box-sizing: border-box;
 }
 
+:root {
+  --ui-font-xs: 12px;
+  --ui-font-sm: 13px;
+  --ui-font-md: 14px;
+  --ui-font-lg: 16px;
+  --ui-font-xl: 20px;
+  --ui-font-2xl: 24px;
+  --ui-font-3xl: 30px;
+  --ui-space-xs: 4px;
+  --ui-space-sm: 8px;
+  --ui-space-md: 12px;
+  --ui-space-lg: 16px;
+  --ui-space-xl: 24px;
+  --ui-control-height-sm: 32px;
+  --ui-control-height-md: 40px;
+  --ui-control-height-lg: 48px;
+  --ui-icon-sm: 20px;
+  --ui-icon-md: 28px;
+  --ui-icon-lg: 34px;
+  --ui-radius-sm: 5px;
+  --ui-radius-md: 8px;
+  --ui-radius-lg: 10px;
+  --ui-bg: #151515;
+  --ui-panel: #222222;
+  --ui-panel-deep: #1c1c1c;
+  --ui-border: #333333;
+  --ui-text: #ffffff;
+  --ui-muted: #999999;
+  --ui-accent: #FEB7FF;
+  --ui-accent-hover: #ff99f5;
+}
+
 body {
   margin: 0;
   font-family: "Roboto", "Arial", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #151515;
-  color: #fff;
+  background-color: var(--ui-bg);
+  color: var(--ui-text);
+  font-size: var(--ui-font-md);
 }
 
 code {
@@ -27,7 +60,7 @@ code {
 /* Контент с отступом для сайдбара */
 .app__content {
   flex: 1;
-  margin-left: 55px;
+  margin-left: 48px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;

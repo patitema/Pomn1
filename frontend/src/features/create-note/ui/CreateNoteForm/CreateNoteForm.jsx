@@ -75,6 +75,7 @@ const CreateNoteForm = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
+      className={`create-note-modal ${isFolder ? 'create-note-modal--folder' : ''}`}
       title={isFolder ? 'Создать папку' : 'Создать заметку'}
     >
       <form className="create-note-form" onSubmit={handleSubmit}>

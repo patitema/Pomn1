@@ -1,5 +1,5 @@
 .Hcontainer{
-    padding-top: 30px;
+    padding-top: 24px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -8,14 +8,14 @@
 
 .hTextContainer{
     text-align: center;
-    font-size: 18px;
+    font-size: var(--ui-font-lg);
 }
 .Hcontainer h2{
     color: #999;
 }
 
 .NotesContainer{
-    height: calc(100vh - 110px);
+    height: calc(100vh - 92px);
     min-height: 0;
     width: 100%;
     overflow: hidden;
@@ -23,36 +23,36 @@
 
 .notes-page__main{
     position: relative;
-    height: calc(100vh - 110px);
+    height: calc(100vh - 92px);
     min-height: 0;
     overflow: hidden;
 }
 
 .notes-page__main--reader-open .note-graph__viewport{
-    transform: translateX(-250px);
+    transform: translateX(-220px);
 }
 
 .NotesContainer canvas{
     width: 100%;
     padding-left: 52px;
-    padding-right: 100px;
-    padding-bottom: 20px;
+    padding-right: 80px;
+    padding-bottom: 16px;
     height: auto;
 }
 
 
 
 .FileName h3{
-    padding-left: 10px;
+    padding-left: var(--ui-space-sm);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 100px;
-    font-size: 25px;
+    width: 84px;
+    font-size: var(--ui-font-xl);
 }
 
 .FileName.active h3{
-    width: 550px;
+    width: 460px;
 }
 
 .Info{
@@ -65,20 +65,20 @@
 }
 
 .openInfoBtn{
-    width: 20px;
-    height: 90px;
+    width: 18px;
+    height: 72px;
     background-color: transparent;
     border: none;
-    margin-left: -20px;
+    margin-left: -18px;
 }
 
 .openInfoBtn.active{
-    margin-left: 20px;
+    margin-left: 16px;
 }
 
 .openInfoSvg{
-    width: 30px;
-    height: 90px;
+    width: 26px;
+    height: 72px;
     margin-left: 0;
     color: #AAA;
     transition: all 0.3s ease-out;
@@ -102,7 +102,7 @@
     width: 100%;
     color: #FFF;
     border: none;
-    font-size: 30px;
+    font-size: var(--ui-font-xl);
     text-align: start;
     resize: none;
     outline: none;
@@ -118,10 +118,16 @@
     width: 100%;
     height: 100%;
     min-height: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.notes-page__reader-content::-webkit-scrollbar{
+    display: none;
 }
 
 .FileInfo .notes-page__reader-content .markdown-viewer {
-    flex: 1;
+    flex: 1 1 auto;
     height: auto;
     min-height: 0;
 }
@@ -131,11 +137,17 @@
     height: 100%;
     overflow-y: auto;
     color: #FFF;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.notes-page__folder-reader::-webkit-scrollbar{
+    display: none;
 }
 
 .notes-page__folder-reader-title{
-    margin: 0 0 16px;
-    font-size: 18px;
+    margin: 0 0 var(--ui-space-md);
+    font-size: var(--ui-font-lg);
     font-weight: 700;
 }
 
@@ -164,13 +176,13 @@
 
 .notes-page__folder-reader-button{
     width: 100%;
-    padding: 10px 12px;
+    padding: 8px 10px;
     border: 0;
     background: transparent;
     color: #FFF;
     cursor: pointer;
     font: inherit;
-    font-size: 16px;
+    font-size: var(--ui-font-md);
     line-height: 1.35;
     text-align: left;
 }
@@ -182,7 +194,7 @@
 .notes-page__folder-reader-empty{
     margin: 0;
     color: #AAA;
-    font-size: 16px;
+    font-size: var(--ui-font-md);
 }
 
 .linked-tasks{
@@ -193,8 +205,8 @@
 }
 
 .linked-tasks--reader{
-    margin-top: 18px;
-    padding: 12px;
+    margin-top: 14px;
+    padding: 10px;
     border: 1px solid #666;
     border-radius: 5px;
     background-color: rgba(10, 10, 10, 0.18);
@@ -226,8 +238,14 @@
     height: 100%;
     overflow-y: auto;
     color: #FFF;
-    font-size: 20px;
+    font-size: var(--ui-font-lg);
     text-align: start;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.FileInfo .markdown-viewer::-webkit-scrollbar {
+    display: none;
 }
 
 .FileInfo .markdown-viewer h1,
@@ -268,32 +286,32 @@
     justify-content: center;
     align-items: center;
     background-color: #202020;
-    border-top-left-radius: 30px;
-    border-top-right-radius: 30px;
-    width: 600px;
-    height: 80px;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    width: 500px;
+    height: 64px;
 }
 
 .toolButton{
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 50px;
-    height: 50px;
+    width: 42px;
+    height: 42px;
     background-color: transparent;
     border: none;
 }
 
 .toolIcon{
-    height: 40px;
-    width: 40px;
+    height: var(--ui-icon-lg);
+    width: var(--ui-icon-lg);
     color: #666;
     transition: all 0.1s ease-out;
 }
 
 .toolIcon.available{
-    height: 40px;
-    width: 40px;
+    height: var(--ui-icon-lg);
+    width: var(--ui-icon-lg);
     color: #FFF;
     transition: all 0.1s ease-out;
 }
@@ -310,19 +328,20 @@
 .ToolsList{
     display: flex;
     flex-direction: row;
-    gap: 40px;
+    gap: 28px;
 }
 
 /* Стили для ReadFile компонента */
 .ReadFile{
     position: absolute;
     right: 0;
-    top: 100px;
-    width: 100px;
-    height: 670px;
-    padding-top: 10px;
-    border-top-left-radius: 30px;
-    border-bottom-left-radius: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 84px;
+    height: min(680px, calc(100vh - 116px));
+    padding-top: 8px;
+    border-top-left-radius: 24px;
+    border-bottom-left-radius: 24px;
     background-color: #202020;
     transition: all 0.5s ease-out;
     z-index: 1000;
@@ -330,33 +349,33 @@
 
 .ReadFile.active{
     right: 0;
-    border-radius: 30px;
+    border-radius: 24px;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
-    height: 700px;
-    width: 600px;
-    padding-bottom: 20px;
+    height: min(680px, calc(100vh - 116px));
+    width: 500px;
+    padding-bottom: 16px;
     transition: all 0.5s ease-out;
 }
 
 .FileName{
     border-bottom: 1px solid #FFF;
     width: 100%;
-    height: 30px;
+    height: 28px;
 }
 
 .FileName h3{
-    padding-left: 10px;
+    padding-left: var(--ui-space-sm);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 100px;
-    font-size: 25px;
+    width: 84px;
+    font-size: var(--ui-font-xl);
     color: #FFF;
 }
 
 .FileName.active h3{
-    width: 550px;
+    width: 460px;
 }
 
 .Info{
@@ -369,20 +388,20 @@
 }
 
 .openInfoBtn{
-    width: 20px;
-    height: 90px;
+    width: 18px;
+    height: 72px;
     background-color: transparent;
     border: none;
-    margin-left: -20px;
+    margin-left: -18px;
 }
 
 .openInfoBtn.active{
-    margin-left: 20px;
+    margin-left: 16px;
 }
 
 .openInfoSvg{
-    width: 30px;
-    height: 90px;
+    width: 26px;
+    height: 72px;
     margin-left: 0;
     color: #AAA;
     transition: all 0.3s ease-out;
@@ -394,11 +413,19 @@
 }
 
 .FileInfo{
-    width: 90%;
-    height: 85%;
+    width: 92%;
+    height: calc(100% - 44px);
     display: none;
     justify-content: center;
     align-self: center;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.FileInfo::-webkit-scrollbar {
+    display: none;
 }
 
 #FileInfo{
@@ -406,7 +433,7 @@
     width: 100%;
     color: #FFF;
     border: none;
-    font-size: 30px;
+    font-size: var(--ui-font-xl);
     text-align: start;
     resize: none;
     outline: none;

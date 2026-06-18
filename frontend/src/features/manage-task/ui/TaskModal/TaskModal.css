@@ -15,18 +15,18 @@
   background: rgba(0, 0, 0, 0.55);
   color: var(--tasks-white);
   font-family: var(--tasks-font);
-  padding: 24px;
+  padding: var(--ui-space-xl);
 }
 
 .tasks-modal {
   position: relative;
-  width: min(600px, 100%);
-  max-height: calc(100vh - 48px);
+  width: min(540px, 100%);
+  max-height: calc(100vh - 40px);
   overflow: auto;
   border: 1px solid var(--tasks-border);
   border-radius: 10px;
   background: var(--tasks-panel);
-  padding: 42px 28px 24px;
+  padding: 36px 24px 20px;
 }
 
 .tasks-modal__close {
@@ -53,27 +53,27 @@
 }
 
 .tasks-modal h2 {
-  font-size: 24px;
+  font-size: var(--ui-font-xl);
   font-weight: 400;
   line-height: 1;
-  margin: 0 0 28px;
+  margin: 0 0 22px;
   text-transform: uppercase;
 }
 
 .tasks-modal__form {
   display: grid;
-  gap: 16px;
+  gap: var(--ui-space-md);
 }
 
 .tasks-modal-field {
   display: grid;
-  gap: 8px;
+  gap: var(--ui-space-sm);
 }
 
 .tasks-modal-field span,
 .tasks-modal-priority legend {
   color: var(--tasks-white);
-  font-size: 15px;
+  font-size: var(--ui-font-sm);
   text-transform: uppercase;
 }
 
@@ -85,21 +85,21 @@
   border-radius: 5px;
   background: var(--tasks-panel-deep);
   color: var(--tasks-white);
-  font-size: 15px;
+  font-size: var(--ui-font-sm);
   outline: none;
-  padding: 0 18px;
+  padding: 0 var(--ui-space-md);
   text-transform: uppercase;
 }
 
 .tasks-modal-field input,
 .tasks-modal-field select {
-  height: 42px;
+  height: var(--ui-control-height-md);
 }
 
 .tasks-modal-field textarea {
-  min-height: 100px;
+  min-height: 84px;
   resize: vertical;
-  padding-top: 12px;
+  padding-top: var(--ui-space-sm);
 }
 
 .tasks-modal-field input::placeholder,
@@ -111,7 +111,7 @@
 .tasks-modal__row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 16px;
+  gap: var(--ui-space-md);
 }
 
 .tasks-modal__row--disabled {
@@ -121,10 +121,10 @@
 .tasks-modal-deadline-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--ui-space-sm);
   color: var(--tasks-white);
   cursor: pointer;
-  font-size: 15px;
+  font-size: var(--ui-font-sm);
   text-transform: uppercase;
 }
 
@@ -136,44 +136,44 @@
 
 .tasks-modal-checklist {
   display: grid;
-  gap: 10px;
+  gap: var(--ui-space-sm);
 }
 
 .tasks-modal-checklist__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--ui-space-md);
 }
 
 .tasks-modal-checklist__header span {
   color: var(--tasks-white);
-  font-size: 15px;
+  font-size: var(--ui-font-sm);
   text-transform: uppercase;
 }
 
 .tasks-modal-checklist__header button {
-  min-width: 112px;
-  height: 36px;
+  min-width: 104px;
+  height: var(--ui-control-height-sm);
   border: 1px solid var(--tasks-border);
   border-radius: 5px;
   background: var(--tasks-panel-deep);
   color: var(--tasks-white);
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--ui-font-xs);
   text-transform: uppercase;
 }
 
 .tasks-modal-checklist__items {
   display: grid;
-  gap: 8px;
+  gap: var(--ui-space-sm);
 }
 
 .tasks-modal-checklist__item {
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) 34px;
+  grid-template-columns: 20px minmax(0, 1fr) 32px;
   align-items: center;
-  gap: 8px;
+  gap: var(--ui-space-sm);
 }
 
 .tasks-modal-checklist__item input[type='checkbox'] {
@@ -184,12 +184,12 @@
 
 .tasks-modal-checklist__item input[type='text'] {
   width: 100%;
-  height: 38px;
+  height: var(--ui-control-height-sm);
   border: 1px solid var(--tasks-border);
   border-radius: 5px;
   background: var(--tasks-panel-deep);
   color: var(--tasks-white);
-  font-size: 14px;
+  font-size: var(--ui-font-sm);
   outline: none;
   padding: 0 12px;
 }
@@ -200,20 +200,20 @@
 }
 
 .tasks-modal-checklist__item button {
-  width: 34px;
-  height: 34px;
+  width: var(--ui-control-height-sm);
+  height: var(--ui-control-height-sm);
   border: 1px solid var(--tasks-border);
   border-radius: 5px;
   background: transparent;
   color: var(--tasks-white);
   cursor: pointer;
-  font-size: 20px;
+  font-size: var(--ui-font-lg);
   line-height: 1;
 }
 
 .tasks-modal-checklist__empty {
   color: var(--tasks-muted);
-  font-size: 13px;
+  font-size: var(--ui-font-xs);
   margin: 0;
   text-transform: uppercase;
 }
@@ -228,17 +228,17 @@
 
 .tasks-modal-priority legend {
   grid-column: 1 / -1;
-  margin-bottom: 12px;
+  margin-bottom: var(--ui-space-sm);
 }
 
 .tasks-modal-priority button {
-  height: 42px;
+  height: var(--ui-control-height-md);
   border: 1px solid var(--tasks-border);
   border-radius: 5px;
   background: var(--tasks-panel-deep);
   color: var(--tasks-muted);
   cursor: pointer;
-  font-size: 15px;
+  font-size: var(--ui-font-sm);
   text-transform: uppercase;
 }
 
@@ -255,20 +255,20 @@
 .tasks-modal__actions {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin-top: 8px;
+  gap: var(--ui-space-md);
+  margin-top: var(--ui-space-sm);
 }
 
 .tasks-modal__actions button {
-  min-width: 130px;
+  min-width: 116px;
   width: auto;
-  height: 44px;
+  height: var(--ui-control-height-md);
   border: 1px solid var(--tasks-border);
   border-radius: 5px;
   background: transparent;
   color: var(--tasks-white);
   cursor: pointer;
-  font-size: 15px;
+  font-size: var(--ui-font-sm);
   text-transform: uppercase;
 }
 
@@ -279,18 +279,19 @@
 
 .tasks-modal__error {
   color: #ff8787;
-  font-size: 14px;
+  font-size: var(--ui-font-sm);
   margin: -4px 0 0;
 }
 
 @media (max-width: 760px) {
   .tasks-modal {
-    padding-inline: 20px;
+    padding: 56px 20px 24px;
   }
 
   .tasks-modal__row,
   .tasks-modal-priority {
     grid-template-columns: 1fr;
+    gap: var(--ui-space-lg);
   }
 
   .tasks-modal__actions {

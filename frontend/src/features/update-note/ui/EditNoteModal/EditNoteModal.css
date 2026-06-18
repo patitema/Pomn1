@@ -1,42 +1,42 @@
 .edit-note-modal {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--ui-space-md);
 }
 
 .edit-note-modal__dialog {
-  max-width: 600px;
+  max-width: 540px;
 }
 
 .edit-note-modal__field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--ui-space-xs);
   width: 100%;
 }
 
 .edit-note-modal__label {
-  color: #fff;
-  font-size: 14px;
+  color: var(--ui-text);
+  font-size: var(--ui-font-sm);
   font-weight: 500;
-  margin-bottom: 4px;
+  margin-bottom: var(--ui-space-xs);
 }
 
 .edit-note-modal__textarea {
-  padding: 12px;
-  border: 1px solid #333;
-  border-radius: 8px;
-  background-color: #222;
-  color: #fff;
-  font-size: 16px;
+  padding: var(--ui-space-md);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-panel);
+  color: var(--ui-text);
+  font-size: var(--ui-font-md);
   font-family: inherit;
   resize: vertical;
-  min-height: 120px;
+  min-height: 104px;
 }
 
 .edit-note-modal__textarea:focus {
   outline: none;
-  border-color: #FEB7FF;
+  border-color: var(--ui-accent);
 }
 
 .edit-note-modal__textarea::placeholder {
@@ -45,23 +45,23 @@
 
 .edit-note-modal__select {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #333;
-  border-radius: 8px;
-  background-color: #222;
-  color: #fff;
-  font-size: 16px;
+  padding: var(--ui-space-sm) var(--ui-space-md);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-panel);
+  color: var(--ui-text);
+  font-size: var(--ui-font-md);
   font-family: inherit;
 }
 
 .edit-note-modal__select:focus {
   outline: none;
-  border-color: #FEB7FF;
+  border-color: var(--ui-accent);
 }
 
 .edit-note-modal__actions {
   display: flex;
-  gap: 12px;
+  gap: var(--ui-space-md);
   justify-content: flex-end;
-  margin-top: 8px;
+  margin-top: var(--ui-space-sm);
 }

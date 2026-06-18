@@ -1,38 +1,50 @@
+.create-note-modal {
+  max-width: 560px;
+}
+
+.create-note-modal--folder {
+  min-height: 188px;
+}
+
+.create-note-modal--folder .modal__content {
+  padding-top: var(--ui-space-xs);
+}
+
 .create-note-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--ui-space-md);
 }
 
 .create-note-form__field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--ui-space-xs);
   width: 100%;
 }
 
 .create-note-form__label {
-  color: #fff;
-  font-size: 14px;
+  color: var(--ui-text);
+  font-size: var(--ui-font-sm);
   font-weight: 500;
-  margin-bottom: 4px;
+  margin-bottom: var(--ui-space-xs);
 }
 
 .create-note-form__textarea {
-  padding: 12px;
-  border: 1px solid #333;
-  border-radius: 8px;
-  background-color: #222;
-  color: #fff;
-  font-size: 16px;
+  padding: var(--ui-space-md);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-panel);
+  color: var(--ui-text);
+  font-size: var(--ui-font-md);
   font-family: inherit;
   resize: vertical;
-  min-height: 120px;
+  min-height: 104px;
 }
 
 .create-note-form__textarea:focus {
   outline: none;
-  border-color: #FEB7FF;
+  border-color: var(--ui-accent);
 }
 
 .create-note-form__textarea::placeholder {
@@ -41,26 +53,27 @@
 
 .create-note-form__select {
   width: 100%;
-  padding: 10px 14px;
-  border: 1px solid #333;
-  border-radius: 8px;
-  background-color: #222;
-  color: #fff;
-  font-size: 16px;
+  padding: 8px 12px;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-panel);
+  color: var(--ui-text);
+  font-size: var(--ui-font-md);
   font-family: inherit;
   transition: border-color 0.2s ease;
 }
 
 .create-note-form__select:focus {
   outline: none;
-  border-color: #FEB7FF;
+  border-color: var(--ui-accent);
 }
 
 .create-note-form__actions {
   display: flex;
-  gap: 12px;
+  gap: var(--ui-space-md);
   justify-content: flex-end;
-  margin-top: 8px;
+  margin-top: var(--ui-space-md);
+  flex-wrap: wrap;
 }
 
 .create-note-form__folder-button {
@@ -73,8 +86,8 @@
 }
 
 .create-note-form__note-button {
-  background-color: #FEB7FF;
-  color: #151515;
+  background-color: var(--ui-accent);
+  color: var(--ui-bg);
 }
 
 .create-note-form__note-button:hover:not(:disabled) {

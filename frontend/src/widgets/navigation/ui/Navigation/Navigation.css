@@ -9,7 +9,7 @@ nav {
   justify-content: center;
   flex-direction: column;
   padding-top: 10px;
-  width: 55px;
+  width: 48px;
   height: 100vh;
   border-right: 1px solid #fff;
   background-color: #222222;
@@ -21,7 +21,7 @@ nav {
   align-items: center;
   flex-direction: column;
   padding-top: 10px;
-  width: 250px;
+  width: 220px;
   height: 100vh;
   border-right: 1px solid #fff;
   background-color: #222222;
@@ -30,11 +30,11 @@ nav {
 .logo-nav {
   position: absolute;
   top: 0;
-  margin-top: 40px;
+  margin-top: 32px;
   display: flex;
   justify-content: center;
-  width: 200px;
-  height: 100px;
+  width: 180px;
+  height: 84px;
   opacity: 0;
   transition: all 0.2s ease-out;
 }
@@ -42,14 +42,14 @@ nav {
 .nav-container.active .logo-nav {
   display: flex;
   justify-content: center;
-  width: 200px;
-  height: 100px;
+  width: 180px;
+  height: 84px;
   opacity: 1;
 }
 
 .logo-nav img {
-  width: 50px;
-  height: 50px;
+  width: 42px;
+  height: 42px;
   user-select: none;
 }
 
@@ -61,7 +61,7 @@ ul {
   display: flex;
   align-items: center;
   flex-direction: column;
-  gap: 25px;
+  gap: 22px;
 }
 
 .list-Of-Pages > li p {
@@ -86,7 +86,7 @@ ul {
   opacity: 1;
   display: flex;
   flex-direction: row;
-  font-size: 20px;
+  font-size: var(--ui-font-lg);
   flex-wrap: nowrap;
   color: #fff;
   text-decoration: none;
@@ -99,15 +99,15 @@ ul {
 }
 
 .icon {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   transition: all 0.1s ease-in-out;
   user-select: none;
 }
 
 .profile-icon {
-  width: 40px !important;
-  height: 40px !important;
+  width: 34px !important;
+  height: 34px !important;
 }
 
 .list-Of-Pages > li > a:hover .icon {
@@ -117,7 +117,7 @@ ul {
 
 .openNavBtn {
   position: absolute;
-  top: 50px;
+  top: 44px;
   right: auto;
   transform: rotate(180deg);
   background-color: transparent;
@@ -131,23 +131,23 @@ ul {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 15px;
-  height: 43px;
+  width: 14px;
+  height: 36px;
   color: #fff;
 }
 
 .openNavBtn.active {
-  top: 40px;
+  top: 34px;
   right: 0;
-  margin-right: 20px;
+  margin-right: 16px;
   transform: rotate(0deg);
   transition: all 0.2s ease-out;
 }
 
 .icon {
   display: block;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   color: #fff;
   transition: filter 0.12s ease, color 0.12s ease;
 }

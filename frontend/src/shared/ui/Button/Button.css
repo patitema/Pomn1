@@ -3,8 +3,11 @@
 }
 
 .button.MuiButton-root {
-  gap: 8px;
+  gap: var(--ui-space-sm);
   min-width: 0;
+  border-radius: var(--ui-radius-md);
+  line-height: 1.2;
+  text-transform: none;
 }
 
 .button.Mui-disabled {
@@ -12,17 +15,17 @@
 }
 
 .button--primary.MuiButton-root {
-  background-color: #FEB7FF;
-  color: #151515;
+  background-color: var(--ui-accent);
+  color: var(--ui-bg);
 }
 
 .button--primary.MuiButton-root:hover {
-  background-color: #ff99f5;
+  background-color: var(--ui-accent-hover);
 }
 
 .button--secondary.MuiButton-root {
-  background-color: #222222;
-  color: #fff;
+  background-color: var(--ui-panel);
+  color: var(--ui-text);
 }
 
 .button--secondary.MuiButton-root:hover {
@@ -31,7 +34,7 @@
 
 .button--danger.MuiButton-root {
   background-color: #ff4444;
-  color: #fff;
+  color: var(--ui-text);
 }
 
 .button--danger.MuiButton-root:hover {
@@ -39,18 +42,21 @@
 }
 
 .button--small.MuiButton-root {
-  padding: 6px 12px;
-  font-size: 14px;
+  min-height: var(--ui-control-height-sm);
+  padding: 5px 10px;
+  font-size: var(--ui-font-sm);
 }
 
 .button--medium.MuiButton-root {
-  padding: 10px 20px;
-  font-size: 16px;
+  min-height: var(--ui-control-height-md);
+  padding: 8px 16px;
+  font-size: var(--ui-font-md);
 }
 
 .button--large.MuiButton-root {
-  padding: 14px 28px;
-  font-size: 18px;
+  min-height: var(--ui-control-height-lg);
+  padding: 11px 22px;
+  font-size: var(--ui-font-lg);
 }
 
 .button--full-width.MuiButton-root {

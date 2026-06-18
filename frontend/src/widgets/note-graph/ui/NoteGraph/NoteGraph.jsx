@@ -13,7 +13,7 @@ const CONNECTION_MODE = {
 };
 
 const GRAPH_PADDING = 30;
-const GRAPH_BOTTOM_SAFE_AREA = 130;
+const GRAPH_BOTTOM_SAFE_AREA = 104;
 
 const hasExistingConnection = (links, sourceId, targetId) =>
   links.some((link) => {
@@ -133,17 +133,17 @@ const NoteGraph = ({
 
     const simulation = d3
       .forceSimulation(graphData.nodes)
-      .force('link', d3.forceLink(graphData.links).id((d) => d.id).distance(120))
+      .force('link', d3.forceLink(graphData.links).id((d) => d.id).distance(104))
       .force(
         'charge',
         d3.forceManyBody().strength((d) => {
           const linkCount = graphData.links.filter(
             (link) => link.source.id === d.id || link.target.id === d.id
           ).length;
-          return -300 - linkCount * 100;
+          return -260 - linkCount * 84;
         })
       )
-      .force('collide', d3.forceCollide(35).strength(0.8))
+      .force('collide', d3.forceCollide(30).strength(0.8))
       .force('x', d3.forceX(width / 2).strength(0.02))
       .force('y', d3.forceY(height / 2).strength(0.02))
       .alpha(hasNewNodes ? 1 : 0.05)
@@ -230,7 +230,7 @@ const NoteGraph = ({
       .selectAll('circle')
       .data(graphData.nodes)
       .join('circle')
-      .attr('r', 15)
+      .attr('r', 13)
       .attr('fill', (d) => {
         const noteData = findNote(d.id);
         return isFolderNote(noteData) ? '#4CAF50' : '#FEB7FF';
@@ -289,9 +289,9 @@ const NoteGraph = ({
       .selectAll('text')
       .data(graphData.nodes)
       .join('text')
-      .attr('dx', 30)
+      .attr('dx', 24)
       .attr('dy', 5)
-      .attr('font-size', '12px')
+      .attr('font-size', '11px')
       .attr('fill', '#fff')
       .style('pointer-events', 'none')
       .text((d) => d.title.slice(0, 20));
@@ -392,7 +392,7 @@ const NoteGraph = ({
     if (!nodesRef.current) return;
 
     nodesRef.current
-      .attr('r', (d) => (d.id === selectedNoteId ? 22 : 15))
+      .attr('r', (d) => (d.id === selectedNoteId ? 19 : 13))
       .attr('stroke', (d) => (d.id === selectedNoteId ? '#FFD700' : '#fff'))
       .attr('stroke-width', (d) => (d.id === selectedNoteId ? 4 : 2));
   }, [selectedNoteId]);

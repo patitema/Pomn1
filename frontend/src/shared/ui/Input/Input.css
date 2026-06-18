@@ -4,5 +4,5 @@
 
 .input-wrapper .MuiInputBase-input {
   font-family: inherit;
-  font-size: 16px;
+  font-size: var(--ui-font-md);
 }
