@@ -113,11 +113,13 @@
 }
 
 .notes-page__reader-content{
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 14px;
     width: 100%;
     height: 100%;
     min-height: 0;
+    overflow: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -126,10 +128,21 @@
     display: none;
 }
 
-.FileInfo .notes-page__reader-content .markdown-viewer {
-    flex: 1 1 auto;
-    height: auto;
+.notes-page__reader-main{
+    width: 100%;
     min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.notes-page__reader-main::-webkit-scrollbar{
+    display: none;
+}
+
+.FileInfo .notes-page__reader-content .markdown-viewer {
+    height: auto;
+    min-height: 100%;
 }
 
 .notes-page__folder-reader{
@@ -205,11 +218,22 @@
 }
 
 .linked-tasks--reader{
-    margin-top: 14px;
+    box-sizing: border-box;
+    max-width: 100%;
+    margin-top: 0;
     padding: 10px;
+    max-height: min(150px, 28vh);
+    overflow-y: auto;
+    overflow-x: hidden;
     border: 1px solid #666;
     border-radius: 5px;
     background-color: rgba(10, 10, 10, 0.18);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.linked-tasks--reader::-webkit-scrollbar{
+    display: none;
 }
 
 .linked-tasks__item{
@@ -235,11 +259,12 @@
 
 .FileInfo .markdown-viewer {
     width: 100%;
-    height: 100%;
-    overflow-y: auto;
+    height: auto;
+    overflow: visible;
     color: #FFF;
     font-size: var(--ui-font-lg);
     text-align: start;
+    box-sizing: border-box;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -355,6 +380,7 @@
     height: min(680px, calc(100vh - 116px));
     width: 500px;
     padding-bottom: 16px;
+    overflow: hidden;
     transition: all 0.5s ease-out;
 }
 
@@ -385,6 +411,12 @@
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
+}
+
+.ReadFile .Info{
+    position: static;
+    height: calc(100% - 28px);
+    min-height: 0;
 }
 
 .openInfoBtn{
@@ -419,7 +451,7 @@
     justify-content: center;
     align-self: center;
     min-height: 0;
-    overflow-y: auto;
+    overflow: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }

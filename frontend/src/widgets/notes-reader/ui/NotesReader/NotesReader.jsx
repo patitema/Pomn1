@@ -38,33 +38,35 @@ const NotesReader = ({
         </div>
         <div className={`FileInfo ${activeClass}`}>
           <div className="notes-page__reader-content">
-            {isFolder ? (
-              <div className="notes-page__folder-reader">
-                <h4 className="notes-page__folder-reader-title">Заметки в папке</h4>
-                {folderNotes.length > 0 ? (
-                  <ul className="notes-page__folder-reader-list">
-                    {folderNotes.map((note) => (
-                      <li key={note.id} className="notes-page__folder-reader-item">
-                        <button
-                          type="button"
-                          className="notes-page__folder-reader-button"
-                          onClick={() => onSelectNote?.(note)}
-                        >
-                          {note.title}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="notes-page__folder-reader-empty">В папке нет заметок.</p>
-                )}
-              </div>
-            ) : (
-              <MarkdownViewer
-                content={selectedNote?.text || ''}
-                className="notes-page__viewer"
-              />
-            )}
+            <div className="notes-page__reader-main">
+              {isFolder ? (
+                <div className="notes-page__folder-reader">
+                  <h4 className="notes-page__folder-reader-title">Заметки в папке</h4>
+                  {folderNotes.length > 0 ? (
+                    <ul className="notes-page__folder-reader-list">
+                      {folderNotes.map((note) => (
+                        <li key={note.id} className="notes-page__folder-reader-item">
+                          <button
+                            type="button"
+                            className="notes-page__folder-reader-button"
+                            onClick={() => onSelectNote?.(note)}
+                          >
+                            {note.title}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="notes-page__folder-reader-empty">В папке нет заметок.</p>
+                  )}
+                </div>
+              ) : (
+                <MarkdownViewer
+                  content={selectedNote?.text || ''}
+                  className="notes-page__viewer"
+                />
+              )}
+            </div>
 
             {linkedTasks.length > 0 && (
               <div className="linked-tasks linked-tasks--reader" aria-label="Связанные задачи">

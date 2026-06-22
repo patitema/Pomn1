@@ -240,7 +240,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the detailed architecture guide.
 | Linked task previews in notes | Implemented |
 | Vite migration | Completed |
 | Production security env wiring | Completed |
-| Compact UI scale redesign | In progress |
+| Compact UI scale redesign | Paused |
 | Export | Not started |
 | Tags | Not started |
 
