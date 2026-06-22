@@ -34,6 +34,7 @@
   --ui-muted: #999999;
   --ui-accent: #FEB7FF;
   --ui-accent-hover: #ff99f5;
+  --mobile-nav-height: 56px;
 }
 
 body {
@@ -64,6 +65,7 @@ code {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 /* Контейнер страницы */
@@ -79,4 +81,26 @@ code {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+}
+
+@media (max-width: 1199px) {
+  .app {
+    min-height: 100dvh;
+  }
+
+  .app__content {
+    margin-left: 0;
+    padding-top: var(--mobile-nav-height);
+    min-height: 100dvh;
+    width: 100%;
+  }
+
+  .page-container {
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .page-container--centered {
+    min-height: calc(100dvh - var(--mobile-nav-height));
+  }
 }

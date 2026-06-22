@@ -37,6 +37,8 @@
 .note-graph__svg {
   width: 100%;
   height: 100%;
+  touch-action: none;
+  user-select: none;
 }
 
 .note-graph__loading,

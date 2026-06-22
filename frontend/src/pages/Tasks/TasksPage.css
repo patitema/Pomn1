@@ -1059,6 +1059,38 @@
 
   .tasks-summary {
     grid-template-columns: 1fr;
+    justify-content: stretch;
+    justify-items: stretch;
+    width: 100%;
+    gap: var(--ui-space-md);
+  }
+
+  .tasks-summary-card {
+    min-height: 76px;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "icon label value";
+    justify-content: stretch;
+    place-content: stretch;
+    padding: 14px 16px;
+    text-align: left;
+  }
+
+  .tasks-summary-card span {
+    align-self: center;
+    font-size: var(--ui-font-sm);
+    line-height: 1.2;
+    white-space: normal;
+  }
+
+  .tasks-summary-card strong {
+    align-self: center;
+    font-size: var(--ui-font-xl);
+  }
+
+  .tasks-summary-card svg {
+    align-self: center;
+    width: 26px;
+    height: 26px;
   }
 
   .tasks-filter-bar {

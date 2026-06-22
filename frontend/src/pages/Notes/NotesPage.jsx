@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { getTaskWeekQuery } from '@entities/task'
@@ -56,11 +56,18 @@ const NotesPage = () => {
   const [updateTask] = useUpdateTaskMutation()
   const [connectionMode, setConnectionMode] = useState(CONNECTION_MODE.IDLE)
   const [connectionSourceId, setConnectionSourceId] = useState(null)
+  const [isFooterVisible, setIsFooterVisible] = useState(false)
+  const footerBoundaryRef = useRef(null)
 
   const selectedNote = notes.find((note) => note.id === selectedNoteId) || null
   const noteOptions = notes.filter((note) => !note.is_folder)
   const isReaderOpen = Boolean(selectedNote)
   const isConnectionModeActive = connectionMode !== CONNECTION_MODE.IDLE
+  const notesMainClassName = [
+    'notes-page__main',
+    isReaderOpen ? 'notes-page__main--reader-open' : '',
+    isFooterVisible ? 'notes-page__main--footer-visible' : '',
+  ].filter(Boolean).join(' ')
   const taskModal = useTaskModalController({ deleteTask, updateTask })
 
   const handleAddNote = () => {
@@ -138,6 +145,42 @@ const NotesPage = () => {
       document.removeEventListener('keydown', handleEscape)
     }
   }, [isConnectionModeActive])
+
+  useEffect(() => {
+    const footerBoundary = footerBoundaryRef.current
+
+    if (!footerBoundary) {
+      return undefined
+    }
+
+    let animationFrameId = null
+
+    const updateFooterVisibility = () => {
+      if (animationFrameId) {
+        window.cancelAnimationFrame(animationFrameId)
+      }
+
+      animationFrameId = window.requestAnimationFrame(() => {
+        const footerTop = footerBoundary.getBoundingClientRect().top
+
+        setIsFooterVisible(footerTop <= window.innerHeight)
+        animationFrameId = null
+      })
+    }
+
+    updateFooterVisibility()
+    window.addEventListener('scroll', updateFooterVisibility, { passive: true })
+    window.addEventListener('resize', updateFooterVisibility)
+
+    return () => {
+      if (animationFrameId) {
+        window.cancelAnimationFrame(animationFrameId)
+      }
+
+      window.removeEventListener('scroll', updateFooterVisibility)
+      window.removeEventListener('resize', updateFooterVisibility)
+    }
+  }, [])
 
   const handleConnectionNodeClick = async (note) => {
     if (!note || connectionMode === CONNECTION_MODE.IDLE) return
@@ -268,7 +311,7 @@ const NotesPage = () => {
           </div>
         </div>
       </header>
-      <main className={`notes-page__main ${isReaderOpen ? 'notes-page__main--reader-open' : ''}`}>
+      <main className={notesMainClassName}>
         <div className="NotesContainer">
           <NoteGraph
             selectedNoteId={selectedNoteId}
@@ -304,7 +347,9 @@ const NotesPage = () => {
           isConnectionModeActive={isConnectionModeActive}
         />
       </main>
-      <Footer />
+      <div className="notes-page__footer-boundary" ref={footerBoundaryRef}>
+        <Footer />
+      </div>
 
       <CreateNoteForm
         isOpen={isCreateNoteModalOpen}

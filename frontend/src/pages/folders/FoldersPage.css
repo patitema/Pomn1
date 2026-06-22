@@ -122,6 +122,10 @@
   height: inherit;
 }
 
+.RootDropZone {
+  width: 60vw;
+}
+
 .FolderCreateButton {
   position: fixed;
   right: 24px;
@@ -420,5 +424,71 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: 760px) {
+  .FolderContainer {
+    align-items: stretch;
+    min-height: calc(100dvh - var(--mobile-nav-height));
+    padding: 24px 12px 88px;
+  }
+
+  .navFolderView {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+    gap: var(--ui-space-md);
+  }
+
+  .SearchInput,
+  .FolderFilters,
+  .FolderFilter,
+  .FolderFilterSelect,
+  .FolderFilterReset {
+    width: 100%;
+  }
+
+  .FolderFilters {
+    align-items: stretch;
+  }
+
+  .FileList {
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .RootDropZone {
+    width: 100%;
+  }
+
+  .FolderSearchEmpty,
+  .stroke-folder,
+  .unfolder-stroke {
+    width: 100%;
+  }
+
+  .stroke-folder {
+    padding: var(--ui-space-md);
+  }
+
+  .unfolder-stroke,
+  .stroke {
+    padding-left: var(--ui-space-md);
+  }
+
+  .folder-main,
+  .note-main {
+    gap: var(--ui-space-sm);
+  }
+
+  .Tool-btns {
+    flex-shrink: 0;
+    width: auto;
+  }
+
+  .FolderCreateButton {
+    right: 14px;
+    bottom: 14px;
   }
 }

@@ -474,3 +474,163 @@
 .FileInfo.active{
     display: flex;
 }
+
+@media (max-width: 1199px) {
+    .NotesContainer,
+    .notes-page__main{
+        height: calc(100dvh - var(--mobile-nav-height));
+        min-height: 0;
+    }
+
+    .notes-page__main{
+        overflow: visible;
+    }
+
+    .notes-page__main--reader-open .note-graph__viewport{
+        transform: none;
+    }
+
+    .note-graph__viewport{
+        padding-bottom: 88px;
+    }
+
+    .EditToolsContainer{
+        position: fixed;
+        left: 50%;
+        bottom: max(14px, env(safe-area-inset-bottom));
+        transform: translateX(-50%);
+        margin: 0;
+        width: min(480px, calc(100% - 32px));
+        height: 56px;
+        border-radius: 18px;
+        z-index: 900;
+    }
+
+    .notes-page__main--footer-visible .EditToolsContainer{
+        position: absolute;
+        bottom: 14px;
+    }
+
+    .ToolsList{
+        gap: clamp(14px, 5vw, 28px);
+    }
+
+    .toolButton{
+        width: 38px;
+        height: 38px;
+    }
+
+    .toolIcon,
+    .toolIcon.available{
+        width: 30px;
+        height: 30px;
+    }
+
+    .ReadFile{
+        display: none;
+        position: fixed;
+        top: calc(var(--mobile-nav-height) + 16px);
+        right: 16px;
+        bottom: 16px;
+        left: auto;
+        width: min(560px, calc(100vw - 32px));
+        height: calc(100dvh - var(--mobile-nav-height) - 32px);
+        padding-top: 0;
+        border-radius: 20px;
+        transform: none;
+        z-index: 1500;
+    }
+
+    .ReadFile.active{
+        display: block;
+        position: fixed;
+        top: calc(var(--mobile-nav-height) + 16px);
+        right: 16px;
+        bottom: 16px;
+        left: auto;
+        width: min(560px, calc(100vw - 32px));
+        height: calc(100dvh - var(--mobile-nav-height) - 32px);
+        padding-top: 0;
+        padding-bottom: 0;
+        border-radius: 20px;
+        transform: none;
+    }
+
+    .FileName{
+        display: flex;
+        align-items: center;
+        height: 44px;
+    }
+
+    .FileName h3,
+    .FileName.active h3{
+        width: calc(100% - 56px);
+        font-size: var(--ui-font-xl);
+    }
+
+    .Info,
+    .ReadFile .Info{
+        height: calc(100% - 44px);
+        align-items: stretch;
+    }
+
+    .openInfo{
+        position: absolute;
+        top: 6px;
+        right: 12px;
+        z-index: 2;
+    }
+
+    .openInfoBtn,
+    .openInfoBtn.active{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        margin-left: 0;
+        cursor: pointer;
+    }
+
+    .openInfoSvg,
+    .openInfoSvg.active{
+        width: 22px;
+        height: 38px;
+    }
+
+    .FileInfo,
+    .FileInfo.active{
+        width: 100%;
+        height: 100%;
+        padding: 16px;
+        align-self: stretch;
+    }
+}
+
+@media (max-width: 599px) {
+    .EditToolsContainer{
+        bottom: max(12px, env(safe-area-inset-bottom));
+        width: min(420px, calc(100% - 24px));
+        height: 54px;
+    }
+
+    .notes-page__main--footer-visible .EditToolsContainer{
+        bottom: 12px;
+    }
+
+    .ReadFile,
+    .ReadFile.active{
+        top: var(--mobile-nav-height);
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: calc(100dvh - var(--mobile-nav-height));
+        border-radius: 0;
+    }
+
+    .FileInfo,
+    .FileInfo.active{
+        padding: 14px;
+    }
+}

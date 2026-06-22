@@ -14,11 +14,10 @@ export function RootDropZone({ children }) {
     minHeight: '100px',
     borderRadius: '5px',
     transition: 'background-color 0.2s ease',
-    width: '60vw',
   }
 
   return (
-    <div ref={setNodeRef} style={style}>
+    <div className="RootDropZone" ref={setNodeRef} style={style}>
       {children}
     </div>
   )
