@@ -92,7 +92,10 @@ newman run tests/api/postman-collection.json --env-var baseUrl=http://localhost:
 Frontend:
 
 ```env
+# Docker/prod: browser uses the same origin and frontend nginx proxies /api/ to backend.
 REACT_APP_API_URL=/api
+
+# Local frontend dev without dockerized frontend:
 REACT_APP_API_URL=http://localhost:8000/api
 VITE_API_URL=http://localhost:8000/api
 ```
