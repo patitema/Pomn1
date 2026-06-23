@@ -124,7 +124,7 @@ const EditNoteModal = ({
             onChange={(value) => setFormData({ ...formData, content: value || '' })}
             placeholder="Содержимое заметки (поддерживается Markdown)..."
             height={300}
-            preview="live"
+            preview="edit"
           />
         </label>
 

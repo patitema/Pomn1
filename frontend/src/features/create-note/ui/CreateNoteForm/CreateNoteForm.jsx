@@ -114,19 +114,12 @@ const CreateNoteForm = ({
               onChange={(value) => setFormData({ ...formData, content: value || '' })}
               placeholder="Содержимое заметки (поддерживается Markdown)..."
               height={300}
-              preview="live"
+              preview="edit"
             />
           </label>
         )}
 
         <div className="create-note-form__actions">
-          <Button
-            type="submit"
-            className={isFolder ? 'create-note-form__folder-button' : ''}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Создание...' : 'Создать'}
-          </Button>
           {isFolder ? (
             <Button
               className="create-note-form__note-button"
@@ -144,6 +137,13 @@ const CreateNoteForm = ({
               Создать папку
             </Button>
           )}
+          <Button
+            type="submit"
+            className={isFolder ? 'create-note-form__folder-button' : ''}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Создание...' : 'Создать'}
+          </Button>
           <Button
             variant="secondary"
             onClick={onClose}

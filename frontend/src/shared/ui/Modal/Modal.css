@@ -34,3 +34,39 @@
   padding: 0;
   color: var(--ui-text);
 }
+
+@media (max-width: 760px) {
+  .modal__container.MuiDialog-container {
+    align-items: flex-start;
+  }
+
+  .modal {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: none;
+    height: calc(100dvh - var(--mobile-nav-height));
+    max-height: calc(100dvh - var(--mobile-nav-height));
+    margin: var(--mobile-nav-height) 0 0;
+    border-radius: 0;
+    padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  }
+
+  .modal.MuiPaper-root {
+    width: 100%;
+    max-width: none;
+    height: calc(100dvh - var(--mobile-nav-height));
+    max-height: calc(100dvh - var(--mobile-nav-height));
+    margin: var(--mobile-nav-height) 0 0;
+    border-radius: 0;
+  }
+
+  .modal .modal__title {
+    flex-shrink: 0;
+  }
+
+  .modal .modal__content {
+    flex: 1;
+    min-height: 0;
+  }
+}

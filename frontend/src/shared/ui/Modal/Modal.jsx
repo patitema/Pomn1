@@ -16,6 +16,9 @@ const Modal = ({
     open={isOpen}
     onClose={onClose}
     slotProps={{
+      container: {
+        className: 'modal__container',
+      },
       paper: {
         className: `modal ${className}`.trim(),
         sx: {

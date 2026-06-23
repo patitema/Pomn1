@@ -30,10 +30,16 @@ const NotesReader = ({
       </div>
       <div className="Info">
         <div className="openInfo">
-          <button className={`openInfoBtn ${activeClass}`}>
-            <svg className={`openInfoSvg ${activeClass}`} onClick={onClose}>
+          <button
+            className={`openInfoBtn ${activeClass}`}
+            type="button"
+            aria-label="Закрыть"
+            onClick={onClose}
+          >
+            <svg className={`openInfoSvg ${activeClass}`} aria-hidden="true">
               <use href="/images/icons.svg#Arrow"></use>
             </svg>
+            <span className="openInfoCloseIcon" aria-hidden="true">X</span>
           </button>
         </div>
         <div className={`FileInfo ${activeClass}`}>

@@ -1,3 +1,5 @@
+import { useEffect, useId, useState } from 'react'
+
 import {
   DraggableNote,
   DroppableFolder,
@@ -32,6 +34,8 @@ const FolderBrowser = ({
 }) => {
   const regularNotes = notes.filter(isRegularNote)
   const hasActiveFilters = hasActiveFolderViewFilters(filters)
+  const [areFiltersOpen, setAreFiltersOpen] = useState(false)
+  const filtersId = useId()
   const visibleFolders = folders.filter((folder) =>
     folderBranchMatchesFilters({ folder, filters, notes: regularNotes, tasks })
   )
@@ -39,6 +43,12 @@ const FolderBrowser = ({
     (note) => note.folder === null && noteMatchesFolderViewFilters(note, filters, tasks)
   )
   const hasVisibleResults = visibleFolders.length > 0 || unfolderNotes.length > 0
+
+  useEffect(() => {
+    if (hasActiveFilters) {
+      setAreFiltersOpen(true)
+    }
+  }, [hasActiveFilters])
 
   return (
     <div className="FolderContainer">
@@ -50,7 +60,24 @@ const FolderBrowser = ({
           value={filters.search}
           onChange={(e) => onFilterChange('search', e.target.value)}
         />
-        <div className="FolderFilters" aria-label="Фильтры файлового вида">
+        <button
+          className={[
+            'FolderFiltersToggle',
+            areFiltersOpen ? 'is-open' : '',
+            hasActiveFilters ? 'has-active' : '',
+          ].filter(Boolean).join(' ')}
+          type="button"
+          aria-controls={filtersId}
+          aria-expanded={areFiltersOpen}
+          onClick={() => setAreFiltersOpen((current) => !current)}
+        >
+          <span>{hasActiveFilters ? 'Фильтры активны' : 'Фильтры'}</span>
+        </button>
+        <div
+          id={filtersId}
+          className={`FolderFilters ${areFiltersOpen ? 'is-open' : ''}`}
+          aria-label="Фильтры файлового вида"
+        >
           <label className="FolderFilter">
             <span>Тип</span>
             <select

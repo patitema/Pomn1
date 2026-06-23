@@ -97,3 +97,19 @@
 .css-kg6qyf{
   background-color: #252525 !important;
 }
+
+@media (max-width: 760px) {
+  .create-note-modal--folder .modal__content {
+    display: flex;
+    align-items: center;
+    padding-top: 0;
+  }
+
+  .create-note-modal--folder .create-note-form {
+    width: 100%;
+  }
+
+  .create-note-modal--folder .create-note-form__actions {
+    justify-content: center;
+  }
+}

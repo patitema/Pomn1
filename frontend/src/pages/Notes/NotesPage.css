@@ -89,6 +89,20 @@
     transition: all 0.3s ease-out;
 }
 
+.openInfoCloseIcon{
+    display: none;
+    color: #AAA;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1;
+    transition: color 0.15s ease-out;
+}
+
+.openInfoBtn:hover .openInfoCloseIcon,
+.openInfoBtn:focus-visible .openInfoCloseIcon{
+    color: #FEB7FF;
+}
+
 .FileInfo{
     width: 90%;
     height: 85%;
@@ -529,14 +543,14 @@
     .ReadFile{
         display: none;
         position: fixed;
-        top: calc(var(--mobile-nav-height) + 16px);
-        right: 16px;
-        bottom: 16px;
-        left: auto;
-        width: min(560px, calc(100vw - 32px));
-        height: calc(100dvh - var(--mobile-nav-height) - 32px);
+        top: var(--mobile-nav-height);
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: calc(100dvh - var(--mobile-nav-height));
         padding-top: 0;
-        border-radius: 20px;
+        border-radius: 0;
         transform: none;
         z-index: 1500;
     }
@@ -544,15 +558,15 @@
     .ReadFile.active{
         display: block;
         position: fixed;
-        top: calc(var(--mobile-nav-height) + 16px);
-        right: 16px;
-        bottom: 16px;
-        left: auto;
-        width: min(560px, calc(100vw - 32px));
-        height: calc(100dvh - var(--mobile-nav-height) - 32px);
+        top: var(--mobile-nav-height);
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: calc(100dvh - var(--mobile-nav-height));
         padding-top: 0;
         padding-bottom: 0;
-        border-radius: 20px;
+        border-radius: 0;
         transform: none;
     }
 
@@ -592,10 +606,23 @@
         cursor: pointer;
     }
 
+    .openInfoCloseIcon{
+        display: block;
+        color: #AAA;
+        font-size: 28px;
+        font-weight: 400;
+        line-height: 1;
+        transition: color 0.15s ease-out;
+    }
+
+    .openInfoBtn:hover .openInfoCloseIcon,
+    .openInfoBtn:focus-visible .openInfoCloseIcon{
+        color: #FEB7FF;
+    }
+
     .openInfoSvg,
     .openInfoSvg.active{
-        width: 22px;
-        height: 38px;
+        display: none;
     }
 
     .FileInfo,

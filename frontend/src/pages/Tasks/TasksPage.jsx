@@ -922,8 +922,33 @@ const CalendarView = ({
   </>
 )
 
-const TasksFilterBar = ({ filters, noteOptions, onChange, onReset }) => (
-  <section className="tasks-filter-bar" aria-label="Фильтры задач">
+const TasksFilterBar = ({ filters, noteOptions, onChange, onReset }) => {
+  const [areFiltersOpen, setAreFiltersOpen] = useState(false)
+  const hasActiveFilters = Object.values(filters).some(Boolean)
+
+  useEffect(() => {
+    if (hasActiveFilters) {
+      setAreFiltersOpen(true)
+    }
+  }, [hasActiveFilters])
+
+  return (
+    <section className="tasks-filter-panel" aria-label="Фильтры задач">
+      <button
+        className={[
+          'tasks-filter-toggle',
+          areFiltersOpen ? 'is-open' : '',
+          hasActiveFilters ? 'has-active' : '',
+        ].filter(Boolean).join(' ')}
+        type="button"
+        aria-expanded={areFiltersOpen}
+        aria-controls="tasks-filter-bar"
+        onClick={() => setAreFiltersOpen((current) => !current)}
+      >
+        <span>{hasActiveFilters ? 'Фильтры активны' : 'Фильтры'}</span>
+      </button>
+
+      <div id="tasks-filter-bar" className={`tasks-filter-bar ${areFiltersOpen ? 'is-open' : ''}`}>
     <label className="tasks-filter-field tasks-filter-field--search">
       <span>Поиск</span>
       <input
@@ -983,8 +1008,10 @@ const TasksFilterBar = ({ filters, noteOptions, onChange, onReset }) => (
     <button className="tasks-filter-reset" type="button" onClick={onReset}>
       Сбросить
     </button>
-  </section>
-)
+      </div>
+    </section>
+  )
+}
 
 const AllTasksView = ({
   hasFilters,

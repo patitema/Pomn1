@@ -48,6 +48,10 @@
   flex-wrap: wrap;
 }
 
+.FolderFiltersToggle {
+  display: none;
+}
+
 .FolderFilter {
   display: flex;
   flex-direction: column;
@@ -281,17 +285,21 @@
 
 .note-content {
   width: 100%;
+  max-width: 100%;
+  overflow: hidden;
   margin-top: var(--ui-space-sm);
   padding-top: var(--ui-space-sm);
   border-top: 1px solid #444;
 }
 
 .note-text {
+  max-width: 100%;
   font-size: var(--ui-font-md);
   color: #fff;
   line-height: 1.4;
   margin-bottom: var(--ui-space-sm);
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
   word-wrap: break-word;
   user-select: all;
 }
@@ -442,15 +450,54 @@
   }
 
   .SearchInput,
-  .FolderFilters,
   .FolderFilter,
   .FolderFilterSelect,
   .FolderFilterReset {
     width: 100%;
   }
 
+  .FolderFiltersToggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: var(--ui-control-height-sm);
+    border: 1px solid #777;
+    border-radius: var(--ui-radius-sm);
+    background-color: rgba(34, 34, 34, 0.9);
+    color: #fff;
+    cursor: pointer;
+    font-size: var(--ui-font-sm);
+    font-weight: 700;
+    padding: 0 var(--ui-space-md);
+    transition: border-color 0.15s ease-out, color 0.15s ease-out;
+  }
+
+  .FolderFiltersToggle::after {
+    content: "+";
+    font-size: var(--ui-font-lg);
+    line-height: 1;
+  }
+
+  .FolderFiltersToggle.is-open::after {
+    content: "-";
+  }
+
+  .FolderFiltersToggle.has-active,
+  .FolderFiltersToggle:hover,
+  .FolderFiltersToggle:focus-visible {
+    border-color: #FEB7FF;
+    color: #FEB7FF;
+  }
+
   .FolderFilters {
+    display: none;
     align-items: stretch;
+    width: 100%;
+  }
+
+  .FolderFilters.is-open {
+    display: flex;
   }
 
   .FileList {
