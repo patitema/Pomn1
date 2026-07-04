@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { ReduxProvider } from './providers/ReduxProvider';
-import { MuiProvider } from './providers/MuiProvider';
 import { AppRoutes } from './providers/Router';
 import { Navigation } from '@widgets/navigation';
 import UserInit from './providers/UserInit/UserInit';
@@ -14,16 +13,14 @@ if (window.Telegram && window.Telegram.WebApp) {
 
 export const App = () => (
   <ReduxProvider>
-    <MuiProvider>
-      <BrowserRouter>
-        <UserInit />
-        <div className="app">
-          <Navigation />
-          <main className="app__content">
-            <AppRoutes />
-          </main>
-        </div>
-      </BrowserRouter>
-    </MuiProvider>
+    <BrowserRouter>
+      <UserInit />
+      <div className="app">
+        <Navigation />
+        <main className="app__content">
+          <AppRoutes />
+        </main>
+      </div>
+    </BrowserRouter>
   </ReduxProvider>
 );

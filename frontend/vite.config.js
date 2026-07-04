@@ -21,6 +21,19 @@ export default defineConfig({
   },
   build: {
     sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/react-router-dom/')) return 'react';
+          if (id.includes('/@reduxjs/') || id.includes('/react-redux/')) return 'redux';
+          if (id.includes('/@mui/') || id.includes('/@emotion/')) return 'mui';
+          if (id.includes('/d3') || id.includes('/internmap/') || id.includes('/delaunator/') || id.includes('/robust-predicates/')) return 'd3';
+          if (id.includes('/@uiw/') || id.includes('/react-markdown/') || id.includes('/remark-') || id.includes('/rehype-') || id.includes('/micromark') || id.includes('/mdast') || id.includes('/hast') || id.includes('/unist') || id.includes('/vfile')) return 'markdown';
+          return 'vendor';
+        },
+      },
+    },
   },
   test: {
     environment: 'jsdom',

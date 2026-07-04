@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectUser, selectIsAuthenticated } from '@entities/user';
+import { selectUser, selectIsAuthenticated } from '@entities/user/model/selectors';
 import { routes } from '@shared/config';
 import './Navigation.css';
 

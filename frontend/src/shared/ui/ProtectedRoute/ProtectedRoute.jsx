@@ -1,7 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '@entities/user/model/selectors';
-import { Loader } from '@shared/ui';
+import { Loader } from '@shared/ui/Loader';
 import { routes } from '@shared/config';
 
 /**

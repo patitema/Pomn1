@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "POMNI",
+  "name": "POMNI - заметки, задачи и граф знаний",
+  "description": "Онлайн-сервис для заметок, папок, задач и связей между знаниями.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -8,18 +9,14 @@
       "type": "image/x-icon"
     },
     {
-      "src": "logo192.png",
+      "src": "images/BIg_logo.png",
       "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "236x236"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#101014",
+  "background_color": "#101014"
 }
