@@ -1,5 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://patitema-site.ru/sitemap.xml
-Sitemap: https://pomn1.ru/sitemap-pomn1.xml
+Sitemap: https://pomn1.ru/sitemap.xml

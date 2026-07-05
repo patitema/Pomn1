@@ -149,13 +149,13 @@ deploy-dev:
     - if: $CI_COMMIT_BRANCH == "dev"
   environment:
     name: dev
-    url: https://dev.patitema-site.ru
+    url: https://dev.pomn1.ru
   variables:
     DEPLOY_PATH: /opt/pomni-dev
     DEPLOY_BRANCH: dev
     COMPOSE_PROJECT_NAME: pomni_dev
     BACKEND_PORT: "8001"
-    DEPLOY_URL: https://dev.patitema-site.ru
+    DEPLOY_URL: https://dev.pomn1.ru
   script:
     - set -x
     - echo "SSH_USER=$SSH_USER"
@@ -170,13 +170,13 @@ deploy-main:
     - if: $CI_COMMIT_BRANCH == "main"
   environment:
     name: production
-    url: https://patitema-site.ru
+    url: https://pomn1.ru
   variables:
     DEPLOY_PATH: /opt/pomni-main
     DEPLOY_BRANCH: main
     COMPOSE_PROJECT_NAME: pomni_main
     BACKEND_PORT: "8000"
-    DEPLOY_URL: https://patitema-site.ru
+    DEPLOY_URL: https://pomn1.ru
   script:
     - ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -o ConnectTimeout=30 "$SSH_USER@$SERVER_HOST" "echo SSH_OK"
     - |

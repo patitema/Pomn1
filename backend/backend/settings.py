@@ -48,8 +48,7 @@ if not SECRET_KEY:
 
 ALLOWED_HOSTS = env_list(
     'ALLOWED_HOSTS',
-    'localhost,127.0.0.1,patitema-site.ru,'
-    'api.patitema-site.ru,148.253.208.46',
+    'localhost,127.0.0.1,pomn1.ru,148.253.208.46',
 )
 
 SECURE_SSL_REDIRECT = env_bool('DJANGO_SECURE_SSL_REDIRECT', False)
@@ -176,7 +175,7 @@ CORS_ALLOWED_ORIGINS = env_list(
     'CORS_ALLOWED_ORIGINS',
     'http://localhost:3000,http://localhost:3001,'
     'http://127.0.0.1:3000,http://127.0.0.1:3001,'
-    'https://patitema-site.ru',
+    'https://pomn1.ru',
 )
 
 CORS_ALLOW_CREDENTIALS = env_bool('CORS_ALLOW_CREDENTIALS', True)
