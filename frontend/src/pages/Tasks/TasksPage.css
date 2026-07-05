@@ -6,7 +6,7 @@
   --tasks-muted: #a3a3a3;
   --tasks-pink: #ffbeef;
   --tasks-white: #fff;
-  --tasks-font: "Roboto", "Arial", sans-serif;
+  --tasks-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
 
   min-height: 100vh;
   background: var(--tasks-bg);

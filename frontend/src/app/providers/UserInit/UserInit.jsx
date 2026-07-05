@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useGetCurrentUserQuery } from '@shared/api'
 import { setUser, setToken, logout as clearAuth } from '@entities/user'
-import { Loader } from '@shared/ui'
+import { Loader } from '@shared/ui/Loader'
 
 /**
  * Компонент-инициализатор: при наличии токена в localStorage
@@ -15,7 +15,7 @@ import { Loader } from '@shared/ui'
 const UserInit = () => {
   const dispatch = useDispatch()
   const token = localStorage.getItem('token')
-  const [isInitialized, setIsInitialized] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(!token)
 
   const { data: user, isLoading, isError } = useGetCurrentUserQuery(undefined, {
     skip: !token,
@@ -44,7 +44,7 @@ const UserInit = () => {
     }
   }, [token, user, isLoading, isError, dispatch])
 
-  if (!isInitialized) {
+  if (token && !isInitialized) {
     return <Loader />
   }
 

@@ -60,6 +60,7 @@ const PhoneInput = ({ value = '', onChange, placeholder, label, error, name = 'p
         value={displayValue}
         onChange={handleChange}
         placeholder={placeholder || '+7(XXX)-XXX-XX-XX'}
+        aria-label={label || placeholder || 'Телефон'}
         inputMode="numeric"
       />
       {error && <span className="phone-input__error">{error}</span>}

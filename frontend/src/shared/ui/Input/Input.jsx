@@ -5,6 +5,7 @@ const Input = ({
   label,
   error,
   className = '',
+  slotProps,
   ...props
 }) => (
   <TextField
@@ -13,6 +14,13 @@ const Input = ({
     fullWidth
     helperText={error || undefined}
     label={label}
+    slotProps={{
+      ...slotProps,
+      input: {
+        'aria-label': props['aria-label'] || label || props.placeholder,
+        ...slotProps?.input,
+      },
+    }}
     {...props}
   />
 );
