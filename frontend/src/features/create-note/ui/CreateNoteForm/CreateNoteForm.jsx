@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useCreateNoteMutation, useGetNotesQuery } from '@shared/api';
-import { Input, Button, Modal, MarkdownEditor } from '@shared/ui';
+import { Input, Button, Modal } from '@shared/ui';
+import { LazyMarkdownEditor } from '@shared/ui/LazyMarkdownEditor';
 import './CreateNoteForm.css';
 
 const NO_FOLDER = 'no-folder';
@@ -109,7 +110,7 @@ const CreateNoteForm = ({
         {!isFolder && (
           <label className="create-note-form__field">
             <span className="create-note-form__label">Содержимое</span>
-            <MarkdownEditor
+            <LazyMarkdownEditor
               value={formData.content}
               onChange={(value) => setFormData({ ...formData, content: value || '' })}
               placeholder="Содержимое заметки (поддерживается Markdown)..."

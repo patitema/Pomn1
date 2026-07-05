@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useCreateLinkMutation, useDeleteLinkMutation, useUpdateNoteMutation } from '@shared/api';
-import { Input, Button, Modal, MarkdownEditor } from '@shared/ui';
+import { Input, Button, Modal } from '@shared/ui';
+import { LazyMarkdownEditor } from '@shared/ui/LazyMarkdownEditor';
 import './EditNoteModal.css';
 
 const getLinkedFolderLink = (links, noteId, folderId) =>
@@ -119,7 +120,7 @@ const EditNoteModal = ({
 
         <label className="edit-note-modal__field">
           <span className="edit-note-modal__label">Содержимое</span>
-          <MarkdownEditor
+          <LazyMarkdownEditor
             value={formData.content}
             onChange={(value) => setFormData({ ...formData, content: value || '' })}
             placeholder="Содержимое заметки (поддерживается Markdown)..."

@@ -1,4 +1,4 @@
-import { MarkdownViewer } from '@shared/ui';
+import { LazyMarkdownViewer } from '@shared/ui/LazyMarkdownViewer';
 import {
   getNearestTaskPreviews,
 } from '@entities/task';
@@ -67,7 +67,7 @@ const NotesReader = ({
                   )}
                 </div>
               ) : (
-                <MarkdownViewer
+                <LazyMarkdownViewer
                   content={selectedNote?.text || ''}
                   className="notes-page__viewer"
                 />
