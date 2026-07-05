@@ -4,12 +4,9 @@ import { ReduxProvider } from './providers/ReduxProvider';
 import { AppRoutes } from './providers/Router';
 import { Navigation } from '@widgets/navigation';
 import UserInit from './providers/UserInit/UserInit';
+import { initTelegramWebApp } from '@shared/lib/loadTelegramWebApp';
 
-// Инициализация Telegram Web App
-if (window.Telegram && window.Telegram.WebApp) {
-  window.Telegram.WebApp.ready();
-  window.Telegram.WebApp.expand();
-}
+initTelegramWebApp().catch(() => {});
 
 export const App = () => (
   <ReduxProvider>

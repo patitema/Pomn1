@@ -8,10 +8,10 @@ const Footer = () => {
         <p>ТЕЛЕФОН: <span>+79059884353</span></p>
         <div className="callback-images">
           <a href="https://t.me/example">
-            <img src="/images/TG.png" alt="Telegram" />
+            <img src="/images/TG.webp" alt="Telegram" />
           </a>
           <a href="https://wa.me/79059884353">
-            <img src="/images/Whatsapp.png" alt="WhatsApp" />
+            <img src="/images/Whatsapp.webp" alt="WhatsApp" />
           </a>
         </div>
       </div>

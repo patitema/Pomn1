@@ -48,7 +48,7 @@ export const Navigation = () => {
     <nav>
       <div className={`nav-container ${isActive ? 'active' : ''}`}>
         <div className="logo-nav">
-          <img src="/images/small.png" alt="Logo" />
+          <img src="/images/small.webp" alt="Logo" />
         </div>
         <button
           type="button"

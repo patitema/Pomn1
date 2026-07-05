@@ -9,8 +9,8 @@
       "type": "image/x-icon"
     },
     {
-      "src": "images/BIg_logo.png",
-      "type": "image/png",
+      "src": "images/BIg_logo.webp",
+      "type": "image/webp",
       "sizes": "236x236"
     }
   ],

@@ -10,7 +10,7 @@ header{
 }
 
 .header-container{
-    background: url(/images/BG.png);
+    background: url(/images/BG.webp);
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -205,29 +205,6 @@ main{
     padding: 12px 14px;
     border-left: 3px solid #FEB7FF;
     background: #1c1c1c;
-}
-
-.support{
-    margin-top: 24px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.support p{
-    font-size: var(--ui-font-xl);
-}
-
-#boosty{
-    margin-top: 16px;
-    background-color: #FFF;
-    width: 240px;
-    height: 80px;
-    background: url(/public/images/boosty.png);
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
 }
 
 @media (max-width: 1024px){
