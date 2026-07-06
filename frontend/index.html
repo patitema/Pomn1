@@ -60,6 +60,58 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root">
       <div class="page-container public-home">
+        <nav class="public-home-nav" aria-label="Основная навигация">
+          <div class="nav-container">
+            <div class="logo-nav">
+              <img src="/images/small.webp" alt="Logo" />
+            </div>
+            <ul class="list-Of-Pages">
+              <li>
+                <a href="/" aria-label="Главная" title="Главная" class="nav-link nav-link--active">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="/images/icons.svg#general"></use>
+                  </svg>
+                  <p class="nav-link__label">Главная</p>
+                </a>
+              </li>
+              <li>
+                <a href="/notes" aria-label="Заметки" title="Заметки" class="nav-link">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="/images/icons.svg#pointView"></use>
+                  </svg>
+                  <p class="nav-link__label">Заметки</p>
+                </a>
+              </li>
+              <li>
+                <a href="/folders" aria-label="Папка" title="Папка" class="nav-link">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="/images/icons.svg#folders"></use>
+                  </svg>
+                  <p class="nav-link__label">Папка</p>
+                </a>
+              </li>
+              <li>
+                <a href="/tasks" aria-label="Задачи" title="Задачи" class="nav-link">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="/images/icons.svg#notes"></use>
+                  </svg>
+                  <p class="nav-link__label">Задачи</p>
+                </a>
+              </li>
+              <li>
+                <a href="/auth" aria-label="Войти" title="Войти" class="nav-link">
+                  <span class="profile-nav-icon">
+                    <svg class="icon profile-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <use href="/images/icons.svg#icon-profile"></use>
+                    </svg>
+                  </span>
+                  <p class="nav-link__label">Войти</p>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
         <div class="header-container">
           <h1>POMNI</h1>
           <p>Онлайн-сервис для заметок, задач, папок и связей между знаниями</p>
@@ -125,6 +177,10 @@
           <div class="footer-container">
             <h3>ОБРАТНАЯ СВЯЗЬ</h3>
             <p>ТЕЛЕФОН: <span>+79059884353</span></p>
+            <div class="footer-links" aria-label="Правовая информация">
+              <a href="/privacy">Политика конфиденциальности</a>
+              <a href="/terms">Условия использования</a>
+            </div>
             <div class="callback-images">
               <a href="https://t.me/example" aria-label="Telegram">
                 <img src="/images/TG.webp" alt="Telegram" />

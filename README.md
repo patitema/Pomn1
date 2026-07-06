@@ -1,8 +1,38 @@
-# Pomni
+# POMNI
 
-Pomni is a web application for managing notes, folders, knowledge links, and tasks. The frontend is a React 19 SPA built with Vite, the backend is Django 5.2 + Django REST Framework, and MySQL is used in Docker/prod-style environments.
+POMNI is an online productivity service for managing notes, folders, knowledge links, and tasks. The frontend is a React 19 SPA built with Vite, the backend is Django 5.2 + Django REST Framework, and MySQL is used in Docker/prod-style environments.
 
 The frontend follows Feature-Sliced Design: `app -> pages -> widgets -> features -> entities -> shared`.
+
+## Quick Start
+
+The fastest full-project start is Docker:
+
+```bash
+docker compose up -d --build
+```
+
+Then open:
+
+- Frontend: `http://localhost:3000`
+- Backend API: `http://localhost:8000/api/`
+
+For local split development, run the backend from `backend/` and the frontend from `frontend/`:
+
+```bash
+cd backend
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
+
+```bash
+cd frontend
+npm ci
+npm start
+```
+
+Local frontend development expects `REACT_APP_API_URL=http://localhost:8000/api` or `VITE_API_URL=http://localhost:8000/api` when the frontend is not using the Docker nginx proxy.
 
 ## Current Features
 
@@ -132,6 +162,8 @@ Use real secret values on the server. Do not commit `.env` files with production
 | `/` | Home page |
 | `/auth` | Login |
 | `/registration` | Registration |
+| `/privacy` | Privacy policy |
+| `/terms` | Terms of use |
 | `/notes` | Graph view for notes/folders |
 | `/folders` | File/folder view |
 | `/tasks` | Task tracker |
@@ -213,6 +245,8 @@ Pomn1/
   plans/
   README.md
   ARCHITECTURE.md
+  AGENTS.md
+  PLANS.md
 ```
 
 ## Architecture Notes
@@ -227,6 +261,14 @@ Pomn1/
 - Legacy top-level frontend folders (`components`, `context`, `hooks`, `utils`) have been removed from `frontend/src`.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the detailed architecture guide.
+
+## Contributor Orientation
+
+- Read `AGENTS.md` before changing code; it captures project-specific agent rules, feature invariants, validation commands, and active product decisions.
+- Use `PLANS.md` for any significant feature or refactor plan.
+- Use `plans/ACTIVE_PLAN_SEQUENCE.md` to understand active work order.
+- Use `plans/project-init-2026-06-25.md` as the current initialization snapshot for structure, commands, and known documentation entry points.
+- Keep `backend/backend/settings.py`, `docker-compose.yml`, and README environment examples synchronized when deployment domains or security env vars change.
 
 ## Current Status
 
@@ -268,6 +310,8 @@ python manage.py migrate
 
 Run backend validation after model or migration changes.
 
-## License
+## Product and Legal
 
-The project is developed for educational purposes as part of a graduation qualification work.
+POMNI is maintained as an independent product by ИП Авхимович А. П. Public legal pages are available at `/privacy` and `/terms`.
+
+This repository does not publish an open-source license. Contact `support@pomni.ru` for product or legal questions.

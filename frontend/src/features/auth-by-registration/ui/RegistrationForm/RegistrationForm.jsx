@@ -109,6 +109,11 @@ const RegistrationForm = () => {
         {isLoading ? 'Регистрация...' : 'Зарегистрироваться'}
       </Button>
 
+      <p className="registration-form__legal">
+        Регистрируясь, вы соглашаетесь с <Link to="/terms">условиями использования</Link> и
+        подтверждаете ознакомление с <Link to="/privacy">политикой конфиденциальности</Link>.
+      </p>
+
       <p className="registration-form__footer">
         Уже есть аккаунт? <Link to="/auth">Войти</Link>
       </p>

@@ -1,4 +1,5 @@
 import './index.css';
+import './widgets/navigation/ui/Navigation/Navigation.css';
 import './pages/home/HomePage.css';
 import './widgets/footer/ui/Footer/Footer.css';
 

@@ -19,6 +19,24 @@ footer{
     font-size: var(--ui-font-lg);
 }
 
+.footer-links{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    margin: 12px 0;
+}
+
+.footer-links a{
+    color: var(--ui-muted);
+    font-size: var(--ui-font-sm);
+    text-decoration: none;
+}
+
+.footer-links a:hover{
+    color: #d7d7d7;
+    text-decoration: underline;
+}
+
 .callback-images{
     display: flex;
     flex-direction: row;
@@ -27,4 +45,18 @@ footer{
 .callback-images img{
     width: 42px;
     height: 42px;
+}
+
+@media (max-width: 1199px){
+    footer{
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+}
+
+@media (max-width: 480px){
+    footer{
+        padding-left: 16px;
+        padding-right: 16px;
+    }
 }
