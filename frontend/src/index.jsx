@@ -1,12 +1,20 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { App } from './app';
 import './index.css';
+import './pages/home/HomePage.css';
+import './widgets/footer/ui/Footer/Footer.css';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const renderApp = async () => {
+  const [{ default: React }, { default: ReactDOM }, { App }] = await Promise.all([
+    import('react'),
+    import('react-dom/client'),
+    import('./app'),
+  ]);
 
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  root.render(
+    React.createElement(React.StrictMode, null, React.createElement(App))
+  );
+};
+
+if (window.location.pathname !== '/') {
+  renderApp();
+}

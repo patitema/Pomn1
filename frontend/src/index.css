@@ -83,6 +83,10 @@ code {
   min-height: 100vh;
 }
 
+html[data-route="app"] .public-home {
+  display: none;
+}
+
 @media (max-width: 1199px) {
   .app {
     min-height: 100dvh;
