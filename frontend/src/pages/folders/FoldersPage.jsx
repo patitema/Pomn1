@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { selectUser } from '@entities/user'
 import { getTaskWeekQuery } from '@entities/task'
 import { isFolderNote, isRegularNote } from '@entities/note'
@@ -23,6 +23,10 @@ import { EditFolderModal } from '@features/update-folder'
 import { FolderBrowser } from '@widgets/folder-browser'
 import { DEFAULT_FOLDER_VIEW_FILTERS } from '@widgets/folder-tree'
 import { Footer } from '@widgets/footer'
+import {
+  FOLDER_MOUSE_SENSOR_OPTIONS,
+  FOLDER_TOUCH_SENSOR_OPTIONS,
+} from './model/dndSensors'
 import './FoldersPage.css'
 
 const FoldersPage = () => {
@@ -59,11 +63,8 @@ const FoldersPage = () => {
   const taskModal = useTaskModalController({ deleteTask, updateTask })
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
+    useSensor(MouseSensor, FOLDER_MOUSE_SENSOR_OPTIONS),
+    useSensor(TouchSensor, FOLDER_TOUCH_SENSOR_OPTIONS)
   )
 
   const handleDragEnd = async (event) => {

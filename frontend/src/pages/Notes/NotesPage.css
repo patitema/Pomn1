@@ -52,7 +52,7 @@
 }
 
 .FileName.active h3{
-    width: 460px;
+    width: 610px;
 }
 
 .Info{
@@ -127,9 +127,9 @@
 }
 
 .notes-page__reader-content{
-    display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
-    gap: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     width: 100%;
     height: 100%;
     min-height: 0;
@@ -142,9 +142,45 @@
     display: none;
 }
 
+.notes-page__reader-tabs{
+    display: flex;
+    flex-shrink: 0;
+    border-bottom: 1px solid #444;
+    background-color: rgba(0, 0, 0, 0.12);
+}
+
+.notes-page__reader-tab{
+    flex: 1;
+    min-width: 0;
+    padding: 9px 8px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: #AAA;
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--ui-font-sm);
+    font-weight: 700;
+    line-height: 1.2;
+    transition: border-color 0.15s ease-out, color 0.15s ease-out, background-color 0.15s ease-out;
+}
+
+.notes-page__reader-tab:hover,
+.notes-page__reader-tab:focus-visible{
+    color: #FFF;
+    background-color: rgba(255, 255, 255, 0.05);
+    outline: none;
+}
+
+.notes-page__reader-tab--active{
+    border-bottom-color: #FEB7FF;
+    color: #FFF;
+}
+
 .notes-page__reader-main{
     width: 100%;
     min-height: 0;
+    flex: 1;
     overflow-y: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -231,25 +267,6 @@
     width: 100%;
 }
 
-.linked-tasks--reader{
-    box-sizing: border-box;
-    max-width: 100%;
-    margin-top: 0;
-    padding: 10px;
-    max-height: min(150px, 28vh);
-    overflow-y: auto;
-    overflow-x: hidden;
-    border: 1px solid #666;
-    border-radius: 5px;
-    background-color: rgba(10, 10, 10, 0.18);
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-
-.linked-tasks--reader::-webkit-scrollbar{
-    display: none;
-}
-
 .linked-tasks__item{
     width: 100%;
     border: 1px solid transparent;
@@ -269,6 +286,24 @@
     border-color: #FEB7FF;
     background-color: rgba(254, 183, 255, 0.1);
     outline: none;
+}
+
+.notes-page__reader-tasks{
+    box-sizing: border-box;
+    max-width: 100%;
+    padding: 2px 0 0;
+    overflow-x: hidden;
+}
+
+.notes-page__reader-empty{
+    margin: 0;
+    padding: 12px 10px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    color: #AAA;
+    font-size: var(--ui-font-md);
+    line-height: 1.4;
+    background-color: rgba(255, 255, 255, 0.04);
 }
 
 .FileInfo .markdown-viewer {
@@ -392,7 +427,7 @@
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
     height: min(680px, calc(100vh - 116px));
-    width: 500px;
+    width: 650px;
     padding-bottom: 16px;
     overflow: hidden;
     transition: all 0.5s ease-out;
@@ -415,7 +450,7 @@
 }
 
 .FileName.active h3{
-    width: 460px;
+    width: 610px;
 }
 
 .Info{
@@ -489,7 +524,37 @@
     display: flex;
 }
 
+@media (min-width: 1200px) {
+    .ReadFile.active .Info{
+        position: relative;
+        align-items: stretch;
+    }
+
+    .ReadFile.active .openInfo{
+        position: absolute;
+        left: 0;
+        top: 50%;
+        z-index: 2;
+        transform: translateY(-50%);
+    }
+
+    .ReadFile.active .FileInfo.active{
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        align-self: stretch;
+    }
+
+    .ReadFile.active .notes-page__reader-main{
+        padding: 16px 16px 16px 50px;
+    }
+}
+
 @media (max-width: 1199px) {
+    .notes-page__main{
+        --notes-mobile-toolbar-reserve: 86px;
+    }
+
     .NotesContainer,
     .notes-page__main{
         height: calc(100dvh - var(--mobile-nav-height));
@@ -552,7 +617,7 @@
         padding-top: 0;
         border-radius: 0;
         transform: none;
-        z-index: 1500;
+        z-index: 850;
     }
 
     .ReadFile.active{
@@ -568,6 +633,15 @@
         padding-bottom: 0;
         border-radius: 0;
         transform: none;
+    }
+
+    .ReadFile.active .notes-page__reader-content{
+        padding-bottom: var(--notes-mobile-toolbar-reserve);
+    }
+
+    .ReadFile.active .notes-page__reader-main,
+    .ReadFile.active .notes-page__folder-reader{
+        scroll-padding-bottom: var(--notes-mobile-toolbar-reserve);
     }
 
     .FileName{
@@ -629,12 +703,20 @@
     .FileInfo.active{
         width: 100%;
         height: 100%;
-        padding: 16px;
+        padding: 0;
         align-self: stretch;
+    }
+
+    .ReadFile.active .notes-page__reader-main{
+        padding: 16px;
     }
 }
 
 @media (max-width: 599px) {
+    .notes-page__main{
+        --notes-mobile-toolbar-reserve: 82px;
+    }
+
     .EditToolsContainer{
         bottom: max(12px, env(safe-area-inset-bottom));
         width: min(420px, calc(100% - 24px));
@@ -658,6 +740,10 @@
 
     .FileInfo,
     .FileInfo.active{
+        padding: 0;
+    }
+
+    .ReadFile.active .notes-page__reader-main{
         padding: 14px;
     }
 }

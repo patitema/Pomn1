@@ -22,6 +22,8 @@ import {
   useUpdateNoteMutation,
   useUpdateTaskMutation,
 } from '@shared/api'
+import { getNotesMainClassName } from './model/notesLayout'
+import { useMobileScrollLock } from './model/useMobileScrollLock'
 import './NotesPage.css'
 
 const CONNECTION_MODE = {
@@ -63,12 +65,10 @@ const NotesPage = () => {
   const noteOptions = notes.filter((note) => !note.is_folder)
   const isReaderOpen = Boolean(selectedNote)
   const isConnectionModeActive = connectionMode !== CONNECTION_MODE.IDLE
-  const notesMainClassName = [
-    'notes-page__main',
-    isReaderOpen ? 'notes-page__main--reader-open' : '',
-    isFooterVisible ? 'notes-page__main--footer-visible' : '',
-  ].filter(Boolean).join(' ')
+  const notesMainClassName = getNotesMainClassName({ isFooterVisible, isReaderOpen })
   const taskModal = useTaskModalController({ deleteTask, updateTask })
+
+  useMobileScrollLock(isReaderOpen)
 
   const handleAddNote = () => {
     setIsCreateNoteModalOpen(true)

@@ -1,8 +1,14 @@
+import { useEffect, useState } from 'react';
 import { LazyMarkdownViewer } from '@shared/ui/LazyMarkdownViewer';
 import {
-  getNearestTaskPreviews,
+  getTasksLinkedToNote,
 } from '@entities/task';
 import { LinkedTaskActions } from '@features/linked-task-actions';
+
+const READER_TABS = {
+  CONTENT: 'content',
+  TASKS: 'tasks',
+};
 
 const NotesReader = ({
   selectedNote,
@@ -15,13 +21,21 @@ const NotesReader = ({
   onSelectNote,
   onToggleTaskDone,
 }) => {
+  const [activeTab, setActiveTab] = useState(READER_TABS.CONTENT);
   const isActive = Boolean(selectedNote);
   const isFolder = Boolean(selectedNote?.is_folder);
+  const isRegularNote = isActive && !isFolder;
   const activeClass = isActive ? 'active' : '';
-  const linkedTasks = isActive && !isFolder ? getNearestTaskPreviews(tasks, selectedNote.id) : [];
+  const linkedTasks = isRegularNote ? getTasksLinkedToNote(tasks, selectedNote.id) : [];
   const folderNotes = isFolder
     ? notes.filter((note) => note.folder === selectedNote.id && !note.is_folder)
     : [];
+  const isContentTabActive = activeTab === READER_TABS.CONTENT;
+  const isTasksTabActive = activeTab === READER_TABS.TASKS;
+
+  useEffect(() => {
+    setActiveTab(READER_TABS.CONTENT);
+  }, [selectedNote?.id]);
 
   return (
     <div className={`ReadFile ${activeClass}`}>
@@ -44,6 +58,28 @@ const NotesReader = ({
         </div>
         <div className={`FileInfo ${activeClass}`}>
           <div className="notes-page__reader-content">
+            {isRegularNote && (
+              <div className="notes-page__reader-tabs" role="tablist" aria-label="Разделы заметки">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={isContentTabActive}
+                  className={`notes-page__reader-tab ${isContentTabActive ? 'notes-page__reader-tab--active' : ''}`}
+                  onClick={() => setActiveTab(READER_TABS.CONTENT)}
+                >
+                  Содержание
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={isTasksTabActive}
+                  className={`notes-page__reader-tab ${isTasksTabActive ? 'notes-page__reader-tab--active' : ''}`}
+                  onClick={() => setActiveTab(READER_TABS.TASKS)}
+                >
+                  {`Задачи · ${linkedTasks.length}`}
+                </button>
+              </div>
+            )}
             <div className="notes-page__reader-main">
               {isFolder ? (
                 <div className="notes-page__folder-reader">
@@ -66,6 +102,23 @@ const NotesReader = ({
                     <p className="notes-page__folder-reader-empty">В папке нет заметок.</p>
                   )}
                 </div>
+              ) : isTasksTabActive ? (
+                <div className="linked-tasks notes-page__reader-tasks" aria-label="Связанные задачи">
+                  {linkedTasks.length > 0 ? (
+                    linkedTasks.map((task) => (
+                      <LinkedTaskActions
+                        key={task.id}
+                        task={task}
+                        onDelete={onDeleteTask}
+                        onEdit={onEditTask}
+                        onOpenWeek={onOpenTaskWeek}
+                        onToggleDone={onToggleTaskDone}
+                      />
+                    ))
+                  ) : (
+                    <p className="notes-page__reader-empty">Нет прикреплённых задач.</p>
+                  )}
+                </div>
               ) : (
                 <LazyMarkdownViewer
                   content={selectedNote?.text || ''}
@@ -73,21 +126,6 @@ const NotesReader = ({
                 />
               )}
             </div>
-
-            {linkedTasks.length > 0 && (
-              <div className="linked-tasks linked-tasks--reader" aria-label="Связанные задачи">
-                {linkedTasks.map((task) => (
-                  <LinkedTaskActions
-                    key={task.id}
-                    task={task}
-                    onDelete={onDeleteTask}
-                    onEdit={onEditTask}
-                    onOpenWeek={onOpenTaskWeek}
-                    onToggleDone={onToggleTaskDone}
-                  />
-                ))}
-              </div>
-            )}
           </div>
         </div>
       </div>
