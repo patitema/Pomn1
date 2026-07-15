@@ -54,7 +54,6 @@
 .FileName.active h3{
     width: 610px;
 }
-
 .Info{
     display: flex;
     width: 100%;
@@ -312,6 +311,8 @@
     overflow: visible;
     color: #FFF;
     font-size: var(--ui-font-lg);
+    line-height: 1.28;
+    white-space: normal;
     text-align: start;
     box-sizing: border-box;
     scrollbar-width: none;
@@ -326,6 +327,63 @@
 .FileInfo .markdown-viewer h2,
 .FileInfo .markdown-viewer h3 {
     color: #FFF;
+}
+
+.FileInfo .markdown-viewer h1,
+.FileInfo .markdown-viewer h2,
+.FileInfo .markdown-viewer h3,
+.FileInfo .markdown-viewer h4,
+.FileInfo .markdown-viewer h5,
+.FileInfo .markdown-viewer h6,
+.FileInfo .markdown-viewer p,
+.FileInfo .markdown-viewer ul,
+.FileInfo .markdown-viewer ol,
+.FileInfo .markdown-viewer pre,
+.FileInfo .markdown-viewer blockquote{
+    margin-top: 0;
+}
+
+.FileInfo .markdown-viewer h1,
+.FileInfo .markdown-viewer h2{
+    margin-bottom: 0.32em;
+    padding-bottom: 0.18em;
+}
+
+.FileInfo .markdown-viewer h3,
+.FileInfo .markdown-viewer h4,
+.FileInfo .markdown-viewer h5,
+.FileInfo .markdown-viewer h6{
+    margin-bottom: 0.28em;
+}
+
+.FileInfo .markdown-viewer p,
+.FileInfo .markdown-viewer ul,
+.FileInfo .markdown-viewer ol,
+.FileInfo .markdown-viewer pre,
+.FileInfo .markdown-viewer blockquote{
+    margin-bottom: 0.35em;
+}
+
+.FileInfo .markdown-viewer ul,
+.FileInfo .markdown-viewer ol,
+.FileInfo .markdown-viewer li{
+    white-space: normal;
+}
+
+.FileInfo .markdown-viewer li{
+    margin-bottom: 0.18em;
+}
+
+.FileInfo .markdown-viewer li > p{
+    margin: 0;
+}
+
+.FileInfo .markdown-viewer p:last-child,
+.FileInfo .markdown-viewer ul:last-child,
+.FileInfo .markdown-viewer ol:last-child,
+.FileInfo .markdown-viewer pre:last-child,
+.FileInfo .markdown-viewer blockquote:last-child{
+    margin-bottom: 0;
 }
 
 .FileInfo .markdown-viewer code {
@@ -362,7 +420,7 @@
     background-color: #202020;
     border-top-left-radius: 24px;
     border-top-right-radius: 24px;
-    width: 500px;
+    width: 380px;
     height: 64px;
 }
 
@@ -402,7 +460,10 @@
 .ToolsList{
     display: flex;
     flex-direction: row;
-    gap: 28px;
+    gap: 22px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
 /* Стили для ReadFile компонента */
@@ -525,6 +586,19 @@
 }
 
 @media (min-width: 1200px) {
+    .ReadFile,
+    .ReadFile.active{
+        height: 90%;
+    }
+
+    .ReadFile.active{
+        width: min(730px, calc(100% - 96px));
+    }
+
+    .ReadFile.active .FileName h3{
+        width: calc(100% - 40px);
+    }
+
     .ReadFile.active .Info{
         position: relative;
         align-items: stretch;
@@ -579,7 +653,7 @@
         bottom: max(14px, env(safe-area-inset-bottom));
         transform: translateX(-50%);
         margin: 0;
-        width: min(480px, calc(100% - 32px));
+        width: min(380px, calc(100% - 32px));
         height: 56px;
         border-radius: 18px;
         z-index: 900;
@@ -591,7 +665,7 @@
     }
 
     .ToolsList{
-        gap: clamp(14px, 5vw, 28px);
+        gap: clamp(14px, 4vw, 22px);
     }
 
     .toolButton{
@@ -719,7 +793,7 @@
 
     .EditToolsContainer{
         bottom: max(12px, env(safe-area-inset-bottom));
-        width: min(420px, calc(100% - 24px));
+        width: min(360px, calc(100% - 24px));
         height: 54px;
     }
 

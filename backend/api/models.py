@@ -104,6 +104,7 @@ class Task(models.Model):
         default=PRIORITY_LOW,
     )
     due_date = models.DateTimeField(null=True, blank=True)
+    is_all_day = models.BooleanField(default=False)
     deadline = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)

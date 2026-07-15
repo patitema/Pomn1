@@ -294,16 +294,83 @@
 
 .note-text {
   max-width: 100%;
-  font-size: var(--ui-font-md);
+  font-size: var(--ui-font-lg);
   color: #fff;
-  line-height: 1.4;
+  line-height: 1.28;
   margin-bottom: var(--ui-space-sm);
-  white-space: pre-wrap;
+  padding: 0;
+  white-space: normal;
   overflow-wrap: anywhere;
   word-wrap: break-word;
   user-select: all;
 }
 
+.note-content .markdown-viewer {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  color: #fff;
+  font-size: var(--ui-font-lg);
+  line-height: 1.28;
+  padding: 0;
+  white-space: normal;
+  text-align: start;
+  box-sizing: border-box;
+}
+
+.note-content .markdown-viewer h1,
+.note-content .markdown-viewer h2,
+.note-content .markdown-viewer h3 {
+  color: #fff;
+}
+
+.note-content .markdown-viewer h1,
+.note-content .markdown-viewer h2 {
+  margin: 0 0 0.32em;
+  padding-bottom: 0.18em;
+}
+
+.note-content .markdown-viewer h3,
+.note-content .markdown-viewer h4,
+.note-content .markdown-viewer h5,
+.note-content .markdown-viewer h6 {
+  margin: 0 0 0.28em;
+}
+
+.note-content .markdown-viewer p,
+.note-content .markdown-viewer ul,
+.note-content .markdown-viewer ol,
+.note-content .markdown-viewer pre,
+.note-content .markdown-viewer blockquote {
+  margin: 0 0 0.35em;
+}
+
+.note-content .markdown-viewer ul,
+.note-content .markdown-viewer ol {
+  padding-left: 2em;
+}
+
+.note-content .markdown-viewer ul,
+.note-content .markdown-viewer ol,
+.note-content .markdown-viewer li {
+  white-space: normal;
+}
+
+.note-content .markdown-viewer li {
+  margin: 0 0 0.18em;
+}
+
+.note-content .markdown-viewer li > p {
+  margin: 0;
+}
+
+.note-content .markdown-viewer p:last-child,
+.note-content .markdown-viewer ul:last-child,
+.note-content .markdown-viewer ol:last-child,
+.note-content .markdown-viewer pre:last-child,
+.note-content .markdown-viewer blockquote:last-child {
+  margin-bottom: 0;
+}
 .note-info {
   font-size: var(--ui-font-xs);
   color: #999;

@@ -29,6 +29,16 @@ describe('NotesReader', () => {
     expect(screen.getByTestId('markdown-viewer').textContent).toBe('Текст заметки')
   })
 
+  it('keeps manual line breaks but removes empty reader gaps', () => {
+    const noteWithEmptyLines = {
+      ...regularNote,
+      text: '- one\n\n- two\n\nplain\nline',
+    }
+
+    render(<NotesReader selectedNote={noteWithEmptyLines} tasks={tasks} />)
+
+    expect(screen.getByTestId('markdown-viewer').textContent).toBe('- one\n- two\nplain  \nline')
+  })
   it('shows all tasks linked to the selected note in the tasks tab', async () => {
     render(<NotesReader selectedNote={regularNote} tasks={tasks} />)
 

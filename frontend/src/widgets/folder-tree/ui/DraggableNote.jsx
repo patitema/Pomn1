@@ -3,6 +3,7 @@ import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { getNearestTaskPreviews } from '@entities/task'
 import { LinkedTaskActions } from '@features/linked-task-actions'
+import { normalizeReaderMarkdown } from '@shared/lib'
 import { LazyMarkdownViewer } from '@shared/ui/LazyMarkdownViewer'
 
 export function DraggableNote({
@@ -24,6 +25,7 @@ export function DraggableNote({
     id: note.id,
   })
   const linkedTasks = isNoteOpen ? getNearestTaskPreviews(tasks, note.id) : []
+  const readerMarkdown = normalizeReaderMarkdown(note.text || '')
 
   const style = {
     marginLeft: `${marginLeft}px`,
@@ -75,7 +77,7 @@ export function DraggableNote({
       {isNoteOpen && (
         <div className="note-content">
           <LazyMarkdownViewer
-            content={note.text}
+            content={readerMarkdown}
             className="note-text"
           />
           {linkedTasks.length > 0 && (

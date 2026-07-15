@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from datetime import timedelta
+
 from django.utils import timezone
 from .models import Note, Link, Task, TaskChecklistItem, Status
 
@@ -171,6 +173,7 @@ class TaskSerializer(serializers.ModelSerializer):
             'status',
             'priority',
             'due_date',
+            'is_all_day',
             'deadline',
             'checklist_items',
             'completed_at',
@@ -178,12 +181,6 @@ class TaskSerializer(serializers.ModelSerializer):
             'updated_at',
         )
         read_only_fields = ('id', 'note', 'user', 'completed_at', 'created_at', 'updated_at')
-
-    def validate_due_date(self, value):
-        current_minute = timezone.now().replace(second=0, microsecond=0)
-        if value and value < current_minute:
-            raise serializers.ValidationError('Due date cannot be in the past.')
-        return value
 
     def validate_deadline(self, value):
         current_minute = timezone.now().replace(second=0, microsecond=0)
@@ -193,8 +190,26 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         note = attrs.get('note')
+        due_date = attrs.get('due_date', getattr(self.instance, 'due_date', None))
+        is_all_day = attrs.get('is_all_day', getattr(self.instance, 'is_all_day', False))
         request = self.context.get('request') if hasattr(self, 'context') else None
         user = getattr(request, 'user', None)
+
+        if due_date:
+            current_minute = timezone.now().replace(second=0, microsecond=0)
+            if is_all_day:
+                if due_date < current_minute - timedelta(hours=24):
+                    raise serializers.ValidationError({
+                        'due_date': 'Due date cannot be in the past.'
+                    })
+            elif due_date < current_minute:
+                raise serializers.ValidationError({
+                    'due_date': 'Due date cannot be in the past.'
+                })
+        elif is_all_day:
+            raise serializers.ValidationError({
+                'due_date': 'All-day task requires a due date.'
+            })
 
         if note and user and user.is_authenticated:
             if note.user_id != user.id or note.is_folder:

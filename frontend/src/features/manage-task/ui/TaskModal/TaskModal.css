@@ -118,7 +118,11 @@
   opacity: 0.55;
 }
 
-.tasks-modal-deadline-toggle {
+.tasks-modal-field--disabled {
+  opacity: 0.55;
+}
+
+.tasks-modal-toggle {
   display: inline-flex;
   align-items: center;
   gap: var(--ui-space-sm);
@@ -128,7 +132,7 @@
   text-transform: uppercase;
 }
 
-.tasks-modal-deadline-toggle input {
+.tasks-modal-toggle input {
   width: 18px;
   height: 18px;
   accent-color: var(--tasks-pink);

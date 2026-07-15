@@ -2,6 +2,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  min-height: 100vh;
 }
 
 .loader__spinner {
@@ -15,6 +17,11 @@
   width: 20px;
   height: 20px;
   border-width: 2px;
+}
+
+.loader--small {
+  width: auto;
+  min-height: 0;
 }
 
 .loader--medium .loader__spinner {
@@ -31,5 +38,16 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+
+@media (max-width: 1199px) {
+  .loader {
+    min-height: calc(100dvh - var(--mobile-nav-height));
+  }
+
+  .loader--small {
+    min-height: 0;
   }
 }

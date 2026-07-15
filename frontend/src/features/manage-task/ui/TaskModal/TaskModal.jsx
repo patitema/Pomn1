@@ -88,6 +88,15 @@ export const TaskModal = ({
           )}
         </section>
 
+        <label className="tasks-modal-toggle">
+          <input
+            type="checkbox"
+            checked={taskForm.isAllDay}
+            onChange={(event) => onChange('isAllDay', event.target.checked)}
+          />
+          <span>Весь день</span>
+        </label>
+
         <div className="tasks-modal__row">
           <label className="tasks-modal-field">
             <span>Дата</span>
@@ -99,18 +108,19 @@ export const TaskModal = ({
             />
           </label>
 
-          <label className="tasks-modal-field">
+          <label className={`tasks-modal-field ${taskForm.isAllDay ? 'tasks-modal-field--disabled' : ''}`}>
             <span>Время</span>
             <input
               type="time"
               min={minTime}
               value={taskForm.time}
+              disabled={taskForm.isAllDay}
               onChange={(event) => onChange('time', event.target.value)}
             />
           </label>
         </div>
 
-        <label className="tasks-modal-deadline-toggle">
+        <label className="tasks-modal-toggle">
           <input
             type="checkbox"
             checked={taskForm.hasDeadline}

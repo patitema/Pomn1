@@ -16,6 +16,4 @@ const renderApp = async () => {
   );
 };
 
-if (window.location.pathname !== '/') {
-  renderApp();
-}
+renderApp();
