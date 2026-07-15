@@ -12,12 +12,31 @@ const parseDate = (rawDate) => {
 
 const getDisplayDate = (task) => parseDate(task?.due_date || task?.deadline)
 
-const getSortDate = (task) => getDisplayDate(task) || parseDate(task?.created_at)
+const getSortDate = (task) => {
+  const displayDate = getDisplayDate(task)
+
+  if (displayDate && task?.is_all_day) {
+    displayDate.setHours(23, 59, 59, 999)
+  }
+
+  return displayDate || parseDate(task?.created_at)
+}
 
 const formatDateTime = (date) => {
   if (!date) return 'Без даты'
 
   return `${padDatePart(date.getDate())}.${padDatePart(date.getMonth() + 1)}.${date.getFullYear()}, ${padDatePart(date.getHours())}:${padDatePart(date.getMinutes())}`
+}
+
+const formatTaskDateTime = (task) => {
+  const date = getDisplayDate(task)
+
+  if (!date) return 'Без даты'
+  if (task?.is_all_day) {
+    return `${padDatePart(date.getDate())}.${padDatePart(date.getMonth() + 1)}.${date.getFullYear()}, Весь день`
+  }
+
+  return formatDateTime(date)
 }
 
 export const getTasksLinkedToNote = (tasks = [], noteId) => {
@@ -33,7 +52,7 @@ export const getTaskPreviewDate = (task) => getDisplayDate(task)
 export const getTaskPreviewLabel = (task) => {
   const title = task?.title || `Задача ${task?.id ?? ''}`.trim()
 
-  return `${title} - ${formatDateTime(getDisplayDate(task))}`
+  return `${title} - ${formatTaskDateTime(task)}`
 }
 
 export const getNearestTaskPreviews = (tasks = [], noteId, limit = 3) => {

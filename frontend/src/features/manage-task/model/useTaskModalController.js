@@ -15,7 +15,7 @@ export const useTaskModalController = ({ deleteTask, updateTask }) => {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
 
   const minDate = useMemo(() => getTodayInputDate(), [])
-  const minTime = taskForm.date === minDate ? getCurrentInputTime() : undefined
+  const minTime = !taskForm.isAllDay && taskForm.date === minDate ? getCurrentInputTime() : undefined
   const minDeadlineTime =
     taskForm.hasDeadline && taskForm.deadlineDate === minDate ? getCurrentInputTime() : undefined
 
@@ -112,7 +112,7 @@ export const useTaskModalController = ({ deleteTask, updateTask }) => {
       return
     }
 
-    if (taskForm.date === minDate && taskForm.time < getCurrentInputTime()) {
+    if (!taskForm.isAllDay && taskForm.date === minDate && taskForm.time < getCurrentInputTime()) {
       setTaskFormError('Для текущего дня выберите время не раньше текущего')
       return
     }

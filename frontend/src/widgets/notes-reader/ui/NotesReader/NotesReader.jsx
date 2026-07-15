@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { LazyMarkdownViewer } from '@shared/ui/LazyMarkdownViewer';
+import { normalizeReaderMarkdown } from '@shared/lib';
 import {
   getTasksLinkedToNote,
 } from '@entities/task';
@@ -32,6 +33,7 @@ const NotesReader = ({
     : [];
   const isContentTabActive = activeTab === READER_TABS.CONTENT;
   const isTasksTabActive = activeTab === READER_TABS.TASKS;
+  const readerMarkdown = normalizeReaderMarkdown(selectedNote?.text || '');
 
   useEffect(() => {
     setActiveTab(READER_TABS.CONTENT);
@@ -121,7 +123,7 @@ const NotesReader = ({
                 </div>
               ) : (
                 <LazyMarkdownViewer
-                  content={selectedNote?.text || ''}
+                  content={readerMarkdown}
                   className="notes-page__viewer"
                 />
               )}

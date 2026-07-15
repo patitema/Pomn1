@@ -63,6 +63,7 @@ const emptyTaskForm = {
   title: '',
   description: '',
   checklistItems: [],
+  isAllDay: false,
   hasDeadline: false,
   date: '',
   time: '00:00',
@@ -221,7 +222,8 @@ const apiDateToTaskTime = (date) => {
   return `${hours}:${minutes}`
 }
 
-const buildDueDate = (date, time) => new Date(`${date}T${time || '00:00'}:00`).toISOString()
+const buildDueDate = (date, time, isAllDay = false) =>
+  new Date(`${date}T${isAllDay ? '00:00' : time || '00:00'}:00`).toISOString()
 
 const createChecklistClientId = () => `checklist-${Date.now()}-${Math.random().toString(36).slice(2)}`
 
@@ -244,7 +246,8 @@ const createTaskFromForm = (form) => ({
     is_completed: item.isCompleted,
     position: index,
   })),
-  due_date: buildDueDate(form.date, form.time),
+  due_date: buildDueDate(form.date, form.time, form.isAllDay),
+  is_all_day: form.isAllDay,
   deadline: form.hasDeadline ? buildDueDate(form.deadlineDate, form.deadlineTime) : null,
   priority: form.priority,
   status: form.status,
@@ -279,6 +282,7 @@ const mapApiTasksToDisplay = (apiTasks, noteTitlesById) =>
         isCompleted: Boolean(item.is_completed),
         position: item.position,
       })),
+      isAllDay: Boolean(task.is_all_day),
       hasDeadline,
       date: apiDateToTaskDate(task.due_date),
       time: apiDateToTaskTime(task.due_date),
@@ -301,6 +305,10 @@ const sortTasksChronologically = (tasks) =>
 
     if (firstDate !== secondDate) {
       return firstDate - secondDate
+    }
+
+    if (firstTask.isAllDay !== secondTask.isAllDay) {
+      return firstTask.isAllDay ? -1 : 1
     }
 
     const timeCompare = firstTask.time.localeCompare(secondTask.time)
@@ -341,7 +349,7 @@ const TasksPage = () => {
     })
   )
   const minDate = getTodayInputDate()
-  const minTime = taskForm.date === minDate ? getCurrentInputTime() : undefined
+  const minTime = !taskForm.isAllDay && taskForm.date === minDate ? getCurrentInputTime() : undefined
   const minDeadlineTime =
     taskForm.hasDeadline && taskForm.deadlineDate === minDate ? getCurrentInputTime() : undefined
 
@@ -369,7 +377,13 @@ const TasksPage = () => {
     }, {})
 
     Object.keys(groupedTasks).forEach((date) => {
-      groupedTasks[date].sort((firstTask, secondTask) => firstTask.time.localeCompare(secondTask.time))
+      groupedTasks[date].sort((firstTask, secondTask) => {
+        if (firstTask.isAllDay !== secondTask.isAllDay) {
+          return firstTask.isAllDay ? -1 : 1
+        }
+
+        return firstTask.time.localeCompare(secondTask.time)
+      })
     })
 
     return groupedTasks
@@ -418,6 +432,7 @@ const TasksPage = () => {
       title: task.title,
       description: task.description,
       checklistItems: task.checklistItems,
+      isAllDay: task.isAllDay,
       hasDeadline: task.hasDeadline,
       date: toInputDate(task.date),
       time: task.time,
@@ -527,7 +542,7 @@ const TasksPage = () => {
       return
     }
 
-    if (taskForm.date === minDate && taskForm.time < getCurrentInputTime()) {
+    if (!taskForm.isAllDay && taskForm.date === minDate && taskForm.time < getCurrentInputTime()) {
       setFormError('Для текущего дня выберите время не раньше текущего')
       return
     }
@@ -615,7 +630,10 @@ const TasksPage = () => {
     const targetInputDate = toInputDate(targetDate)
     const draggedTask = tasks.find((task) => task.id === taskId)
 
-    if (!draggedTask || (targetInputDate === minDate && draggedTask.time < getCurrentInputTime())) {
+    if (
+      !draggedTask ||
+      (!draggedTask.isAllDay && targetInputDate === minDate && draggedTask.time < getCurrentInputTime())
+    ) {
       return
     }
 
@@ -625,7 +643,7 @@ const TasksPage = () => {
       await updateTask({
         id: taskId,
         body: {
-          due_date: buildDueDate(targetInputDate, draggedTask.time),
+          due_date: buildDueDate(targetInputDate, draggedTask.time, draggedTask.isAllDay),
         },
       }).unwrap()
     } catch (err) {
@@ -1053,7 +1071,7 @@ const AllTasksView = ({
           >
             <div className="tasks-all-row__date">
               <span>{task.date}</span>
-              <strong>{task.time}</strong>
+              <strong>{task.isAllDay ? 'Весь день' : task.time}</strong>
             </div>
 
             <div className="tasks-all-row__main">
@@ -1178,7 +1196,7 @@ const TaskCard = ({ task, mode, onEdit, onComplete, onRemove, onRestore }) => {
         }
       }}
     >
-      <span className="tasks-card__time">{task.time}</span>
+      <span className="tasks-card__time">{task.isAllDay ? 'Весь день' : task.time}</span>
       <strong>{task.title}</strong>
       {mode === 'week' && (
         <span className="tasks-card__meta">

@@ -2,6 +2,7 @@ export const emptyTaskForm = {
   title: '',
   description: '',
   checklistItems: [],
+  isAllDay: false,
   hasDeadline: false,
   date: '',
   time: '00:00',
@@ -29,7 +30,8 @@ export const getCurrentInputTime = () => {
   return `${hours}:${minutes}`
 }
 
-export const buildDueDate = (date, time) => new Date(`${date}T${time || '00:00'}:00`).toISOString()
+export const buildDueDate = (date, time, isAllDay = false) =>
+  new Date(`${date}T${isAllDay ? '00:00' : time || '00:00'}:00`).toISOString()
 
 export const apiDateToInputDate = (date) => {
   if (!date) return ''
@@ -60,6 +62,7 @@ export const mapApiTaskToForm = (task) => {
       isCompleted: Boolean(item.is_completed),
       position: item.position,
     })),
+    isAllDay: Boolean(task?.is_all_day),
     hasDeadline,
     date: apiDateToInputDate(task?.due_date),
     time: apiDateToInputTime(task?.due_date),
@@ -80,7 +83,8 @@ export const createTaskPayloadFromForm = (form) => ({
     is_completed: item.isCompleted,
     position: index,
   })),
-  due_date: buildDueDate(form.date, form.time),
+  due_date: buildDueDate(form.date, form.time, form.isAllDay),
+  is_all_day: form.isAllDay,
   deadline: form.hasDeadline ? buildDueDate(form.deadlineDate, form.deadlineTime) : null,
   priority: form.priority,
   status: form.status,
