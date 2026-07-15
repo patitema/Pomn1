@@ -9,6 +9,12 @@ POMNI is an online service for personal notes, folders, knowledge graph links, a
 - [Registration](https://pomn1.ru/registration)
 - [Privacy Policy](https://pomn1.ru/privacy)
 - [Terms of Use](https://pomn1.ru/terms)
+- [Notes Online](https://pomn1.ru/notes-online)
+- [Notes and Tasks](https://pomn1.ru/tasks-and-notes)
+- [Weekly Planner](https://pomn1.ru/weekly-planner)
+- [Knowledge Graph](https://pomn1.ru/knowledge-graph)
+- [Markdown Notes](https://pomn1.ru/markdown-notes)
+- [FAQ](https://pomn1.ru/faq)
 - [Sitemap](https://pomn1.ru/sitemap.xml)
 
 ## Site purpose

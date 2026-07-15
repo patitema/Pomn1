@@ -9,6 +9,7 @@ const AuthPage = lazy(() => import('@pages/Auth/AuthPage'));
 const RegistrationPage = lazy(() => import('@pages/registration/RegistrationPage'));
 const PrivacyPolicyPage = lazy(() => import('@pages/legal/PrivacyPolicyPage'));
 const TermsPage = lazy(() => import('@pages/legal/TermsPage'));
+const SeoPage = lazy(() => import('@pages/seo/SeoPage'));
 const NotesPage = lazy(() => import('@pages/Notes/NotesPage'));
 const FoldersPage = lazy(() => import('@pages/folders/FoldersPage'));
 const ProfilePage = lazy(() => import('@pages/Profile/ProfilePage'));
@@ -25,6 +26,12 @@ export const AppRoutes = () => (
       <Route path={routes.registration} element={withMui(<RegistrationPage />)} />
       <Route path={routes.privacy} element={<PrivacyPolicyPage />} />
       <Route path={routes.terms} element={<TermsPage />} />
+      <Route path={routes.notesOnline} element={<SeoPage pageKey="notesOnline" />} />
+      <Route path={routes.tasksAndNotes} element={<SeoPage pageKey="tasksAndNotes" />} />
+      <Route path={routes.weeklyPlanner} element={<SeoPage pageKey="weeklyPlanner" />} />
+      <Route path={routes.knowledgeGraph} element={<SeoPage pageKey="knowledgeGraph" />} />
+      <Route path={routes.markdownNotes} element={<SeoPage pageKey="markdownNotes" />} />
+      <Route path={routes.faq} element={<SeoPage pageKey="faq" />} />
       <Route element={withMui(<ProtectedRoute />)}>
         <Route path={routes.notes} element={<NotesPage />} />
         <Route path={routes.folders} element={<FoldersPage />} />
