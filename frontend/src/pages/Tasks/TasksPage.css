@@ -35,20 +35,11 @@
   align-items: center;
   text-align: center;
   margin-bottom: 26px;
-}
-
-.tasks-page__brand h1 {
-  font-size: var(--ui-font-2xl);
-  line-height: 1;
-  letter-spacing: 0.08em;
-  margin: 0 0 12px;
-}
-
-.tasks-page__brand p {
-  color: var(--tasks-muted);
   font-size: var(--ui-font-lg);
-  line-height: 1;
-  text-transform: uppercase;
+}
+
+.tasks-page__brand h2 {
+  color: #999;
 }
 
 .tasks-page__content {
@@ -84,7 +75,7 @@
 
 .tasks-view-toggle {
   display: inline-grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   border: 1px solid var(--tasks-border);
   border-radius: 8px;
   overflow: hidden;

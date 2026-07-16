@@ -40,7 +40,7 @@ const FoldersPage = () => {
   const { data: folders = [], isLoading: foldersLoading } = useGetFoldersQuery(undefined, {
     refetchOnMountOrArgChange: true,
   })
-  const { data: tasks = [], isLoading: tasksLoading } = useGetTasksQuery(undefined, {
+  const { data: tasks = [], isLoading: tasksLoading } = useGetTasksQuery({ scope: 'regular' }, {
     refetchOnMountOrArgChange: true,
   })
   const regularNotes = notes.filter(isRegularNote)

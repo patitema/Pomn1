@@ -4,6 +4,7 @@ import './TaskModal.css'
 export const TaskModal = ({
   taskForm,
   isEditing,
+  isBoardTask = false,
   error,
   minDate,
   minDeadlineTime,
@@ -88,10 +89,11 @@ export const TaskModal = ({
           )}
         </section>
 
-        <label className="tasks-modal-toggle">
+        <label className={`tasks-modal-toggle ${!taskForm.date ? 'tasks-modal-field--disabled' : ''}`}>
           <input
             type="checkbox"
             checked={taskForm.isAllDay}
+            disabled={!taskForm.date}
             onChange={(event) => onChange('isAllDay', event.target.checked)}
           />
           <span>Весь день</span>
@@ -99,7 +101,7 @@ export const TaskModal = ({
 
         <div className="tasks-modal__row">
           <label className="tasks-modal-field">
-            <span>Дата</span>
+            <span>Дата (необязательно)</span>
             <input
               type="date"
               min={minDate}
@@ -108,13 +110,13 @@ export const TaskModal = ({
             />
           </label>
 
-          <label className={`tasks-modal-field ${taskForm.isAllDay ? 'tasks-modal-field--disabled' : ''}`}>
+          <label className={`tasks-modal-field ${!taskForm.date || taskForm.isAllDay ? 'tasks-modal-field--disabled' : ''}`}>
             <span>Время</span>
             <input
               type="time"
               min={minTime}
               value={taskForm.time}
-              disabled={taskForm.isAllDay}
+              disabled={!taskForm.date || taskForm.isAllDay}
               onChange={(event) => onChange('time', event.target.value)}
             />
           </label>
@@ -167,16 +169,18 @@ export const TaskModal = ({
           ))}
         </fieldset>
 
-        <label className="tasks-modal-field tasks-modal-field--select">
-          <span>Статус</span>
-          <select value={taskForm.status} onChange={(event) => onChange('status', event.target.value)}>
-            {Object.entries(statuses).map(([statusKey, status]) => (
-              <option key={statusKey} value={statusKey}>
-                {status.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        {!isBoardTask && (
+          <label className="tasks-modal-field tasks-modal-field--select">
+            <span>Статус</span>
+            <select value={taskForm.status} onChange={(event) => onChange('status', event.target.value)}>
+              {Object.entries(statuses).map(([statusKey, status]) => (
+                <option key={statusKey} value={statusKey}>
+                  {status.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
 
         <label className="tasks-modal-field tasks-modal-field--select">
           <span>Заметка</span>
