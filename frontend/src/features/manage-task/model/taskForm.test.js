@@ -25,4 +25,15 @@ describe('all-day task form mapping', () => {
 
     expect(form.isAllDay).toBe(true)
   })
+  it('creates an unscheduled task without an invalid date', () => {
+    const payload = createTaskPayloadFromForm({
+      ...emptyTaskForm,
+      title: 'Unscheduled task',
+      date: '',
+      isAllDay: true,
+    })
+
+    expect(payload.due_date).toBeNull()
+    expect(payload.is_all_day).toBe(false)
+  })
 })

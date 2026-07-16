@@ -10,6 +10,21 @@ urlpatterns = [
     path('links/<int:pk>/', views.link_detail, name='link-detail'),
     path('tasks/', views.tasks_list, name='tasks-list'),
     path('tasks/<int:pk>/', views.task_detail, name='task-detail'),
+    path(
+        'tasks/<int:pk>/move-to-board-column/',
+        views.move_task_to_board_column,
+        name='task-move-to-board-column',
+    ),
+    path(
+        'task-board/columns/',
+        views.task_board_columns_list,
+        name='task-board-columns-list',
+    ),
+    path(
+        'task-board/columns/<int:pk>/',
+        views.task_board_column_detail,
+        name='task-board-column-detail',
+    ),
     path('register/', views.register, name='register'),
     path('login/', views.login, name='login'),
     path('logout/', views.logout, name='logout'),

@@ -7,12 +7,18 @@ import { selectUser } from '@entities/user'
 import { TaskModal } from '@features/manage-task'
 import {
   useCreateTaskMutation,
+  useCreateTaskBoardColumnMutation,
   useDeleteTaskMutation,
+  useDeleteTaskBoardColumnMutation,
   useGetNotesQuery,
+  useGetTaskBoardColumnsQuery,
   useGetTasksQuery,
+  useMoveTaskToBoardColumnMutation,
   useUpdateTaskMutation,
+  useUpdateTaskBoardColumnMutation,
 } from '@shared/api'
 import { Footer } from '@widgets/footer'
+import { TaskBoard } from '@widgets/task-board'
 import './TasksPage.css'
 
 const PRIORITIES = {
@@ -72,6 +78,7 @@ const emptyTaskForm = {
   priority: 'low',
   status: 'planned',
   note: '',
+  boardColumnId: null,
 }
 
 const emptyTaskFilters = {
@@ -212,9 +219,11 @@ const taskDateToDate = (date) => {
   return new Date(year, month - 1, day)
 }
 
-const apiDateToTaskDate = (date) => formatTaskDate(new Date(date))
+const apiDateToTaskDate = (date) => (date ? formatTaskDate(new Date(date)) : '')
 
 const apiDateToTaskTime = (date) => {
+  if (!date) return ''
+
   const parsedDate = new Date(date)
   const hours = String(parsedDate.getHours()).padStart(2, '0')
   const minutes = String(parsedDate.getMinutes()).padStart(2, '0')
@@ -246,12 +255,13 @@ const createTaskFromForm = (form) => ({
     is_completed: item.isCompleted,
     position: index,
   })),
-  due_date: buildDueDate(form.date, form.time, form.isAllDay),
-  is_all_day: form.isAllDay,
+  due_date: form.date ? buildDueDate(form.date, form.time, form.isAllDay) : null,
+  is_all_day: Boolean(form.date && form.isAllDay),
   deadline: form.hasDeadline ? buildDueDate(form.deadlineDate, form.deadlineTime) : null,
   priority: form.priority,
   status: form.status,
   note_id: form.note ? Number(form.note) : null,
+  board_column_id: form.boardColumnId ? Number(form.boardColumnId) : null,
 })
 
 const buildTaskFilterParams = (filters) => {
@@ -293,6 +303,8 @@ const mapApiTasksToDisplay = (apiTasks, noteTitlesById) =>
       status: task.status,
       note: task.note ? noteTitlesById[task.note] || '' : '',
       noteId: task.note,
+      boardColumnId: task.board_column?.id || null,
+      boardPosition: task.board_position,
       createdAt: task.created_at,
       updatedAt: task.updated_at,
     }
@@ -323,13 +335,24 @@ const TasksPage = () => {
   document.title = 'POMNI - TASKS'
 
   const user = useSelector(selectUser)
-  const [searchParams] = useSearchParams()
-  const { data: apiTasks = [], isLoading: tasksLoading } = useGetTasksQuery()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [view, setView] = useState('week')
+  const { data: apiTasks = [], isLoading: tasksLoading } = useGetTasksQuery({ scope: 'regular' })
+  const { data: boardApiTasks = [], isLoading: boardTasksLoading } = useGetTasksQuery(
+    { scope: 'board' },
+    { skip: view !== 'board' }
+  )
+  const { data: boardColumns = [], isLoading: boardColumnsLoading } = useGetTaskBoardColumnsQuery(undefined, {
+    skip: view !== 'board',
+  })
   const { data: notes = [], isLoading: notesLoading } = useGetNotesQuery({ is_folder: false })
   const [createTask] = useCreateTaskMutation()
   const [updateTask] = useUpdateTaskMutation()
   const [deleteTask] = useDeleteTaskMutation()
-  const [view, setView] = useState('week')
+  const [createTaskBoardColumn] = useCreateTaskBoardColumnMutation()
+  const [updateTaskBoardColumn] = useUpdateTaskBoardColumnMutation()
+  const [deleteTaskBoardColumn] = useDeleteTaskBoardColumnMutation()
+  const [moveTaskToBoardColumn] = useMoveTaskToBoardColumnMutation()
   const [focusedDate, setFocusedDate] = useState(() => normalizeDate(new Date()))
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTaskId, setEditingTaskId] = useState(null)
@@ -338,7 +361,7 @@ const TasksPage = () => {
   const [formError, setFormError] = useState('')
   const taskFilterParams = useMemo(() => buildTaskFilterParams(taskFilters), [taskFilters])
   const hasTaskFilters = Object.keys(taskFilterParams).length > 0
-  const { data: filteredApiTasks = [], isFetching: filteredTasksFetching } = useGetTasksQuery(taskFilterParams, {
+  const { data: filteredApiTasks = [], isFetching: filteredTasksFetching } = useGetTasksQuery({ ...taskFilterParams, scope: 'regular' }, {
     skip: view !== 'all' || !hasTaskFilters,
   })
   const sensors = useSensors(
@@ -365,6 +388,10 @@ const TasksPage = () => {
     }, {})
   }, [noteOptions])
   const tasks = useMemo(() => mapApiTasksToDisplay(apiTasks, noteTitlesById), [apiTasks, noteTitlesById])
+  const boardTasks = useMemo(
+    () => mapApiTasksToDisplay(boardApiTasks, noteTitlesById),
+    [boardApiTasks, noteTitlesById]
+  )
   const filteredTasks = useMemo(
     () => mapApiTasksToDisplay(filteredApiTasks, noteTitlesById),
     [filteredApiTasks, noteTitlesById]
@@ -372,6 +399,7 @@ const TasksPage = () => {
 
   const tasksByDate = useMemo(() => {
     const groupedTasks = tasks.reduce((acc, task) => {
+      if (!task.date) return acc
       acc[task.date] = acc[task.date] ? [...acc[task.date], task] : [task]
       return acc
     }, {})
@@ -400,12 +428,19 @@ const TasksPage = () => {
   const sortedFilteredTasks = useMemo(() => sortTasksChronologically(filteredTasks), [filteredTasks])
   const allViewTasks = hasTaskFilters ? sortedFilteredTasks : sortedTasks
 
+  const handleViewChange = (nextView) => {
+    setView(nextView)
+    const nextSearchParams = new URLSearchParams(searchParams)
+    nextSearchParams.set('view', nextView)
+    setSearchParams(nextSearchParams, { replace: true })
+  }
+
   useEffect(() => {
     const targetView = searchParams.get('view')
     const targetDate = parseInputDate(searchParams.get('date'))
 
-    if (targetView === 'week') {
-      setView('week')
+    if (['week', 'all', 'calendar', 'board'].includes(targetView)) {
+      setView(targetView)
     }
 
     if (targetDate) {
@@ -413,7 +448,7 @@ const TasksPage = () => {
     }
   }, [searchParams])
 
-  const openCreateModal = (date = '') => {
+  const openCreateModal = (date = '', boardColumnId = null) => {
     const selectedDate = toInputDate(date)
 
     setEditingTaskId(null)
@@ -421,6 +456,7 @@ const TasksPage = () => {
       ...emptyTaskForm,
       date: selectedDate,
       time: selectedDate === minDate ? getCurrentInputTime() : emptyTaskForm.time,
+      boardColumnId,
     })
     setFormError('')
     setIsModalOpen(true)
@@ -441,6 +477,7 @@ const TasksPage = () => {
       priority: task.priority,
       status: task.status,
       note: task.noteId ? String(task.noteId) : '',
+      boardColumnId: task.boardColumnId,
     })
     setFormError('')
     setIsModalOpen(true)
@@ -470,6 +507,7 @@ const TasksPage = () => {
             deadlineTime: emptyTaskForm.deadlineTime,
           }
         : {}),
+      ...(field === 'date' && !value ? { isAllDay: false } : {}),
       [field]: value,
     }))
     setFormError('')
@@ -532,17 +570,12 @@ const TasksPage = () => {
       return
     }
 
-    if (!taskForm.date) {
-      setFormError('Выберите дату задачи')
-      return
-    }
-
-    if (taskForm.date < minDate) {
+    if (taskForm.date && taskForm.date < minDate) {
       setFormError('Нельзя выбрать дату раньше текущей')
       return
     }
 
-    if (!taskForm.isAllDay && taskForm.date === minDate && taskForm.time < getCurrentInputTime()) {
+    if (taskForm.date && !taskForm.isAllDay && taskForm.date === minDate && taskForm.time < getCurrentInputTime()) {
       setFormError('Для текущего дня выберите время не раньше текущего')
       return
     }
@@ -616,6 +649,17 @@ const TasksPage = () => {
     }
   }
 
+  const handleCreateBoardColumn = (title) => createTaskBoardColumn({ title }).unwrap()
+
+  const handleRenameBoardColumn = (id, title) =>
+    updateTaskBoardColumn({ id, body: { title } }).unwrap()
+
+  const handleDeleteBoardColumn = (id, taskAction) =>
+    deleteTaskBoardColumn({ id, taskAction }).unwrap()
+
+  const handleMoveTaskToBoardColumn = (taskId, columnId) =>
+    moveTaskToBoardColumn({ taskId, columnId }).unwrap()
+
   const handleDragEnd = async ({ active, over }) => {
     if (!over) return
 
@@ -669,7 +713,7 @@ const TasksPage = () => {
 
   const handleCalendarDateSelect = (date) => {
     setFocusedDate(taskDateToDate(date))
-    setView('week')
+    handleViewChange('week')
   }
 
   return (
@@ -677,7 +721,7 @@ const TasksPage = () => {
       <div className="tasks-page__inner">
         <header className="tasks-page__brand">
           <h1>POMNI</h1>
-          <p>{user ? `${user.username} BASE` : 'BASE NAME'}</p>
+          <h2>{user ? user.username : 'BASE NAME'} BASE</h2>
         </header>
 
         <main className="tasks-page__content">
@@ -688,33 +732,42 @@ const TasksPage = () => {
                 <button
                   className={`tasks-view-toggle__button ${view === 'week' ? 'active' : ''}`}
                   type="button"
-                  onClick={() => setView('week')}
+                  onClick={() => handleViewChange('week')}
                 >
                   Неделя
                 </button>
                 <button
                   className={`tasks-view-toggle__button ${view === 'all' ? 'active' : ''}`}
                   type="button"
-                  onClick={() => setView('all')}
+                  onClick={() => handleViewChange('all')}
                 >
                   Все задачи
                 </button>
                 <button
                   className={`tasks-view-toggle__button ${view === 'calendar' ? 'active' : ''}`}
                   type="button"
-                  onClick={() => setView('calendar')}
+                  onClick={() => handleViewChange('calendar')}
                 >
                   Календарь
+                </button>
+                <button
+                  className={`tasks-view-toggle__button ${view === 'board' ? 'active' : ''}`}
+                  type="button"
+                  onClick={() => handleViewChange('board')}
+                >
+                  Доска
                 </button>
               </div>
             </div>
 
-            <button className="tasks-create-button" type="button" onClick={() => openCreateModal()}>
-              Новая задача
-            </button>
+            {view !== 'board' && (
+              <button className="tasks-create-button" type="button" onClick={() => openCreateModal()}>
+                Новая задача
+              </button>
+            )}
           </section>
 
-          {tasksLoading || notesLoading ? (
+          {notesLoading || (view === 'board' ? boardTasksLoading || boardColumnsLoading : tasksLoading) ? (
             <p className="tasks-page__loading">Загрузка задач...</p>
           ) : view === 'week' ? (
             <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
@@ -752,7 +805,7 @@ const TasksPage = () => {
                 onRestoreTask={handleRestoreTask}
               />
             </>
-          ) : (
+          ) : view === 'calendar' ? (
             <CalendarView
               days={calendarDays}
               periodLabel={calendarPeriodLabel}
@@ -766,6 +819,20 @@ const TasksPage = () => {
               onRemoveTask={handleRemoveTask}
               onRestoreTask={handleRestoreTask}
             />
+          ) : (
+            <TaskBoard
+              columns={boardColumns}
+              tasks={boardTasks}
+              regularTasks={tasks}
+              isLoading={boardTasksLoading || boardColumnsLoading}
+              onCreateColumn={handleCreateBoardColumn}
+              onRenameColumn={handleRenameBoardColumn}
+              onDeleteColumn={handleDeleteBoardColumn}
+              onCreateTask={(columnId) => openCreateModal('', columnId)}
+              onEditTask={openEditModal}
+              onImportTask={handleMoveTaskToBoardColumn}
+              onMoveTask={handleMoveTaskToBoardColumn}
+            />
           )}
         </main>
       </div>
@@ -774,6 +841,7 @@ const TasksPage = () => {
         <TaskModal
           taskForm={taskForm}
           isEditing={Boolean(editingTaskId)}
+          isBoardTask={Boolean(taskForm.boardColumnId)}
           error={formError}
           minDate={minDate}
           minTime={minTime}
@@ -1070,8 +1138,8 @@ const AllTasksView = ({
             }}
           >
             <div className="tasks-all-row__date">
-              <span>{task.date}</span>
-              <strong>{task.isAllDay ? 'Весь день' : task.time}</strong>
+              <span>{task.date || 'Без даты'}</span>
+              <strong>{task.date ? (task.isAllDay ? 'Весь день' : task.time) : 'Не запланировано'}</strong>
             </div>
 
             <div className="tasks-all-row__main">
