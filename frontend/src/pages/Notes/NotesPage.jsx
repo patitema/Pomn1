@@ -39,7 +39,7 @@ const NotesPage = () => {
   const { data: notes = [] } = useGetNotesQuery(undefined, {
     refetchOnMountOrArgChange: true,
   })
-  const { data: tasks = [] } = useGetTasksQuery(undefined, {
+  const { data: tasks = [] } = useGetTasksQuery({ scope: 'regular' }, {
     refetchOnMountOrArgChange: true,
   })
   const { data: links = [] } = useGetLinksQuery(undefined, {

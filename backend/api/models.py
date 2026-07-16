@@ -64,6 +64,25 @@ class Status(models.Model):
         return self.name
 
 
+class TaskBoardColumn(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='task_board_columns',
+    )
+    title = models.CharField(max_length=120)
+    position = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['position', 'id']
+        db_table = 'api_task_board_column'
+
+    def __str__(self):
+        return self.title
+
+
 class Task(models.Model):
     STATUS_PLANNED = 'planned'
     STATUS_IN_PROGRESS = 'in-progress'
@@ -93,6 +112,14 @@ class Task(models.Model):
         related_name='tasks',
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
+    board_column = models.ForeignKey(
+        TaskBoardColumn,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='board_tasks',
+    )
+    board_position = models.PositiveIntegerField(null=True, blank=True)
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,

@@ -38,7 +38,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Note', 'Link', 'Task', 'User'],
+  tagTypes: ['Note', 'Link', 'Task', 'TaskBoardColumn', 'User'],
   endpoints: (builder) => ({
     // === NOTES (включая папки) ===
     getNotes: builder.query({
@@ -157,6 +157,50 @@ export const api = createApi({
       ],
     }),
 
+    // === TASK BOARD ===
+    getTaskBoardColumns: builder.query({
+      query: () => 'task-board/columns/',
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: 'TaskBoardColumn', id })),
+              { type: 'TaskBoardColumn', id: 'LIST' },
+            ]
+          : [{ type: 'TaskBoardColumn', id: 'LIST' }],
+    }),
+    createTaskBoardColumn: builder.mutation({
+      query: (body) => ({ url: 'task-board/columns/', method: 'POST', body }),
+      invalidatesTags: [{ type: 'TaskBoardColumn', id: 'LIST' }],
+    }),
+    updateTaskBoardColumn: builder.mutation({
+      query: ({ id, body }) => ({ url: `task-board/columns/${id}/`, method: 'PATCH', body }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'TaskBoardColumn', id },
+        { type: 'TaskBoardColumn', id: 'LIST' },
+      ],
+    }),
+    deleteTaskBoardColumn: builder.mutation({
+      query: ({ id, taskAction }) => ({
+        url: `task-board/columns/${id}/`,
+        method: 'DELETE',
+        params: taskAction ? { task_action: taskAction } : undefined,
+      }),
+      invalidatesTags: [
+        { type: 'TaskBoardColumn', id: 'LIST' },
+        { type: 'Task', id: 'LIST' },
+      ],
+    }),
+    moveTaskToBoardColumn: builder.mutation({
+      query: ({ taskId, columnId }) => ({
+        url: `tasks/${taskId}/move-to-board-column/`,
+        method: 'POST',
+        body: { column_id: columnId },
+      }),
+      invalidatesTags: (result, error, { taskId }) => [
+        { type: 'Task', id: taskId },
+        { type: 'Task', id: 'LIST' },
+      ],
+    }),
     // === USER ===
     getCurrentUser: builder.query({
       query: () => 'current-user/',
@@ -197,6 +241,11 @@ export const {
   useCreateTaskMutation,
   useUpdateTaskMutation,
   useDeleteTaskMutation,
+  useGetTaskBoardColumnsQuery,
+  useCreateTaskBoardColumnMutation,
+  useUpdateTaskBoardColumnMutation,
+  useDeleteTaskBoardColumnMutation,
+  useMoveTaskToBoardColumnMutation,
   useGetCurrentUserQuery,
   useLoginMutation,
   useRegisterMutation,

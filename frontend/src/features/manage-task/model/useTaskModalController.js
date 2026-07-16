@@ -51,6 +51,7 @@ export const useTaskModalController = ({ deleteTask, updateTask }) => {
             deadlineTime: emptyTaskForm.deadlineTime,
           }
         : {}),
+      ...(field === 'date' && !value ? { isAllDay: false } : {}),
       [field]: value,
     }))
     setTaskFormError('')
@@ -102,17 +103,12 @@ export const useTaskModalController = ({ deleteTask, updateTask }) => {
       return
     }
 
-    if (!taskForm.date) {
-      setTaskFormError('Выберите дату задачи')
-      return
-    }
-
-    if (taskForm.date < minDate) {
+    if (taskForm.date && taskForm.date < minDate) {
       setTaskFormError('Нельзя выбрать дату раньше текущей')
       return
     }
 
-    if (!taskForm.isAllDay && taskForm.date === minDate && taskForm.time < getCurrentInputTime()) {
+    if (taskForm.date && !taskForm.isAllDay && taskForm.date === minDate && taskForm.time < getCurrentInputTime()) {
       setTaskFormError('Для текущего дня выберите время не раньше текущего')
       return
     }
