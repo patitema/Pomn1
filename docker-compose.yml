@@ -2,6 +2,7 @@ services:
   db:
     image: mysql:8.0
     container_name: ${COMPOSE_PROJECT_NAME:-pomni}_db
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
       MYSQL_DATABASE: ${DB_NAME:-Pomni}
@@ -25,12 +26,13 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: ${COMPOSE_PROJECT_NAME:-pomni}_backend
+    restart: unless-stopped
     volumes:
       - ./backend:/app
     expose:
       - "8000"
     ports:
-      - "${BACKEND_PORT:-8000}:8000"
+      - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
     environment:
       - DB_HOST=db
       - DB_NAME=${DB_NAME:-Pomni}
@@ -62,6 +64,7 @@ services:
       args:
         REACT_APP_API_URL: ${REACT_APP_API_URL:-/api}
     container_name: ${COMPOSE_PROJECT_NAME:-pomni}_frontend
+    restart: unless-stopped
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     environment:
