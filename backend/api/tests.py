@@ -97,6 +97,36 @@ class TaskAllDayApiTests(APITestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn('due_date', response.data)
 
+    def test_past_task_can_change_status_without_rescheduling(self):
+        task = Task.objects.create(
+            user=self.user,
+            title='Past task',
+            due_date=timezone.now() - timedelta(days=2),
+            is_all_day=False,
+            priority='low',
+            status='planned',
+        )
+
+        complete_response = self.client.patch(
+            f'/api/tasks/{task.id}/',
+            {'status': 'done'},
+            format='json',
+        )
+
+        self.assertEqual(complete_response.status_code, 200)
+        self.assertEqual(complete_response.data['status'], 'done')
+        self.assertIsNotNone(complete_response.data['completed_at'])
+
+        restore_response = self.client.patch(
+            f'/api/tasks/{task.id}/',
+            {'status': 'planned'},
+            format='json',
+        )
+
+        self.assertEqual(restore_response.status_code, 200)
+        self.assertEqual(restore_response.data['status'], 'planned')
+        self.assertIsNone(restore_response.data['completed_at'])
+
 
 class TaskBoardApiTests(APITestCase):
     def setUp(self):
