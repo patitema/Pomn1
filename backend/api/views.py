@@ -10,6 +10,7 @@ from django.db import transaction
 from django.db.models import Max
 from django.db.models import Q
 from .models import Note, Link, Profile, Task, TaskBoardColumn
+from .email_service import send_welcome_email
 from .serializer import (
     NoteSerializer,
     LinkSerializer,
@@ -434,6 +435,8 @@ def register(request):
     profile.save()
 
     token, created = Token.objects.get_or_create(user=user)
+    send_welcome_email(user)
+
     return Response({
         'token': token.key,
         'user': {
