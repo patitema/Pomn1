@@ -224,24 +224,29 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         note = attrs.get('note')
-        due_date = attrs.get('due_date', getattr(self.instance, 'due_date', None))
-        is_all_day = attrs.get('is_all_day', getattr(self.instance, 'is_all_day', False))
         request = self.context.get('request') if hasattr(self, 'context') else None
         user = getattr(request, 'user', None)
 
-        if due_date:
-            current_minute = timezone.now().replace(second=0, microsecond=0)
-            if is_all_day:
-                if due_date < current_minute - timedelta(hours=24):
+        schedule_changed = (
+            self.instance is None
+            or 'due_date' in attrs
+            or 'is_all_day' in attrs
+        )
+        if schedule_changed:
+            due_date = attrs.get('due_date', getattr(self.instance, 'due_date', None))
+            is_all_day = attrs.get('is_all_day', getattr(self.instance, 'is_all_day', False))
+            if due_date:
+                current_minute = timezone.now().replace(second=0, microsecond=0)
+                if is_all_day and due_date < current_minute - timedelta(hours=24):
                     raise serializers.ValidationError({
                         'due_date': 'Due date cannot be in the past.'
                     })
-            elif due_date < current_minute:
-                raise serializers.ValidationError({
-                    'due_date': 'Due date cannot be in the past.'
-                })
-        else:
-            attrs['is_all_day'] = False
+                if not is_all_day and due_date < current_minute:
+                    raise serializers.ValidationError({
+                        'due_date': 'Due date cannot be in the past.'
+                    })
+            else:
+                attrs['is_all_day'] = False
 
         if note and user and user.is_authenticated:
             if note.user_id != user.id or note.is_folder:
