@@ -1,10 +1,64 @@
 from datetime import timedelta
+from unittest.mock import patch
 
 from django.contrib.auth.models import User
+from django.core import mail
+from django.test import override_settings
 from django.utils import timezone
 from rest_framework.test import APITestCase
 
 from .models import Task, TaskBoardColumn
+
+
+@override_settings(
+    EMAIL_ENABLED=True,
+    EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
+    DEFAULT_FROM_EMAIL='POMNI <no-reply@pomn1.ru>',
+)
+class RegistrationEmailApiTests(APITestCase):
+    def registration_payload(self, **overrides):
+        return {
+            'username': 'welcome_user',
+            'email': 'welcome@example.com',
+            'password': 'Password_1',
+            'phone_number': '79991234567',
+            **overrides,
+        }
+
+    def test_registration_sends_multipart_welcome_email(self):
+        response = self.client.post(
+            '/api/register/',
+            self.registration_payload(),
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(mail.outbox), 1)
+
+        message = mail.outbox[0]
+        self.assertEqual(message.to, ['welcome@example.com'])
+        self.assertEqual(message.subject, 'Добро пожаловать в POMNI')
+        self.assertIn('welcome_user', message.body)
+        self.assertEqual(len(message.alternatives), 1)
+        self.assertEqual(message.alternatives[0].mimetype, 'text/html')
+        self.assertIn('https://pomn1.ru/notes', message.alternatives[0].content)
+
+    @patch(
+        'api.email_service.EmailMultiAlternatives.send',
+        side_effect=OSError('SMTP is unavailable'),
+    )
+    def test_registration_succeeds_when_email_delivery_fails(self, _send):
+        response = self.client.post(
+            '/api/register/',
+            self.registration_payload(
+                username='mail_failure',
+                email='mail-failure@example.com',
+            ),
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(User.objects.filter(username='mail_failure').exists())
 
 
 class TaskAllDayApiTests(APITestCase):

@@ -151,9 +151,21 @@ DJANGO_SECURE_PROXY_SSL_HEADER=False
 DJANGO_SESSION_COOKIE_SECURE=False
 DJANGO_CSRF_COOKIE_SECURE=False
 DJANGO_SECURE_HSTS_SECONDS=0
+
+EMAIL_ENABLED=True
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=mail.pomn1.ru
+EMAIL_PORT=587
+EMAIL_HOST_USER=no-reply@pomn1.ru
+EMAIL_HOST_PASSWORD=change-me
+EMAIL_USE_TLS=True
+EMAIL_USE_SSL=False
+EMAIL_TIMEOUT=10
+DEFAULT_FROM_EMAIL=POMNI <no-reply@pomn1.ru>
 ```
 
 Use real secret values on the server. Do not commit `.env` files with production secrets.
+Keep `EMAIL_ENABLED=False` until the dedicated Mailcow mailbox and password are configured.
 
 ## Main Routes
 
