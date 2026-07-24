@@ -162,6 +162,7 @@ EMAIL_USE_TLS=True
 EMAIL_USE_SSL=False
 EMAIL_TIMEOUT=10
 DEFAULT_FROM_EMAIL=POMNI <no-reply@pomn1.ru>
+EMAIL_MESSAGE_ID_DOMAIN=pomn1.ru
 ```
 
 Use real secret values on the server. Do not commit `.env` files with production secrets.

@@ -14,6 +14,7 @@ from .models import Task, TaskBoardColumn
     EMAIL_ENABLED=True,
     EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
     DEFAULT_FROM_EMAIL='POMNI <no-reply@pomn1.ru>',
+    EMAIL_MESSAGE_ID_DOMAIN='pomn1.ru',
 )
 class RegistrationEmailApiTests(APITestCase):
     def registration_payload(self, **overrides):
@@ -37,11 +38,15 @@ class RegistrationEmailApiTests(APITestCase):
 
         message = mail.outbox[0]
         self.assertEqual(message.to, ['welcome@example.com'])
+        self.assertTrue(
+            message.extra_headers['Message-ID'].endswith('@pomn1.ru>')
+        )
         self.assertEqual(message.subject, 'Добро пожаловать в POMNI')
         self.assertIn('welcome_user', message.body)
         self.assertEqual(len(message.alternatives), 1)
         self.assertEqual(message.alternatives[0].mimetype, 'text/html')
         self.assertIn('https://pomn1.ru/notes', message.alternatives[0].content)
+        self.assertIn('welcome_user BASE', message.alternatives[0].content)
 
     @patch(
         'api.email_service.EmailMultiAlternatives.send',

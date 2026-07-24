@@ -1,4 +1,5 @@
 import logging
+from email.utils import make_msgid
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -35,6 +36,11 @@ def send_welcome_email(user):
             body=text_body,
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[user.email],
+            headers={
+                'Message-ID': make_msgid(
+                    domain=settings.EMAIL_MESSAGE_ID_DOMAIN,
+                ),
+            },
         )
         message.attach_alternative(html_body, 'text/html')
         return message.send(fail_silently=False) == 1
