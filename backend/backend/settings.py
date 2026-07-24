@@ -229,6 +229,10 @@ DEFAULT_FROM_EMAIL = os.environ.get(
     'DEFAULT_FROM_EMAIL',
     'POMNI <no-reply@pomn1.ru>',
 )
+EMAIL_MESSAGE_ID_DOMAIN = os.environ.get(
+    'EMAIL_MESSAGE_ID_DOMAIN',
+    'pomn1.ru',
+)
 
 if EMAIL_USE_TLS and EMAIL_USE_SSL:
     raise ImproperlyConfigured(
