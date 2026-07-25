@@ -46,3 +46,20 @@
 .login-form__footer a:hover {
   text-decoration: underline;
 }
+
+.login-form__recovery {
+  margin: 0;
+  color: #888;
+  font-size: var(--ui-font-sm);
+  text-align: center;
+}
+
+.login-form__recovery a {
+  color: var(--ui-accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.login-form__recovery a:hover {
+  text-decoration: underline;
+}

@@ -26,6 +26,16 @@ urlpatterns = [
         name='task-board-column-detail',
     ),
     path('register/', views.register, name='register'),
+    path(
+        'password-reset/request/',
+        views.password_reset_request,
+        name='password-reset-request',
+    ),
+    path(
+        'password-reset/confirm/',
+        views.password_reset_confirm,
+        name='password-reset-confirm',
+    ),
     path('login/', views.login, name='login'),
     path('logout/', views.logout, name='logout'),
     path('current-user/', views.current_user, name='current-user'),

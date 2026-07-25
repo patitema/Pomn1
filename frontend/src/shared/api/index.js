@@ -3,6 +3,12 @@ import { logout as clearAuth } from '@entities/user';
 import { routes } from '@shared/config';
 
 const API_URL = import.meta.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+const PUBLIC_ENDPOINTS = [
+  'login',
+  'register',
+  'requestPasswordReset',
+  'confirmPasswordReset',
+];
 
 /**
  * Кастомный baseQuery с перехватом 401.
@@ -14,8 +20,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
   const result = await fetchBaseQuery({
     baseUrl: API_URL,
     prepareHeaders: (headers, { endpoint }) => {
-      const publicEndpoints = ['login', 'register'];
-      if (publicEndpoints.includes(endpoint)) {
+      if (PUBLIC_ENDPOINTS.includes(endpoint)) {
         return headers;
       }
       const token = localStorage.getItem('token');
@@ -26,7 +31,11 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
     },
   })(args, api, extraOptions);
 
-  if (result.error && result.error.status === 401) {
+  if (
+    result.error &&
+    result.error.status === 401 &&
+    !PUBLIC_ENDPOINTS.includes(api.endpoint)
+  ) {
     // Токен невалиден — очищаем состояние и редиректим
     api.dispatch(clearAuth());
     window.location.href = routes.auth;
@@ -214,6 +223,20 @@ export const api = createApi({
       query: (body) => ({ url: 'register/', method: 'POST', body }),
       invalidatesTags: ['User'],
     }),
+    requestPasswordReset: builder.mutation({
+      query: (body) => ({
+        url: 'password-reset/request/',
+        method: 'POST',
+        body,
+      }),
+    }),
+    confirmPasswordReset: builder.mutation({
+      query: (body) => ({
+        url: 'password-reset/confirm/',
+        method: 'POST',
+        body,
+      }),
+    }),
     logout: builder.mutation({
       query: () => ({ url: 'logout/', method: 'POST' }),
       invalidatesTags: ['User'],
@@ -250,5 +273,7 @@ export const {
   useLoginMutation,
   useRegisterMutation,
   useLogoutMutation,
+  useRequestPasswordResetMutation,
+  useConfirmPasswordResetMutation,
   useUpdateProfileMutation,
 } = api;

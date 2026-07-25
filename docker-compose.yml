@@ -58,6 +58,12 @@ services:
       - EMAIL_TIMEOUT=${EMAIL_TIMEOUT:-10}
       - "DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-POMNI <no-reply@pomn1.ru>}"
       - EMAIL_MESSAGE_ID_DOMAIN=${EMAIL_MESSAGE_ID_DOMAIN:-pomn1.ru}
+      - PUBLIC_APP_URL=${PUBLIC_APP_URL:-http://localhost:3000}
+      - PASSWORD_RESET_TIMEOUT=${PASSWORD_RESET_TIMEOUT:-3600}
+      - PASSWORD_RESET_IP_RATE=${PASSWORD_RESET_IP_RATE:-10/15m}
+      - PASSWORD_RESET_EMAIL_RATE=${PASSWORD_RESET_EMAIL_RATE:-3/15m}
+      - PASSWORD_RESET_TRUSTED_PROXY_COUNT=${PASSWORD_RESET_TRUSTED_PROXY_COUNT:-2}
+      - CACHE_TABLE=${CACHE_TABLE:-pomni_cache}
     depends_on:
       db:
         condition: service_healthy
@@ -66,6 +72,7 @@ services:
     command: >
       sh -c "python manage.py wait_for_db --timeout 90 &&
              python manage.py migrate &&
+             python manage.py createcachetable &&
              python manage.py runserver 0.0.0.0:8000"
 
   frontend:

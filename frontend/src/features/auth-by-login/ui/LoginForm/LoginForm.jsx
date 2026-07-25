@@ -63,6 +63,10 @@ const LoginForm = () => {
       <Button type="submit" disabled={isLoading} className="login-form__button">
         {isLoading ? 'Вход...' : 'Войти'}
       </Button>
+
+      <p className="login-form__recovery">
+        <Link to={routes.passwordReset}>Забыли пароль?</Link>
+      </p>
       
       <p className="login-form__footer">
         Нет аккаунта? <Link to={routes.registration}>Зарегистрироваться</Link>

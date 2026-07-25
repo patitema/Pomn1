@@ -233,6 +233,31 @@ EMAIL_MESSAGE_ID_DOMAIN = os.environ.get(
     'EMAIL_MESSAGE_ID_DOMAIN',
     'pomn1.ru',
 )
+PUBLIC_APP_URL = os.environ.get(
+    'PUBLIC_APP_URL',
+    'http://localhost:3000',
+).rstrip('/')
+PASSWORD_RESET_TIMEOUT = int(
+    os.environ.get('PASSWORD_RESET_TIMEOUT', '3600')
+)
+PASSWORD_RESET_IP_RATE = os.environ.get(
+    'PASSWORD_RESET_IP_RATE',
+    '10/15m',
+)
+PASSWORD_RESET_EMAIL_RATE = os.environ.get(
+    'PASSWORD_RESET_EMAIL_RATE',
+    '3/15m',
+)
+PASSWORD_RESET_TRUSTED_PROXY_COUNT = int(
+    os.environ.get('PASSWORD_RESET_TRUSTED_PROXY_COUNT', '2')
+)
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': os.environ.get('CACHE_TABLE', 'pomni_cache'),
+    },
+}
 
 if EMAIL_USE_TLS and EMAIL_USE_SSL:
     raise ImproperlyConfigured(
