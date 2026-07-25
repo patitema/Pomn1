@@ -6,11 +6,26 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db import transaction
 from django.db.models import Max
 from django.db.models import Q
 from .models import Note, Link, Profile, Task, TaskBoardColumn
 from .email_service import send_welcome_email
+from .password_email_service import (
+    send_password_changed_email,
+    send_password_reset_email,
+)
+from .password_reset import (
+    PasswordResetRateLimitExceeded,
+    build_reset_url,
+    check_reset_token,
+    create_reset_token,
+    decode_user_id,
+    encode_user_id,
+    enforce_request_rate_limits,
+    normalize_email,
+)
 from .serializer import (
     NoteSerializer,
     LinkSerializer,
@@ -446,6 +461,111 @@ def register(request):
             'phone_number': profile.phone_number,
         },
     }, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_request(request):
+    email = request.data.get('email')
+    if not isinstance(email, str) or not email.strip():
+        return Response(
+            {'email': ['Email обязателен']},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    email = normalize_email(email)
+    try:
+        validate_email(email)
+    except ValidationError:
+        return Response(
+            {'email': ['Неверный формат email']},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        enforce_request_rate_limits(request, email)
+    except PasswordResetRateLimitExceeded:
+        return Response(
+            {'message': 'Слишком много запросов. Попробуйте позже.'},
+            status=status.HTTP_429_TOO_MANY_REQUESTS,
+        )
+
+    user = User.objects.filter(
+        email__iexact=email,
+        is_active=True,
+    ).first()
+    if user and user.has_usable_password():
+        uid = encode_user_id(user)
+        token = create_reset_token(user)
+        send_password_reset_email(
+            user,
+            build_reset_url(uid, token),
+        )
+
+    return Response({
+        'message': (
+            'Если аккаунт с таким email существует, '
+            'мы отправили ссылку для восстановления пароля.'
+        ),
+    })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_confirm(request):
+    uid = request.data.get('uid')
+    token = request.data.get('token')
+    new_password = request.data.get('new_password')
+    confirm_password = request.data.get('confirm_password')
+
+    if not all(isinstance(value, str) and value for value in (uid, token)):
+        return Response(
+            {
+                'code': 'invalid_or_expired',
+                'message': 'Ссылка недействительна или устарела.',
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        user_id = decode_user_id(uid)
+        user = User.objects.get(pk=user_id, is_active=True)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is None or not check_reset_token(user, token):
+        return Response(
+            {
+                'code': 'invalid_or_expired',
+                'message': 'Ссылка недействительна или устарела.',
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    errors = {}
+    if not isinstance(new_password, str) or not new_password:
+        errors['new_password'] = ['Новый пароль обязателен']
+    if new_password != confirm_password:
+        errors['confirm_password'] = ['Пароли не совпадают']
+    if not errors:
+        try:
+            validate_password(new_password)
+        except ValidationError as error:
+            errors['new_password'] = error.messages
+    if errors:
+        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+    with transaction.atomic():
+        user.set_password(new_password)
+        user.save(update_fields=['password'])
+        Token.objects.filter(user=user).delete()
+        transaction.on_commit(
+            lambda: send_password_changed_email(user)
+        )
+
+    return Response({
+        'message': 'Пароль изменён. Войдите с новым паролем.',
+    })
 
 
 @api_view(['POST'])

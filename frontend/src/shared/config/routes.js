@@ -2,6 +2,8 @@ export const routes = {
   home: '/',
   auth: '/auth',
   registration: '/registration',
+  passwordReset: '/password-reset',
+  passwordResetConfirm: '/password-reset/:uid/:token',
   privacy: '/privacy',
   terms: '/terms',
   notesOnline: '/notes-online',
