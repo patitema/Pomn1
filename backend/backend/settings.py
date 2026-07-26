@@ -251,11 +251,43 @@ PASSWORD_RESET_EMAIL_RATE = os.environ.get(
 PASSWORD_RESET_TRUSTED_PROXY_COUNT = int(
     os.environ.get('PASSWORD_RESET_TRUSTED_PROXY_COUNT', '2')
 )
+VAPID_PUBLIC_KEY = os.environ.get('VAPID_PUBLIC_KEY', '')
+VAPID_PRIVATE_KEY = os.environ.get('VAPID_PRIVATE_KEY', '')
+VAPID_SUBJECT = os.environ.get(
+    'VAPID_SUBJECT',
+    'mailto:support@pomni.ru',
+)
+WEB_PUSH_TIMEOUT = int(os.environ.get('WEB_PUSH_TIMEOUT', '10'))
+WEB_PUSH_ENABLED = env_bool(
+    'WEB_PUSH_ENABLED',
+    bool(VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY),
+)
 
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
         'LOCATION': os.environ.get('CACHE_TABLE', 'pomni_cache'),
+    },
+}
+
+CELERY_BROKER_URL = os.environ.get(
+    'CELERY_BROKER_URL',
+    'redis://redis:6379/0',
+)
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_IGNORE_RESULT = True
+CELERY_TIMEZONE = 'UTC'
+CELERY_ENABLE_UTC = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_TASK_ACKS_LATE = True
+CELERY_TASK_REJECT_ON_WORKER_LOST = True
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_BEAT_SCHEDULE = {
+    'discover-due-push-events-every-minute': {
+        'task': 'api.tasks.discover_due_push_events_task',
+        'schedule': 60.0,
     },
 }
 

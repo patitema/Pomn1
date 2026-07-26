@@ -47,7 +47,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Note', 'Link', 'Task', 'TaskBoardColumn', 'User'],
+  tagTypes: ['Note', 'Link', 'Task', 'TaskBoardColumn', 'User', 'PushSettings'],
   endpoints: (builder) => ({
     // === NOTES (включая папки) ===
     getNotes: builder.query({
@@ -237,6 +237,34 @@ export const api = createApi({
         body,
       }),
     }),
+    getPushSettings: builder.query({
+      query: () => 'push/settings/',
+      providesTags: ['PushSettings'],
+    }),
+    updatePushSettings: builder.mutation({
+      query: (body) => ({
+        url: 'push/settings/',
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['PushSettings', 'User'],
+    }),
+    savePushSubscription: builder.mutation({
+      query: (body) => ({
+        url: 'push/subscriptions/',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['PushSettings'],
+    }),
+    removePushSubscription: builder.mutation({
+      query: (body) => ({
+        url: 'push/unsubscribe/',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['PushSettings'],
+    }),
     logout: builder.mutation({
       query: () => ({ url: 'logout/', method: 'POST' }),
       invalidatesTags: ['User'],
@@ -275,5 +303,9 @@ export const {
   useLogoutMutation,
   useRequestPasswordResetMutation,
   useConfirmPasswordResetMutation,
+  useGetPushSettingsQuery,
+  useUpdatePushSettingsMutation,
+  useSavePushSubscriptionMutation,
+  useRemovePushSubscriptionMutation,
   useUpdateProfileMutation,
 } = api;

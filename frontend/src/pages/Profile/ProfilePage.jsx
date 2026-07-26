@@ -5,6 +5,7 @@ import { selectCurrentUser, logout as clearAuth } from '@entities/user'
 import { useLogoutMutation, useUpdateProfileMutation } from '@shared/api'
 import { Input, Button, PhoneInput } from '@shared/ui'
 import { routes } from '@shared/config'
+import { PushNotificationSettings } from '@features/manage-push-notifications'
 import { Footer } from '@widgets/footer'
 import './ProfilePage.css'
 
@@ -112,6 +113,8 @@ const ProfilePage = () => {
               {isSubmitting ? 'Сохранение...' : 'Сохранить'}
             </Button>
           </form>
+
+          <PushNotificationSettings />
 
           <div className="profile-page__logout">
             <Button variant="danger" onClick={handleLogout}>
