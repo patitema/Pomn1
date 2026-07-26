@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import push_views, views
 
 urlpatterns = [
     path('notes/', views.notes_list, name='notes-list'),
@@ -40,4 +40,19 @@ urlpatterns = [
     path('logout/', views.logout, name='logout'),
     path('current-user/', views.current_user, name='current-user'),
     path('update-profile/', views.update_profile, name='update-profile'),
+    path(
+        'push/settings/',
+        push_views.push_settings,
+        name='push-settings',
+    ),
+    path(
+        'push/subscriptions/',
+        push_views.push_subscriptions,
+        name='push-subscriptions',
+    ),
+    path(
+        'push/unsubscribe/',
+        push_views.push_unsubscribe,
+        name='push-unsubscribe',
+    ),
 ]
