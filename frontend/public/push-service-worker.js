@@ -46,7 +46,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(payload.title || 'POMNI', {
       body: payload.body || 'У вас есть новое напоминание.',
-      badge: '/images/pomni-notification-badge-96.png',
+      icon: '/images/BIg_logo.webp',
+      badge: '/favicon.ico',
       tag: payload.tag || 'pomni-reminder',
       data: {
         url: getSafeUrl(payload.url),
