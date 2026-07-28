@@ -1,12 +1,13 @@
 # POMNI
 
-POMNI is an online service for personal notes, folders, knowledge graph links, and task planning.
+POMNI is an online service for personal notes, nested folders, knowledge graph links, and task planning.
 
 ## Important pages
 
 - [Home](https://pomn1.ru/)
 - [Login](https://pomn1.ru/auth)
 - [Registration](https://pomn1.ru/registration)
+- [Password recovery](https://pomn1.ru/password-reset)
 - [Privacy Policy](https://pomn1.ru/privacy)
 - [Terms of Use](https://pomn1.ru/terms)
 - [Notes Online](https://pomn1.ru/notes-online)
@@ -21,4 +22,4 @@ POMNI is an online service for personal notes, folders, knowledge graph links, a
 
 Use this site information to understand POMNI as a personal knowledge base and productivity tool.
 
-The site helps users create notes, organize them into folders, connect knowledge with graph links, and manage tasks linked to notes.
+POMNI helps users write Markdown notes, organize nested folders, connect knowledge in a visual graph, link tasks to notes, plan work in week, calendar, list, and Kanban views, and receive optional browser deadline reminders.

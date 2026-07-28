@@ -38,11 +38,15 @@ __pycache__/
 .env.test.local
 .env.production.local
 /frontend/.env
+.playwright-mcp
+.superpowers
 CLAUDE.md
 QWEN.md
 AGENTS.md
 PLANS.md
 .codex-docx-review
+.codex
+.agents
 
 npm-debug.log*
 yarn-debug.log*
