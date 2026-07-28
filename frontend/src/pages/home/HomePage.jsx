@@ -2,13 +2,12 @@ import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '@entities/user/model/selectors';
 import { routes } from '@shared/config';
+import { getHomePageCtaState } from './model/homePageModel';
 import { HomePageView } from './HomePageView';
 
 const HomePage = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
-  const landingLink = isAuthenticated ? routes.notes : routes.auth;
-  const headerLabel = isAuthenticated ? 'Перейти к заметкам' : 'Начать';
-  const mainLabel = isAuthenticated ? 'Перейти к заметкам' : 'Начать пользоваться';
+  const { landingLink, headerLabel, mainLabel } = getHomePageCtaState(isAuthenticated, routes);
 
   return (
     <HomePageView

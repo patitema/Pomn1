@@ -1,52 +1,41 @@
 import './PhoneInput.css';
 
-/**
- * Маска телефона: форматирует ввод в формат +7 (XXX) XXX-XX-XX
- * Принимает только цифры.
- */
-
 const DIGITS_ONLY = /[^0-9]/g;
+const MAX_PHONE_DIGITS = 11;
 
-/**
- * Форматирует строку цифр в телефонный формат.
- * "79991234567" → "+7(999)-123-45-67"
- */
+export function unformatPhone(value) {
+  return value.replace(DIGITS_ONLY, '');
+}
+
+export function normalizePhoneDigits(value) {
+  const digits = unformatPhone(value);
+  if (!digits) return '';
+
+  const prefixedDigits = digits[0] === '7' ? digits : `7${digits}`;
+  return prefixedDigits.slice(0, MAX_PHONE_DIGITS);
+}
+
 export function formatPhone(value) {
-  const digits = value.replace(DIGITS_ONLY, '');
-  let clean = digits;
+  let clean = normalizePhoneDigits(value);
 
   if (clean.length === 0) return '';
-  if (clean[0] !== '7') {
-    clean = '7' + clean;
-  }
-  clean = clean.slice(0, 11);
 
   let result = '+7';
   if (clean.length > 1) result += '(' + clean.slice(1, 4);
   if (clean.length >= 4) result += ')';
   if (clean.length > 4) result += '-' + clean.slice(4, 7);
   if (clean.length > 7) result += '-' + clean.slice(7, 9);
-  if (clean.length > 9) result += '-' + clean.slice(9, 11);
+  if (clean.length > 9) result += '-' + clean.slice(9, MAX_PHONE_DIGITS);
 
   return result;
 }
 
-/**
- * Извлекает чистые цифры из форматированной строки.
- */
-export function unformatPhone(value) {
-  return value.replace(DIGITS_ONLY, '');
-}
-
 const PhoneInput = ({ value = '', onChange, placeholder, label, error, name = 'phone_number' }) => {
-  // value — чистые цифры от родителя (controlled)
-  // Показываем отформатированную версию
   const displayValue = value ? formatPhone(value) : '';
 
   const handleChange = (e) => {
     const raw = e.target.value;
-    const digits = unformatPhone(raw);
-    // Наверх отдаём чистые цифры
+    const digits = normalizePhoneDigits(raw);
     onChange({ target: { name, value: digits } });
   };
 

@@ -4,6 +4,13 @@ import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '@entities/user/model/selectors';
 import { Footer } from '@widgets/footer';
 import { routes } from '@shared/config';
+import {
+  buildSeoCanonicalUrl,
+  buildSeoJsonLd,
+  getRelatedSeoPages,
+  getSeoCtaState,
+  getSeoPage,
+} from './model/seoPageModel';
 import { seoPages } from './seoPagesData';
 import './SeoPage.css';
 
@@ -33,7 +40,7 @@ const updateCanonical = (href) => {
 
 const useSeoHead = (page) => {
   useEffect(() => {
-    const canonicalUrl = `https://pomn1.ru${page.path}`;
+    const canonicalUrl = buildSeoCanonicalUrl(page);
 
     document.title = page.metaTitle;
     updateMeta('meta[name="description"]', 'name', 'description', page.description);
@@ -44,49 +51,18 @@ const useSeoHead = (page) => {
   }, [page]);
 };
 
-const buildJsonLd = (page) => ({
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'SoftwareApplication',
-      name: 'POMNI',
-      url: 'https://pomn1.ru/',
-      applicationCategory: 'ProductivityApplication',
-      operatingSystem: 'Web',
-      inLanguage: 'ru-RU',
-      description: 'Онлайн-сервис для заметок, папок, графа знаний и задач.',
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'RUB',
-      },
-    },
-    {
-      '@type': 'FAQPage',
-      mainEntity: page.faq.map(([question, answer]) => ({
-        '@type': 'Question',
-        name: question,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: answer,
-        },
-      })),
-    },
-  ],
-});
-
 export const SeoPage = ({ pageKey }) => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
-  const page = seoPages[pageKey];
-  const primaryRoute = isAuthenticated ? routes.notes : routes.registration;
-  const primaryLabel = isAuthenticated ? 'Перейти к заметкам' : 'Создать аккаунт';
+  const page = getSeoPage(pageKey, seoPages);
+  const { primaryRoute, heroLabel, finalLabel } = getSeoCtaState(isAuthenticated, routes);
+  const relatedPages = getRelatedSeoPages(page, seoPages);
 
   useSeoHead(page);
 
   return (
     <div className="page-container seo-route-page">
       <script type="application/ld+json">
-        {JSON.stringify(buildJsonLd(page))}
+        {JSON.stringify(buildSeoJsonLd(page))}
       </script>
 
       <header className="seo-route-hero">
@@ -96,7 +72,7 @@ export const SeoPage = ({ pageKey }) => {
           <p className="seo-route-lead">{page.lead}</p>
           <div className="seo-route-actions">
             <Link className="seo-route-button" to={primaryRoute}>
-              {isAuthenticated ? 'Перейти к заметкам' : 'Начать пользоваться'}
+              {heroLabel}
             </Link>
             <Link className="seo-route-button seo-route-button--ghost" to={routes.home}>
               На главную
@@ -158,15 +134,12 @@ export const SeoPage = ({ pageKey }) => {
         <section className="seo-route-section">
           <h2>Связанные возможности</h2>
           <div className="seo-route-related">
-            {page.related.map((relatedKey) => {
-              const relatedPage = seoPages[relatedKey];
-              return (
-                <Link to={relatedPage.path} key={relatedKey}>
-                  {relatedPage.eyebrow}
-                  <span>{relatedPage.title}</span>
-                </Link>
-              );
-            })}
+            {relatedPages.map((relatedPage) => (
+              <Link to={relatedPage.path} key={relatedPage.path}>
+                {relatedPage.eyebrow}
+                <span>{relatedPage.title}</span>
+              </Link>
+            ))}
           </div>
         </section>
 
@@ -174,7 +147,7 @@ export const SeoPage = ({ pageKey }) => {
           <h2>Попробуйте POMNI в работе</h2>
           <p>Создайте аккаунт и соберите заметки, задачи и связи в одном месте.</p>
           <Link className="seo-route-button" to={primaryRoute}>
-            {primaryLabel}
+            {finalLabel}
           </Link>
         </section>
 
