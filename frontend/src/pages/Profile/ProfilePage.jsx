@@ -1,70 +1,20 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useSelector, useDispatch } from 'react-redux'
-import { selectCurrentUser, logout as clearAuth } from '@entities/user'
-import { useLogoutMutation, useUpdateProfileMutation } from '@shared/api'
 import { Input, Button, PhoneInput } from '@shared/ui'
-import { routes } from '@shared/config'
 import { PushNotificationSettings } from '@features/manage-push-notifications'
 import { Footer } from '@widgets/footer'
+import { useProfilePageModel } from './model/useProfilePageModel'
 import './ProfilePage.css'
 
 const ProfilePage = () => {
-  const user = useSelector(selectCurrentUser)
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const [logout] = useLogoutMutation()
-  const [updateProfile] = useUpdateProfileMutation()
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    phone_number: '',
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [successMessage, setSuccessMessage] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
-
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        username: user.username || '',
-        email: user.email || '',
-        phone_number: user.phone_number || '',
-      })
-    }
-  }, [user])
-
-  const handleLogout = async () => {
-    try {
-      await logout().unwrap()
-    } catch (err) {
-      console.error('Logout error:', err)
-    } finally {
-      dispatch(clearAuth())
-      navigate(routes.auth)
-    }
-  }
-
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    setIsSubmitting(true)
-    setSuccessMessage('')
-    setErrorMessage('')
-
-    try {
-      await updateProfile(formData).unwrap()
-      setSuccessMessage('Профиль обновлён')
-    } catch (err) {
-      console.error('Failed to update profile:', err)
-      setErrorMessage(err.data?.error || 'Ошибка обновления')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleChange = (field) => (event) => {
-    setFormData({ ...formData, [field]: event.target.value })
-  }
+  const {
+    errorMessage,
+    formData,
+    handleChange,
+    handleLogout,
+    handleSubmit,
+    isSubmitting,
+    successMessage,
+    user,
+  } = useProfilePageModel()
 
   return (
     <div className="page-container profile-page-shell">

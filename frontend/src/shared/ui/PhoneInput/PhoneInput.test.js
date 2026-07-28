@@ -1,4 +1,7 @@
-import { formatPhone, unformatPhone } from './PhoneInput';
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
+import PhoneInput, { formatPhone, normalizePhoneDigits, unformatPhone } from './PhoneInput';
 
 describe('PhoneInput utils', () => {
   describe('formatPhone', () => {
@@ -51,6 +54,16 @@ describe('PhoneInput utils', () => {
     });
   });
 
+  describe('normalizePhoneDigits', () => {
+    it('should return at most 11 digits', () => {
+      expect(normalizePhoneDigits('+7(999)-123-45-678')).toBe('79991234567');
+    });
+
+    it('should add 7 prefix if missing', () => {
+      expect(normalizePhoneDigits('9991234567')).toBe('79991234567');
+    });
+  });
+
   describe('unformatPhone', () => {
     it('should extract digits from formatted string', () => {
       expect(unformatPhone('+7(999)-123-45-67')).toBe('79991234567');
@@ -62,6 +75,21 @@ describe('PhoneInput utils', () => {
 
     it('should return same string if no formatting', () => {
       expect(unformatPhone('79991234567')).toBe('79991234567');
+    });
+  });
+
+  describe('PhoneInput component', () => {
+    it('should pass normalized 11 digits to onChange', () => {
+      const handleChange = vi.fn();
+
+      render(React.createElement(PhoneInput, { value: '', onChange: handleChange, label: 'Phone' }));
+      fireEvent.change(screen.getByLabelText('Phone'), {
+        target: { value: '+7(999)-123-45-678' },
+      });
+
+      expect(handleChange).toHaveBeenCalledWith({
+        target: { name: 'phone_number', value: '79991234567' },
+      });
     });
   });
 });
