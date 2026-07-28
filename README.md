@@ -1,12 +1,12 @@
 # POMNI
 
-POMNI is an online productivity service for managing notes, folders, knowledge links, and tasks. The frontend is a React 19 SPA built with Vite, the backend is Django 5.2 + Django REST Framework, and MySQL is used in Docker/prod-style environments.
+POMNI is a web application for personal notes, nested folders, knowledge links, and task planning. It combines a file view, an interactive knowledge graph, Markdown notes, calendar and Kanban task workflows, transactional email, password recovery, and opt-in browser push reminders.
 
-The frontend follows Feature-Sliced Design: `app -> pages -> widgets -> features -> entities -> shared`.
+The frontend is a React 19 SPA built with Vite and Feature-Sliced Design. The backend is Django 5.2 with Django REST Framework. Docker Compose runs MySQL, Redis, the Django API, Celery worker and beat services, and the frontend nginx container.
 
 ## Quick Start
 
-The fastest full-project start is Docker:
+Start the complete local stack:
 
 ```bash
 docker compose up -d --build
@@ -17,7 +17,7 @@ Then open:
 - Frontend: `http://localhost:3000`
 - Backend API: `http://localhost:8000/api/`
 
-For local split development, run the backend from `backend/` and the frontend from `frontend/`:
+For split local development:
 
 ```bash
 cd backend
@@ -32,44 +32,46 @@ npm ci
 npm start
 ```
 
-Local frontend development expects `REACT_APP_API_URL=http://localhost:8000/api` or `VITE_API_URL=http://localhost:8000/api` when the frontend is not using the Docker nginx proxy.
+When the frontend does not use the Docker nginx proxy, set `REACT_APP_API_URL=http://localhost:8000/api` or `VITE_API_URL=http://localhost:8000/api`.
 
 ## Current Features
 
-- User registration, login, logout, session restore, and protected private routes.
-- Notes and folders stored in one unified `Note` model with `is_folder`.
-- Folder/file view with nested folders, note expansion, full-text note search, filters, editing modals, deletion, and drag-and-drop note moving.
-- Graph view for notes and folders with D3.js, node selection, reader panel, edit/delete toolbar actions, and link creation flow.
-- Markdown editing and rendering for notes through shared `MarkdownEditor` and `MarkdownViewer`.
-- Tasks page with week, calendar, and all-tasks views.
-- Task CRUD through backend API and RTK Query.
-- Task status, priority, scheduled date/time, optional deadline, checklists, filters, completion/restore/remove actions, and week drag-and-drop.
-- Linked task previews and linked task actions for regular notes; folders do not own tasks.
-- Profile page with phone input mask and backend validation.
-- Production security settings controlled by environment variables.
+- Registration, login, logout, token-based session restore, protected routes, and password recovery by email.
+- Welcome email after registration and security notification after a password change.
+- Notes and folders stored in one `Note` model, with folders represented by `is_folder=True`.
+- Nested file/folder view with note expansion, search, filters, editing, deletion, and drag-and-drop moving.
+- D3 knowledge graph with note/folder nodes, reader panel, toolbar actions, and user-created graph links.
+- Markdown editing and rendering through shared editor and viewer components.
+- Task week, calendar, all-tasks, and Kanban board views.
+- Task status, priority, optional schedule, all-day mode, optional deadline, checklist, filters, completion, restore, removal, and week drag-and-drop.
+- User-created Kanban columns, board-only tasks, importing regular tasks, moving tasks between columns, collapsed columns, and explicit column deletion behavior.
+- Linked task previews and actions for regular notes; folders do not own tasks.
+- Opt-in Web Push reminders: a daily task summary and one reminder for an approaching deadline.
+- Profile settings for phone number, timezone, and push notifications.
+- Responsive desktop, tablet, and phone layouts.
 
 ## Tech Stack
 
 ### Frontend
 
 - React 19.1
-- Vite 8
-- Vitest 4
+- Vite 8 and Vitest 4
 - React Router DOM 7.6
-- Redux Toolkit 2.11 + RTK Query
+- Redux Toolkit 2.11 and RTK Query
 - D3.js 7.9
 - dnd-kit 6.3
 - Material UI 9
-- `@uiw/react-md-editor`
-- `react-markdown`
+- `@uiw/react-md-editor` and `react-markdown`
 
-### Backend
+### Backend and Runtime
 
-- Python 3.10+
+- Python 3.11 in Docker
 - Django 5.2.7
 - Django REST Framework 3.16.1
 - DRF TokenAuthentication
-- MySQL via `mysqlclient`
+- MySQL 8 via `mysqlclient`
+- Celery 5.6 with Redis 7.4
+- `pywebpush` 2.3
 - `django-cors-headers`
 - flake8
 
@@ -79,8 +81,21 @@ Local frontend development expects `REACT_APP_API_URL=http://localhost:8000/api`
 
 ```bash
 docker compose up -d --build
+docker compose ps
 docker compose logs -f
 docker compose down
+```
+
+Rebuild only the affected existing service during normal development:
+
+```bash
+docker compose build frontend
+docker compose up -d --no-deps frontend
+```
+
+```bash
+docker compose build backend
+docker compose up -d --no-deps backend
 ```
 
 ### Frontend
@@ -95,23 +110,20 @@ npm test
 npx eslint src/ --max-warnings=0
 ```
 
-Frontend dev server: `http://localhost:3000`.
-
 ### Backend
 
 ```bash
 cd backend
 pip install -r requirements.txt
 python manage.py migrate
-python manage.py createsuperuser
 python manage.py runserver
 python manage.py check
+python manage.py makemigrations --check --dry-run
+python manage.py test api
 flake8 api/ backend/ --max-line-length=120 --exclude=migrations,__pycache__
 ```
 
-Backend API: `http://localhost:8000/api/`.
-
-### API Tests
+### API Collection
 
 ```bash
 newman run tests/api/postman-collection.json --env-var baseUrl=http://localhost:8000/api --bail
@@ -122,18 +134,18 @@ newman run tests/api/postman-collection.json --env-var baseUrl=http://localhost:
 Frontend:
 
 ```env
-# Docker/prod: browser uses the same origin and frontend nginx proxies /api/ to backend.
+# Docker and production: frontend nginx proxies /api to Django.
 REACT_APP_API_URL=/api
 
-# Local frontend dev without dockerized frontend:
+# Split local development:
 REACT_APP_API_URL=http://localhost:8000/api
 VITE_API_URL=http://localhost:8000/api
 ```
 
-Docker/backend:
+Representative Docker/backend variables:
 
 ```env
-COMPOSE_PROJECT_NAME=pomni_main
+COMPOSE_PROJECT_NAME=pomni
 FRONTEND_PORT=3000
 BACKEND_PORT=8000
 
@@ -146,45 +158,52 @@ DJANGO_DEBUG=False
 DJANGO_SECRET_KEY=change-me
 ALLOWED_HOSTS=localhost,127.0.0.1,pomn1.ru,148.253.208.46
 CORS_ALLOWED_ORIGINS=https://pomn1.ru
-DJANGO_SECURE_SSL_REDIRECT=False
-DJANGO_SECURE_PROXY_SSL_HEADER=False
-DJANGO_SESSION_COOKIE_SECURE=False
-DJANGO_CSRF_COOKIE_SECURE=False
-DJANGO_SECURE_HSTS_SECONDS=0
 
-EMAIL_ENABLED=True
-EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_ENABLED=False
 EMAIL_HOST=mail.pomn1.ru
 EMAIL_PORT=587
 EMAIL_HOST_USER=no-reply@pomn1.ru
 EMAIL_HOST_PASSWORD=change-me
 EMAIL_USE_TLS=True
 EMAIL_USE_SSL=False
-EMAIL_TIMEOUT=10
 DEFAULT_FROM_EMAIL=POMNI <no-reply@pomn1.ru>
 EMAIL_MESSAGE_ID_DOMAIN=pomn1.ru
+
+PUBLIC_APP_URL=http://localhost:3000
+PASSWORD_RESET_TIMEOUT=3600
+PASSWORD_RESET_IP_RATE=10/15m
+PASSWORD_RESET_EMAIL_RATE=3/15m
+PASSWORD_RESET_TRUSTED_PROXY_COUNT=2
+CACHE_TABLE=pomni_cache
+
+WEB_PUSH_ENABLED=False
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=mailto:support@pomni.ru
+WEB_PUSH_TIMEOUT=10
+CELERY_BROKER_URL=redis://redis:6379/0
 ```
 
-Use real secret values on the server. Do not commit `.env` files with production secrets.
-Keep `EMAIL_ENABLED=False` until the dedicated Mailcow mailbox and password are configured.
+Defaults keep email and Web Push disabled until their credentials are configured. Production uses `PUBLIC_APP_URL=https://pomn1.ru`. Keep all real passwords, Django secrets, SMTP credentials, and VAPID private keys only in the server `.env`; never commit them.
 
 ## Main Routes
 
-| Route | Purpose |
-| --- | --- |
-| `/` | Home page |
-| `/auth` | Login |
-| `/registration` | Registration |
-| `/privacy` | Privacy policy |
-| `/terms` | Terms of use |
-| `/notes` | Graph view for notes/folders |
-| `/folders` | File/folder view |
-| `/tasks` | Task tracker |
-| `/profile` | User profile |
+| Route | Access | Purpose |
+| --- | --- | --- |
+| `/` | Public | Static home page |
+| `/auth` | Public | Login |
+| `/registration` | Public | Registration |
+| `/password-reset` | Public | Password recovery request |
+| `/password-reset/:uid/:token` | Public | New password confirmation |
+| `/privacy` | Public | Privacy policy |
+| `/terms` | Public | Terms of use |
+| `/notes-online`, `/tasks-and-notes`, `/weekly-planner`, `/knowledge-graph`, `/markdown-notes`, `/faq` | Public | SEO and product information |
+| `/notes` | Private | Graph view |
+| `/folders` | Private | File/folder view |
+| `/tasks` | Private | Week, calendar, all-tasks, and board views |
+| `/profile` | Private | User and notification settings |
 
-Private routes: `/notes`, `/folders`, `/tasks`, `/profile`.
-
-`/tasks` also supports task-week navigation:
+Task links can open a specific week and task:
 
 ```text
 /tasks?view=week&date=YYYY-MM-DD&task=<task-id>
@@ -192,119 +211,97 @@ Private routes: `/notes`, `/folders`, `/tasks`, `/profile`.
 
 ## API Overview
 
-All endpoints except login/register require:
+Protected endpoints require:
 
 ```http
 Authorization: Token <token>
 ```
 
-Core endpoints:
+Public endpoints:
 
 - `POST /api/register/`
 - `POST /api/login/`
-- `POST /api/logout/`
-- `GET /api/current-user/`
-- `PUT /api/update-profile/`
-- `GET|POST /api/notes/`
-- `GET|PUT|DELETE /api/notes/<id>/`
-- `GET|POST /api/folders/`
-- `GET|PUT|DELETE /api/folders/<id>/`
-- `GET|POST /api/links/`
-- `GET|DELETE /api/links/<id>/`
-- `GET|POST /api/tasks/`
-- `GET|PATCH|PUT|DELETE /api/tasks/<id>/`
+- `POST /api/password-reset/request/`
+- `POST /api/password-reset/confirm/`
+
+Protected endpoint groups:
+
+- Auth/profile: `POST /api/logout/`, `GET /api/current-user/`, `PUT /api/update-profile/`
+- Notes: `GET|POST /api/notes/`, `GET|PUT|DELETE /api/notes/<id>/`
+- Folders: `GET|POST /api/folders/`, `GET|PUT|DELETE /api/folders/<id>/`
+- Links: `GET|POST /api/links/`, `GET|DELETE /api/links/<id>/`
+- Tasks: `GET|POST /api/tasks/`, `GET|PATCH|PUT|DELETE /api/tasks/<id>/`
+- Board: `POST /api/tasks/<id>/move-to-board-column/`, `GET|POST /api/task-board/columns/`, `PATCH|DELETE /api/task-board/columns/<id>/`
+- Push: `GET|PUT /api/push/settings/`, `POST /api/push/subscriptions/`, `POST /api/push/unsubscribe/`
 
 ## Project Structure
 
 ```text
 Pomn1/
   backend/
-    manage.py
-    requirements.txt
     api/
       models.py
       serializer.py
       views.py
+      push_views.py
+      push_service.py
+      tasks.py
       urls.py
-      validators.py
       migrations/
     backend/
+      celery.py
       settings.py
       urls.py
+    manage.py
+    requirements.txt
   frontend/
-    index.html
-    package.json
-    vite.config.js
-    nginx.conf
     public/
     src/
       app/
       assets/
-      pages/
-      widgets/
-      features/
       entities/
-        user/
-        note/
-        folder/
-        link/
-        task/
+      features/
+      pages/
       shared/
-        api/
-        config/
-        lib/
-        ui/
-  tests/
+      widgets/
+    index.html
+    package.json
+    vite.config.js
   plans/
-  README.md
-  ARCHITECTURE.md
+  tests/
   AGENTS.md
+  ARCHITECTURE.md
   PLANS.md
+  README.md
+  docker-compose.yml
 ```
 
-## Architecture Notes
+Frontend dependency direction:
 
-- `shared/api` owns RTK Query endpoints and the 401 interceptor.
-- Auth state lives in `entities/user`.
-- Domain helpers live in `entities/*/model`.
-- Reusable UI lives in `shared/ui`.
-- Page-level orchestration remains in `pages`, with larger visual blocks in `widgets`.
-- Frontend aliases are configured through `frontend/vite.config.js` and editor config.
-- Legacy CRA/CRACO setup has been removed.
-- Legacy top-level frontend folders (`components`, `context`, `hooks`, `utils`) have been removed from `frontend/src`.
+```text
+app -> pages -> widgets -> features -> entities -> shared
+```
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the detailed architecture guide.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed component, API, persistence, email, and notification flows.
+
+### Route Page Models
+
+Route pages use colocated `model/` modules when they need orchestration beyond simple composition. The current refactor keeps visual components unchanged while moving handlers, derived state, navigation decisions, and deterministic route data into page models or pure helpers. This keeps the FSD direction intact and avoids adding MobX or ReactUse without a concrete repeated need.
+
+Current page-model coverage includes profile, folders, notes, tasks, SEO routes, and the home CTA state. Thin auth, registration, password-reset, and legal wrappers are covered by render tests instead of unnecessary abstractions.
 
 ## Contributor Orientation
 
-- Read `AGENTS.md` before changing code; it captures project-specific agent rules, feature invariants, validation commands, and active product decisions.
-- Use `PLANS.md` for any significant feature or refactor plan.
-- Use `plans/ACTIVE_PLAN_SEQUENCE.md` to understand active work order.
-- Use `plans/project-init-2026-06-25.md` as the current initialization snapshot for structure, commands, and known documentation entry points.
-- Keep `backend/backend/settings.py`, `docker-compose.yml`, and README environment examples synchronized when deployment domains or security env vars change.
-
-## Current Status
-
-| Area | Status |
-| --- | --- |
-| Authentication/session | Working |
-| Notes/folders CRUD | Working |
-| Markdown editor/viewer | Working |
-| Graph view and manual graph links | Working |
-| Folder full-text search and filters | Implemented |
-| Tasks API and UI | Implemented |
-| Optional task deadlines | Implemented |
-| Task checklists and linked task actions | Implemented |
-| Linked task previews in notes | Implemented |
-| Vite migration | Completed |
-| Production security env wiring | Completed |
-| Compact UI scale redesign | Paused |
-| Export | Not started |
-| Tags | Not started |
+- Read `AGENTS.md` before changing code.
+- Use `PLANS.md` and a living ExecPlan for significant features or refactors.
+- Review all files directly under `plans/` before creating a new plan; completed plans live in `plans/complited/`.
+- Use `plans/project-init-2026-06-25.md` as the current onboarding snapshot.
+- Keep `backend/backend/settings.py`, `docker-compose.yml`, and documented environment names synchronized.
+- Plans are local working files and must not be committed unless the product owner explicitly changes that rule.
 
 ## Validation Baseline
 
-Common frontend validation:
+Frontend:
 
 ```bash
 cd frontend
@@ -313,15 +310,17 @@ npm run build
 npm test
 ```
 
-Common backend validation:
+Backend:
 
 ```bash
 cd backend
 python manage.py check
+python manage.py makemigrations --check --dry-run
 python manage.py migrate
+python manage.py test api
 ```
 
-Run backend validation after model or migration changes.
+Use the smallest relevant checks first. User-visible changes also require manual desktop, tablet, and phone verification before the implementation plan is closed.
 
 ## Product and Legal
 
