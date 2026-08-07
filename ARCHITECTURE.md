@@ -286,12 +286,12 @@ Redis is a transient broker with a small memory limit. MySQL events and delivery
 
 - `db`: MySQL 8 application database.
 - `redis`: constrained Redis broker without durable business state.
-- `backend`: Django API and migrations/cache-table initialization.
+- `backend`: Django API and migrations/cache-table initialization, served by Gunicorn on container port `8000`.
 - `celery-worker`: single-concurrency push delivery worker using the backend image.
 - `celery-beat`: periodic discovery scheduler using the backend image.
-- `frontend`: built SPA served by nginx.
+- `frontend`: built SPA served by nginx and the only host-published service in the default Compose stack; it proxies `/api/` to `backend:8000` over the Docker network.
 
-Rebuild only affected services. Backend code shared with Celery may require rebuilding the backend image and recreating `backend`, `celery-worker`, and `celery-beat`; frontend-only changes require only `frontend`.
+Rebuild only affected services. Backend code shared with Celery may require rebuilding the backend image and recreating `backend`, `celery-worker`, and `celery-beat`; frontend-only changes require only `frontend`. The base `docker-compose.yml` does not publish backend port `8000` to the host. Direct `localhost:8000` access is available only through `docker-compose.local.yml` or split local development with `python manage.py runserver`.
 
 ## Responsive Constraints
 

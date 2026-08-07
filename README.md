@@ -76,6 +76,7 @@ When the frontend does not use the Docker nginx proxy, set `REACT_APP_API_URL=ht
 - Python 3.11 in Docker
 - Django 5.2.7
 - Django REST Framework 3.16.1
+- Gunicorn 26 as the containerized WSGI server
 - DRF TokenAuthentication
 - MySQL 8 via `mysqlclient`
 - Celery 5.6 with Redis 7.4
@@ -93,6 +94,8 @@ docker compose ps
 docker compose logs -f
 docker compose down
 ```
+
+The default Compose stack publishes only the frontend nginx service on `localhost:3000`; `/api` is proxied internally to the backend container. To publish backend directly on `localhost:8000` for local API debugging, include `docker-compose.local.yml` explicitly.
 
 Rebuild only the affected existing service during normal development:
 

@@ -47,6 +47,8 @@ PLANS.md
 .codex-docx-review
 .codex
 .agents
+.backup-db.sh
+.deploy-frontend.sh
 
 npm-debug.log*
 yarn-debug.log*
