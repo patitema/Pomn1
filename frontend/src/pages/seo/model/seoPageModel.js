@@ -18,17 +18,26 @@ export const getRelatedSeoPages = (page, pages) => (
 
 export const buildSeoCanonicalUrl = (page, origin = 'https://pomn1.ru') => origin + page.path;
 
+export const POMNI_BRAND_ALIASES = ['pomn1', 'pomn1.ru', 'Помни'];
+
 export const buildSeoJsonLd = (page) => ({
   '@context': 'https://schema.org',
   '@graph': [
     {
       '@type': 'SoftwareApplication',
       name: 'POMNI',
+      alternateName: POMNI_BRAND_ALIASES,
       url: 'https://pomn1.ru/',
       applicationCategory: 'ProductivityApplication',
       operatingSystem: 'Web',
       inLanguage: 'ru-RU',
       description: 'Онлайн-сервис для заметок, папок, графа знаний и задач.',
+      publisher: {
+        '@type': 'Organization',
+        name: 'POMNI',
+        alternateName: POMNI_BRAND_ALIASES,
+        url: 'https://pomn1.ru/',
+      },
       offers: {
         '@type': 'Offer',
         price: '0',
