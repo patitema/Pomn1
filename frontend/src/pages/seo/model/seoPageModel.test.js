@@ -1,6 +1,7 @@
 import {
   buildSeoCanonicalUrl,
   buildSeoJsonLd,
+  POMNI_BRAND_ALIASES,
   getRelatedSeoPages,
   getSeoCtaState,
   getSeoPage,
@@ -59,6 +60,19 @@ describe('seo page model', () => {
 
   it('builds canonical URL from page path', () => {
     expect(buildSeoCanonicalUrl(pages.notesOnline)).toBe('https://pomn1.ru/notes-online');
+  });
+
+  it('builds application structured data with pomn1 brand aliases', () => {
+    const application = buildSeoJsonLd(pages.notesOnline)['@graph'][0];
+
+    expect(application.name).toBe('POMNI');
+    expect(application.alternateName).toEqual(POMNI_BRAND_ALIASES);
+    expect(application.publisher).toEqual({
+      '@type': 'Organization',
+      name: 'POMNI',
+      alternateName: POMNI_BRAND_ALIASES,
+      url: 'https://pomn1.ru/',
+    });
   });
 
   it('builds FAQ structured data from page FAQ entries', () => {
