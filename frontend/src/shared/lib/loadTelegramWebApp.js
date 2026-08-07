@@ -1,6 +1,12 @@
 const TELEGRAM_SCRIPT_SRC = 'https://telegram.org/js/telegram-web-app.js';
+const TELEGRAM_ROUTE = '/telegram';
 
-const isTelegramWebAppEnvironment = () => {
+export const isTelegramWebAppEnvironment = () => {
+  const pathname = window.location.pathname.replace(/\/+$/, '') || '/';
+  if (pathname !== TELEGRAM_ROUTE) {
+    return false;
+  }
+
   const launchParams = `${window.location.search}${window.location.hash}`;
   return (
     launchParams.includes('tgWebAppData')

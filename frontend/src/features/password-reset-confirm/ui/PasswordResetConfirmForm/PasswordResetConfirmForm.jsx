@@ -6,13 +6,23 @@ import { Button, Input } from '@shared/ui';
 import './PasswordResetConfirmForm.css';
 
 const PasswordResetConfirmForm = () => {
-  const { uid, token } = useParams();
+  const params = useParams();
+  const [resetParams] = useState(() => (
+    { uid: params.uid, token: params.token }
+  ));
+  const { uid, token } = resetParams;
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [localError, setLocalError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [confirmReset, { isLoading, error }] =
     useConfirmPasswordResetMutation();
+
+  useEffect(() => {
+    if (uid && token) {
+      window.history.replaceState(window.history.state, document.title, routes.passwordReset);
+    }
+  }, [uid, token]);
 
   useEffect(() => {
     const existingMeta = document.querySelector('meta[name="referrer"]');

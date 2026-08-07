@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import {
   MemoryRouter,
   Route,
@@ -34,6 +34,24 @@ describe('PasswordResetConfirmForm', () => {
     apiMocks.confirmPasswordReset.mockReset();
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+
+  it('cleans reset secrets from the visible URL after reading route params', async () => {
+    const replaceState = vi.spyOn(window.history, 'replaceState').mockImplementation(() => {});
+
+    renderForm();
+
+    await waitFor(() => {
+      expect(replaceState).toHaveBeenCalledWith(
+        window.history.state,
+        document.title,
+        '/password-reset',
+      );
+    });
+  });
   it('rejects mismatched passwords before the API call', async () => {
     renderForm();
 
