@@ -1,7 +1,6 @@
 # POMNI
 
 POMNI is an online service for personal notes, nested folders, knowledge graph links, and task planning.
-
 POMNI is also referred to by its domain name: pomn1 or pomn1.ru.
 
 ## Important pages

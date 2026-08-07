@@ -14,8 +14,16 @@ docker compose up -d --build
 
 Then open:
 
-- Frontend: `http://localhost:3000`
-- Backend API: `http://localhost:8000/api/`
+- Frontend and proxied API: `http://localhost:3000`
+- Backend API through the frontend nginx proxy: `http://localhost:3000/api/`
+
+The default Docker stack does not publish the backend service to the host. If direct `localhost:8000` backend access is needed for local API debugging, opt in explicitly:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
+```
+
+Then direct local backend access is available at `http://localhost:8000/api/`.
 
 For split local development:
 
@@ -147,6 +155,7 @@ Representative Docker/backend variables:
 ```env
 COMPOSE_PROJECT_NAME=pomni
 FRONTEND_PORT=3000
+# BACKEND_PORT is used only with docker-compose.local.yml for explicit local direct backend access.
 BACKEND_PORT=8000
 
 DB_ROOT_PASSWORD=change-me
@@ -185,6 +194,20 @@ CELERY_BROKER_URL=redis://redis:6379/0
 ```
 
 Defaults keep email and Web Push disabled until their credentials are configured. Production uses `PUBLIC_APP_URL=https://pomn1.ru`. Keep all real passwords, Django secrets, SMTP credentials, and VAPID private keys only in the server `.env`; never commit them.
+
+Production must not publish the backend service directly to the internet. Route public traffic through the frontend nginx container and keep `/api` proxied internally to `backend:8000`. In production `.env`, set:
+
+```env
+PUBLIC_APP_URL=https://pomn1.ru
+DJANGO_DEBUG=False
+DJANGO_SECURE_SSL_REDIRECT=True
+DJANGO_SECURE_PROXY_SSL_HEADER=True
+DJANGO_SESSION_COOKIE_SECURE=True
+DJANGO_CSRF_COOKIE_SECURE=True
+DJANGO_SECURE_HSTS_SECONDS=31536000
+DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS=True
+CORS_ALLOWED_ORIGINS=https://pomn1.ru
+```
 
 ## Main Routes
 
