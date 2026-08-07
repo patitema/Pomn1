@@ -1,3 +1,4 @@
+import socket
 from datetime import UTC, datetime, timedelta
 from unittest.mock import Mock, patch
 from zoneinfo import ZoneInfo
@@ -21,6 +22,7 @@ from .push_views import endpoint_hash
 
 PUSH_TEST_SETTINGS = {
     'WEB_PUSH_ENABLED': True,
+    'WEB_PUSH_VALIDATE_DNS': False,
     'VAPID_PUBLIC_KEY': 'public-key',
     'VAPID_PRIVATE_KEY': 'private-key',
     'VAPID_SUBJECT': 'mailto:support@pomni.ru',
@@ -104,6 +106,50 @@ class PushSettingsApiTests(APITestCase):
         self.assertIn('timezone', timezone_response.data)
         self.assertEqual(endpoint_response.status_code, 400)
         self.assertIn('endpoint', endpoint_response.data)
+
+
+@override_settings(**{**PUSH_TEST_SETTINGS, 'WEB_PUSH_VALIDATE_DNS': True})
+class PushEndpointValidationTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='push-validation-user',
+            password='test-password',
+        )
+        self.client.force_authenticate(self.user)
+
+    def subscription_payload(self, endpoint):
+        return {
+            'endpoint': endpoint,
+            'keys': {
+                'p256dh': 'p256dh-value',
+                'auth': 'auth-value',
+            },
+        }
+
+    def test_subscription_rejects_localhost_literal_endpoint(self):
+        response = self.client.post(
+            '/api/push/subscriptions/',
+            self.subscription_payload('https://127.0.0.1/push'),
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('endpoint', response.data)
+
+    @patch('api.push_serializers.socket.getaddrinfo')
+    def test_subscription_rejects_private_dns_result(self, getaddrinfo_mock):
+        getaddrinfo_mock.return_value = [
+            (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('10.0.0.10', 443)),
+        ]
+
+        response = self.client.post(
+            '/api/push/subscriptions/',
+            self.subscription_payload('https://push.example/subscription'),
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('endpoint', response.data)
 
 
 @override_settings(**PUSH_TEST_SETTINGS)
@@ -208,6 +254,28 @@ class PushEventServiceTests(APITestCase):
         attempt = event.delivery_attempts.get()
         self.assertEqual(attempt.status, PushDeliveryAttempt.STATUS_SENT)
         self.assertIsNotNone(event.completed_at)
+
+    @override_settings(WEB_PUSH_VALIDATE_DNS=True)
+    @patch('api.push_service.webpush')
+    def test_delivery_rejects_stored_unsafe_endpoint(self, webpush_mock):
+        self.subscription.endpoint = 'https://127.0.0.1/push'
+        self.subscription.endpoint_hash = endpoint_hash(self.subscription.endpoint)
+        self.subscription.save(update_fields=['endpoint', 'endpoint_hash'])
+        now = timezone.now()
+        Task.objects.create(
+            user=self.user,
+            title='Unsafe push endpoint',
+            deadline=now + timedelta(hours=23),
+        )
+        event_id = discover_due_push_events(now)[0]
+
+        should_retry = deliver_push_event(event_id)
+
+        self.assertFalse(should_retry)
+        webpush_mock.assert_not_called()
+        attempt = PushDeliveryAttempt.objects.get(event_id=event_id)
+        self.assertEqual(attempt.status, PushDeliveryAttempt.STATUS_FAILED)
+        self.assertEqual(attempt.last_error_code, 'unsafe_endpoint')
 
     @patch('api.push_service.webpush')
     def test_gone_subscription_is_removed(self, webpush_mock):

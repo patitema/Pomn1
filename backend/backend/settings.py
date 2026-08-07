@@ -251,6 +251,8 @@ PASSWORD_RESET_EMAIL_RATE = os.environ.get(
 PASSWORD_RESET_TRUSTED_PROXY_COUNT = int(
     os.environ.get('PASSWORD_RESET_TRUSTED_PROXY_COUNT', '2')
 )
+LOGIN_IP_RATE = os.environ.get('LOGIN_IP_RATE', '10/15m')
+LOGIN_USERNAME_RATE = os.environ.get('LOGIN_USERNAME_RATE', '5/15m')
 VAPID_PUBLIC_KEY = os.environ.get('VAPID_PUBLIC_KEY', '')
 VAPID_PRIVATE_KEY = os.environ.get('VAPID_PRIVATE_KEY', '')
 VAPID_SUBJECT = os.environ.get(
@@ -258,6 +260,7 @@ VAPID_SUBJECT = os.environ.get(
     'mailto:support@pomni.ru',
 )
 WEB_PUSH_TIMEOUT = int(os.environ.get('WEB_PUSH_TIMEOUT', '10'))
+WEB_PUSH_VALIDATE_DNS = env_bool('WEB_PUSH_VALIDATE_DNS', True)
 WEB_PUSH_ENABLED = env_bool(
     'WEB_PUSH_ENABLED',
     bool(VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY),

@@ -8,6 +8,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 from pywebpush import WebPushException, webpush
+from rest_framework import serializers
 
 from .models import (
     Profile,
@@ -16,6 +17,7 @@ from .models import (
     Task,
     WebPushSubscription,
 )
+from .push_serializers import validate_push_endpoint
 
 
 logger = logging.getLogger(__name__)
@@ -221,6 +223,7 @@ def send_attempt(attempt):
 
     attempt.attempt_count += 1
     try:
+        validate_push_endpoint(subscription.endpoint)
         webpush(
             subscription_info={
                 'endpoint': subscription.endpoint,
@@ -235,6 +238,9 @@ def send_attempt(attempt):
             ttl=86400,
             timeout=settings.WEB_PUSH_TIMEOUT,
         )
+    except serializers.ValidationError:
+        attempt.status = PushDeliveryAttempt.STATUS_FAILED
+        attempt.last_error_code = 'unsafe_endpoint'
     except WebPushException as error:
         response = error.response
         http_status = response.status_code if response is not None else None

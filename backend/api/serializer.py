@@ -37,6 +37,13 @@ class NoteSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         )
+        read_only_fields = (
+            'id',
+            'folder',
+            'user',
+            'created_at',
+            'updated_at',
+        )
 
     def validate(self, attrs):
         folder = attrs.get('folder')

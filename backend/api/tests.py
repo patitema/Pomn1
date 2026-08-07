@@ -3,11 +3,108 @@ from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.core import mail
+from django.core.cache import cache
 from django.test import override_settings
 from django.utils import timezone
 from rest_framework.test import APITestCase
 
-from .models import Task, TaskBoardColumn
+from .models import Note, Task, TaskBoardColumn
+
+LOGIN_THROTTLE_TEST_SETTINGS = {
+    'LOGIN_IP_RATE': '2/15m',
+    'LOGIN_USERNAME_RATE': '2/15m',
+    'CACHES': {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'login-throttle-tests',
+        },
+    },
+}
+
+
+class NoteOwnershipApiTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='note-owner', password='test-password')
+        self.other_user = User.objects.create_user(username='other-note-owner', password='test-password')
+        self.client.force_authenticate(self.user)
+
+    def test_create_note_ignores_payload_user(self):
+        response = self.client.post(
+            '/api/notes/',
+            {
+                'title': 'Owned note',
+                'text': 'body',
+                'user': self.other_user.id,
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        note = Note.objects.get(pk=response.data['id'])
+        self.assertEqual(note.user_id, self.user.id)
+        self.assertEqual(response.data['user'], self.user.id)
+
+    def test_create_folder_ignores_payload_user(self):
+        response = self.client.post(
+            '/api/folders/',
+            {
+                'title': 'Owned folder',
+                'text': '',
+                'user': self.other_user.id,
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        folder = Note.objects.get(pk=response.data['id'])
+        self.assertEqual(folder.user_id, self.user.id)
+        self.assertTrue(folder.is_folder)
+
+    def test_update_note_ignores_payload_user(self):
+        note = Note.objects.create(user=self.user, title='Original', text='body')
+
+        response = self.client.put(
+            f'/api/notes/{note.id}/',
+            {'title': 'Changed', 'user': self.other_user.id},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        note.refresh_from_db()
+        self.assertEqual(note.user_id, self.user.id)
+        self.assertEqual(note.title, 'Changed')
+
+
+@override_settings(**LOGIN_THROTTLE_TEST_SETTINGS)
+class LoginThrottleApiTests(APITestCase):
+    def setUp(self):
+        cache.clear()
+        self.user = User.objects.create_user(username='login-user', password='Password_1')
+
+    def test_login_allows_success_before_limit(self):
+        response = self.client.post(
+            '/api/login/',
+            {'username': self.user.username, 'password': 'Password_1'},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('token', response.data)
+
+    def test_login_rate_limit_blocks_after_failed_attempts(self):
+        payload = {'username': self.user.username, 'password': 'wrong-password'}
+
+        first_response = self.client.post('/api/login/', payload, format='json')
+        second_response = self.client.post('/api/login/', payload, format='json')
+        limited_response = self.client.post(
+            '/api/login/',
+            {'username': self.user.username, 'password': 'Password_1'},
+            format='json',
+        )
+
+        self.assertEqual(first_response.status_code, 401)
+        self.assertEqual(second_response.status_code, 401)
+        self.assertEqual(limited_response.status_code, 429)
 
 
 @override_settings(

@@ -12,6 +12,11 @@ from django.db.models import Max
 from django.db.models import Q
 from .models import Note, Link, Profile, Task, TaskBoardColumn
 from .email_service import send_welcome_email
+from .auth_throttling import (
+    LoginRateLimitExceeded,
+    enforce_login_rate_limit,
+    record_failed_login,
+)
 from .password_email_service import (
     send_password_changed_email,
     send_password_reset_email,
@@ -83,10 +88,9 @@ def notes_list(request):
 
     elif request.method == 'POST':
         data = request.data.copy()
-        data['user'] = request.user.id
         serializer = NoteSerializer(data=data, context={'request': request})
         if serializer.is_valid():
-            note = serializer.save()
+            note = serializer.save(user=request.user)
 
             return Response(
                 NoteSerializer(note).data,
@@ -108,11 +112,10 @@ def folders_list(request):
 
     elif request.method == 'POST':
         data = request.data.copy()
-        data['user'] = request.user.id
         data['is_folder'] = True  # Принудительно устанавливаем как папку
         serializer = NoteSerializer(data=data, context={'request': request})
         if serializer.is_valid():
-            folder = serializer.save()
+            folder = serializer.save(user=request.user)
             return Response(
                 NoteSerializer(folder).data,
                 status=status.HTTP_201_CREATED,
@@ -580,6 +583,14 @@ def login(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+    try:
+        enforce_login_rate_limit(request, username)
+    except LoginRateLimitExceeded:
+        return Response(
+            {'error': 'Too many login attempts. Try again later.'},
+            status=status.HTTP_429_TOO_MANY_REQUESTS,
+        )
+
     user = authenticate(username=username, password=password)
     if user:
         token, created = Token.objects.get_or_create(user=user)
@@ -598,6 +609,7 @@ def login(request):
             },
         }, status=status.HTTP_200_OK)
     else:
+        record_failed_login(request, username)
         return Response(
             {'error': 'Invalid credentials'},
             status=status.HTTP_401_UNAUTHORIZED,
