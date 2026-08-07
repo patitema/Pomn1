@@ -63,8 +63,6 @@ services:
       - ./backend:/app
     expose:
       - "8000"
-    ports:
-      - "${BACKEND_PORT:-8000}:8000"
     environment:
       - DB_HOST=db
       - DB_NAME=${DB_NAME:-Pomni}
@@ -111,7 +109,7 @@ services:
       sh -c "python manage.py wait_for_db --timeout 90 &&
              python manage.py migrate &&
              python manage.py createcachetable &&
-             python manage.py runserver 0.0.0.0:8000"
+             gunicorn backend.wsgi:application --bind 0.0.0.0:8000 --workers ${GUNICORN_WORKERS:-2} --timeout ${GUNICORN_TIMEOUT:-60} --access-logfile - --error-logfile -"
 
   celery-worker:
     image: ${COMPOSE_PROJECT_NAME:-pomni}-backend:latest
