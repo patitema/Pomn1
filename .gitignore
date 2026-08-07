@@ -49,6 +49,7 @@ PLANS.md
 .agents
 .backup-db.sh
 .deploy-frontend.sh
+.env
 
 npm-debug.log*
 yarn-debug.log*
