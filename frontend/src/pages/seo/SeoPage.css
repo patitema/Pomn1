@@ -121,6 +121,7 @@
 }
 
 .seo-route-main {
+  display: block;
   width: min(1120px, calc(100% - 40px));
   margin: 0 auto;
 }
@@ -150,6 +151,7 @@
 
 .seo-route-faq,
 .seo-route-related {
+  width: 100%;
   display: grid;
   gap: 12px;
   margin-top: 24px;
@@ -193,6 +195,7 @@
 }
 
 .seo-route-final {
+  width: 100%;
   margin-top: 42px;
   margin-bottom: 64px;
   padding: 28px;
@@ -225,6 +228,7 @@
 
   .seo-route-main {
     width: min(100% - 24px, 1120px);
+    margin: 0 auto;
   }
 
   .seo-route-actions {
