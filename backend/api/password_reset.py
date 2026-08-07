@@ -47,29 +47,39 @@ def build_reset_url(uid, token):
     return f'{settings.PUBLIC_APP_URL}/password-reset/{uid}/{token}'
 
 
-def get_client_ip(request):
-    remote_address = request.META.get('REMOTE_ADDR', '')
-    forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR', '')
+def forwarded_addresses(value):
+    return [
+        address.strip()
+        for address in value.split(',')
+        if address.strip()
+    ]
 
+
+def is_ip_address(value):
     try:
-        remote_is_private = ipaddress.ip_address(remote_address).is_private
+        ipaddress.ip_address(value)
     except ValueError:
-        remote_is_private = False
+        return False
+    return True
 
-    if forwarded_for and remote_is_private:
-        addresses = [
-            address.strip()
-            for address in forwarded_for.split(',')
-            if address.strip()
-        ]
-        if addresses:
-            trusted_count = max(
-                settings.PASSWORD_RESET_TRUSTED_PROXY_COUNT,
-                1,
-            )
-            return addresses[max(len(addresses) - trusted_count, 0)]
 
-    return remote_address or 'unknown'
+def get_client_ip(request):
+    remote_address = request.META.get('REMOTE_ADDR', '') or 'unknown'
+    forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR', '')
+    trusted_count = max(settings.PASSWORD_RESET_TRUSTED_PROXY_COUNT, 0)
+
+    if not forwarded_for or trusted_count == 0:
+        return remote_address
+
+    addresses = forwarded_addresses(forwarded_for)
+    if len(addresses) != trusted_count + 1:
+        return remote_address
+
+    client_address = addresses[-trusted_count - 1]
+    if not is_ip_address(client_address):
+        return remote_address
+
+    return client_address
 
 
 def parse_rate(value):

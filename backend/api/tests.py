@@ -107,6 +107,62 @@ class LoginThrottleApiTests(APITestCase):
         self.assertEqual(limited_response.status_code, 429)
 
 
+class ProfileUpdateApiTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='profile-user',
+            email='profile@example.com',
+            password='test-password',
+        )
+        self.other_user = User.objects.create_user(
+            username='other-profile-user',
+            email='taken@example.com',
+            password='test-password',
+        )
+        self.client.force_authenticate(self.user)
+
+    def test_profile_update_rejects_invalid_email(self):
+        response = self.client.put(
+            '/api/update-profile/',
+            {'email': 'not-an-email'},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('email', response.data)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, 'profile@example.com')
+
+    def test_profile_update_rejects_duplicate_email_case_insensitive(self):
+        response = self.client.put(
+            '/api/update-profile/',
+            {'email': 'TAKEN@example.com'},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('email', response.data)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, 'profile@example.com')
+
+    def test_profile_update_keeps_existing_profile_fields_working(self):
+        response = self.client.put(
+            '/api/update-profile/',
+            {
+                'username': 'profile-user-updated',
+                'email': 'PROFILE@example.com',
+                'phone_number': '79991234567',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.username, 'profile-user-updated')
+        self.assertEqual(self.user.email, 'profile@example.com')
+        self.assertEqual(response.data['phone_number'], '79991234567')
+
+
 @override_settings(
     EMAIL_ENABLED=True,
     EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',

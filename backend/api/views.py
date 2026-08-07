@@ -655,12 +655,30 @@ def update_profile(request):
         # Обновляем поля User
         username = request.data.get('username')
         email = request.data.get('email')
+        normalized_email = None
+        errors = {}
+
+        if email is not None:
+            normalized_email = email.strip().lower() if isinstance(email, str) else ''
+            try:
+                validate_email(normalized_email)
+            except ValidationError as error:
+                errors['email'] = error.messages
+            else:
+                email_exists = User.objects.filter(
+                    email__iexact=normalized_email,
+                ).exclude(pk=user.pk).exists()
+                if email_exists:
+                    errors['email'] = ['Этот email уже зарегистрирован']
+
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
         if username:
             user.username = username
-        if email:
-            user.email = email
+        if normalized_email is not None:
+            user.email = normalized_email
         user.save()
-
         # Обновляем поля Profile
         phone_number = request.data.get('phone_number')
         if phone_number is not None:

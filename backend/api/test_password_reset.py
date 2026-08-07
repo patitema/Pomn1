@@ -152,6 +152,57 @@ class PasswordResetApiTests(APITestCase):
 
         self.assertEqual(limited_response.status_code, 429)
 
+    @override_settings(
+        PASSWORD_RESET_IP_RATE='2/15m',
+        PASSWORD_RESET_TRUSTED_PROXY_COUNT=2,
+    )
+    def test_spoofed_short_forwarded_for_does_not_bypass_ip_limit(self):
+        for index in range(2):
+            response = self.client.post(
+                '/api/password-reset/request/',
+                {'email': f'spoofed-{index}@example.com'},
+                format='json',
+                REMOTE_ADDR='10.0.0.20',
+                HTTP_X_FORWARDED_FOR=f'198.51.100.{index}',
+            )
+            self.assertEqual(response.status_code, 200)
+
+        limited_response = self.client.post(
+            '/api/password-reset/request/',
+            {'email': 'spoofed-3@example.com'},
+            format='json',
+            REMOTE_ADDR='10.0.0.20',
+            HTTP_X_FORWARDED_FOR='198.51.100.3',
+        )
+
+        self.assertEqual(limited_response.status_code, 429)
+
+    @override_settings(
+        PASSWORD_RESET_IP_RATE='2/15m',
+        PASSWORD_RESET_TRUSTED_PROXY_COUNT=2,
+    )
+    def test_trusted_forwarded_chain_uses_forwarded_client_ip(self):
+        forwarded_for = '198.51.100.77, 10.0.0.10, 10.0.0.11'
+        for index in range(2):
+            response = self.client.post(
+                '/api/password-reset/request/',
+                {'email': f'trusted-chain-{index}@example.com'},
+                format='json',
+                REMOTE_ADDR=f'10.0.0.{20 + index}',
+                HTTP_X_FORWARDED_FOR=forwarded_for,
+            )
+            self.assertEqual(response.status_code, 200)
+
+        limited_response = self.client.post(
+            '/api/password-reset/request/',
+            {'email': 'trusted-chain-3@example.com'},
+            format='json',
+            REMOTE_ADDR='10.0.0.30',
+            HTTP_X_FORWARDED_FOR=forwarded_for,
+        )
+
+        self.assertEqual(limited_response.status_code, 429)
+
     @patch(
         'api.password_email_service.EmailMultiAlternatives.send',
         side_effect=OSError('SMTP unavailable'),
